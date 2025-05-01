@@ -11,6 +11,10 @@ export class Usuario {
                 cargo: {type: String, required: true},
                 data_cadastro: {type: Date, default: Date.now},
                 data_ultima_atualizacao: {type: Date, default: Date.now},
+            },
+            {
+                timestamps: {createdAt: 'data_cadastro', updatedAt: 'data_ultima_atualizacao'},
+                versionKey: true,
             }
         )
     }

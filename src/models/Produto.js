@@ -1,11 +1,12 @@
 import mongoose from 'mongoose';
 import mongoosePaginate from 'mongoose-paginate-v2';
 
+
 export class Produto {
     constructor() {
         const produtoSchema = new mongoose.Schema(
             {
-                nome: {type: String, index: true, required: true},
+                nome_produto: {type: String, index: true, required: true},
                 descricao: {type: String},
                 preco: {type: Number, required: true},
                 marca: {type: String},
@@ -18,6 +19,10 @@ export class Produto {
                 status: {type: Boolean, default: true},
                 id_fornecedor: {type: Number, required: true},
                 codigo_produto: {type: String, required: true, index: true},
+            },
+            {
+                timestamps: {createdAt: 'data_cadastro', updatedAt: 'data_ultima_atualizacao'},
+                versionKey: true,
             }
         )
     }

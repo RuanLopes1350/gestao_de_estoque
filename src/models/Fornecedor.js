@@ -14,6 +14,10 @@ export class Fornecedor {
                         
                     }
                 ]
+            },
+            {
+                timestamps: {createdAt: 'data_cadastro', updatedAt: 'data_ultima_atualizacao'},
+                versionKey: true,
             }
         )
     }
