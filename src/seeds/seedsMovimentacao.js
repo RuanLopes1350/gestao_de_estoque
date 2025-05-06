@@ -38,3 +38,5 @@ async function seedMovimentacao() {
     console.log("Movimentações inseridas com sucesso:", resultado);
     DbConnect.desconectar();
 }
+
+export default seedMovimentacao;

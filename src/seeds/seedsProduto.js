@@ -34,3 +34,5 @@ async function seedProduto() {
     console.log("Produtos inseridos com sucesso:", resultado);
     DbConnect.desconectar();
 }
+
+export default seedProduto;

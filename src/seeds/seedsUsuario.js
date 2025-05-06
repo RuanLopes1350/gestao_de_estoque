@@ -23,3 +23,5 @@ async function seedUsuario() {
         }
     )
 }
+
+export default seedUsuario;
