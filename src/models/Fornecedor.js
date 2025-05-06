@@ -5,7 +5,7 @@ export class Fornecedor {
     constructor() {
         const fornecedorSchema = new mongoose.Schema(
             {
-                nome: {type: String, required: true, index: true},
+                nome_fornecedor: {type: String, required: true, index: true},
                 cnpj: {type: String, required: true, index: true},
                 endereco: [
                     {

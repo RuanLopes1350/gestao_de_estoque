@@ -9,8 +9,7 @@ await DbConnect.conectar()
 async function seedProduto() {
 
     await Produto.deleteMany();
-
-    const produtos_array = [];
+    
     const produtos = [];
 
     produtos.push(
