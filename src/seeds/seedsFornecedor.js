@@ -27,3 +27,5 @@ async function seedFornecedor() {
     console.log("Fornecedores inseridos com sucesso:", resultado);
     DbConnect.desconectar();
 }
+
+export default seedFornecedor;
