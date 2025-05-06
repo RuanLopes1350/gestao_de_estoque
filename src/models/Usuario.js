@@ -5,7 +5,7 @@ export class Usuario {
     constructor() {
         const usuarioSchema = mongoose.Schema (
             {
-                nome: {type: String, index: true, required: true},
+                nome_usuario: {type: String, index: true, required: true},
                 matricula: {type: String, index: true, required: true},
                 senha: {type: String, required: true},
                 cargo: {type: String, required: true},

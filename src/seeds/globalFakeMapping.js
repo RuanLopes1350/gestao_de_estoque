@@ -21,7 +21,7 @@ const fakeMappings = {
         codigo_produto: () => fakebr.random.alphaNumeric(10),
     },
     usuario: {
-        nome: () => fakebr.name.fullName(),
+        nome_usuario: () => fakebr.name.fullName(),
         matricula: () => fakerbr.random.number({ min: 1000, max: 9999 }).toString(),
         senha: () => fakebr.internet.password(),
         cargo: () => fakebr.random.arrayElement(['Gerente Geral', 'Gerente de Estoque', 'Estoquista', 'Vendedor']),
@@ -29,7 +29,7 @@ const fakeMappings = {
         data_ultima_atualizacao: () => fakebr.date.past(),
     },
     fornecedor: {
-        nome: () => fakebr.company.companyName(),
+        nome_fornecedor: () => fakebr.company.companyName(),
         cnpj: () => fakebr.br.cpf(),
         endereco: () => fakebr.address.streetAddress(),
         contato: () => [{
@@ -43,6 +43,7 @@ const fakeMappings = {
         destino: () => fakebr.random.arrayElement(['estoque', 'venda', 'transferencia']),
         data_movimentacao: () => fakebr.date.past(),
         id_usuario: () => new mongoose.Types.ObjectId().toString(),
+        nome_usuario: () => fakebr.name.fullName(),
         produtos: () => [
             {
                 produto_ref: () => new mongoose.Types.ObjectId().toString(),
