@@ -9,7 +9,7 @@ await DbConnect.conectar()
 async function seedProduto() {
 
     await Produto.deleteMany();
-    
+
     const produtos = [];
 
     produtos.push(
@@ -29,7 +29,7 @@ async function seedProduto() {
             codigo_produto: getGlobalFakeMapping().produto.codigo_produto(),
         }
     )
-    
+
     const resultado = await Produto.insertMany(produtos);
     console.log("Produtos inseridos com sucesso:", resultado);
     DbConnect.desconectar();

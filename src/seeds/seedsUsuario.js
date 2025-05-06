@@ -7,7 +7,7 @@ import getGlobalFakeMapping from './globalFakeMapping';
 await DbConnect.conectar();
 
 async function seedUsuario() {
-    
+
     await Usuario.deleteMany();
 
     const usuarios = [];
