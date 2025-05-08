@@ -2,7 +2,7 @@ import mongoose from 'mongoose';
 import mongoosePaginate from 'mongoose-paginate-v2';
 
 
-export class Produto {
+class Produto {
     constructor() {
         const produtoSchema = new mongoose.Schema(
             {
@@ -22,8 +22,12 @@ export class Produto {
             },
             {
                 timestamps: {createdAt: 'data_cadastro', updatedAt: 'data_ultima_atualizacao'},
-                versionKey: true,
+                versionKey: false,
             }
         )
+        produtoSchema.plugin(mongoosePaginate);
+        this.model = mongoose.model('produto', produtoSchema);
     }
 }
+
+export default new Produto().model;

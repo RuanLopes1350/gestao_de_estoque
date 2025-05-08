@@ -14,8 +14,12 @@ export class Usuario {
             },
             {
                 timestamps: {createdAt: 'data_cadastro', updatedAt: 'data_ultima_atualizacao'},
-                versionKey: true,
+                versionKey: false,
             }
         )
+        usuarioSchema.plugin(mongoosePaginate);
+        this.model = mongoose.model('usuario', usuarioSchema);
     }
 }
+
+export default new Usuario().model;
