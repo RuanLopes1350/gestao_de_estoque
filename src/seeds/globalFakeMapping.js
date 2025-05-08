@@ -89,7 +89,6 @@ function getGlobalFakeMapping() {
             estoque: () => faker.number.int({ min: 0, max: 1000 }),
             estoque_min: () => faker.number.int({ min: 5, max: 50 }),
             data_ultima_entrada: () => faker.date.recent(),
-            data_ultima_saida: () => faker.date.past(),
             status: () => faker.datatype.boolean(),
             id_fornecedor: () => faker.number.int({ min: 1, max: 100 }),
             codigo_produto: () => faker.string.alphanumeric(10).toUpperCase(),

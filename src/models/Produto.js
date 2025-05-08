@@ -15,7 +15,6 @@ class Produto {
                 estoque: {type: Number, required: true},
                 estoque_min: {type: Number, required: true},
                 data_ultima_entrada: {type: Date},
-                data_ultima_saida: {type: Date},
                 status: {type: Boolean, default: true},
                 id_fornecedor: {type: Number, required: true},
                 codigo_produto: {type: String, required: true, index: true},

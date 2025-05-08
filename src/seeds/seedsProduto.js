@@ -22,7 +22,6 @@ async function seedProduto() {
                 estoque: Math.floor(Math.random() * 100) + 10, // Estoque aleatório entre 10-110
                 estoque_min: 10, // Estoque mínimo padrão
                 data_ultima_entrada: new Date(),
-                data_ultima_saida: null,
                 status: true,
                 id_fornecedor: i + 1, // ID sequencial
                 codigo_produto: fakeMapping.produto.codigo_produto()
