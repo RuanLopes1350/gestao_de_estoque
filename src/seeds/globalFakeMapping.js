@@ -64,7 +64,7 @@ function getGlobalFakeMapping() {
     
     const fakeMapping = {
         usuario: {
-            nome_usuario: () => faker.internet.userName(),
+            nome_usuario: () => faker.person.fullName(),
             matricula: () => faker.string.alphanumeric(6).toUpperCase(),
             senha: () => faker.internet.password(15),
             cargo: () => faker.helpers.arrayElement(['Gerente', 'Assistente', 'Operador', 'Analista', 'Supervisor']),

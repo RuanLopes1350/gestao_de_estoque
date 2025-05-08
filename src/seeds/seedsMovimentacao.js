@@ -26,7 +26,7 @@ async function seedMovimentacao() {
         // Tipos de movimentação
         const tipos = ['entrada', 'saida'];
         
-        for (let i = 0; i < 3; i++) {
+        for (let i = 0; i < 25; i++) {
             const tipo = tipos[Math.floor(Math.random() * tipos.length)];
             const usuario = usuarios[Math.floor(Math.random() * usuarios.length)];
             const produto = produtos[Math.floor(Math.random() * produtos.length)];

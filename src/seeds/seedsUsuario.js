@@ -11,7 +11,7 @@ async function seedUsuario() {
         const usuarios = [];
         
         // Cria 5 usuários fake
-        for (let i = 0; i < 5; i++) {
+        for (let i = 0; i < 50; i++) {
             usuarios.push({
                 nome_usuario: getGlobalFakeMapping().usuario.nome_usuario(),
                 matricula: getGlobalFakeMapping().usuario.matricula(),

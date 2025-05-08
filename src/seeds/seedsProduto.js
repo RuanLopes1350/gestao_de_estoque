@@ -10,7 +10,7 @@ async function seedProduto() {
         const produtos = [];
 
         // Cria 5 produtos fake
-        for (let i = 0; i < 5; i++) {
+        for (let i = 0; i < 50; i++) {
             const fakeMapping = getGlobalFakeMapping();
             produtos.push({
                 nome_produto: fakeMapping.produto.nome_produto(),

@@ -11,7 +11,7 @@ async function seedFornecedor() {
         const fornecedores = [];
         
         // Cria 5 fornecedores fake
-        for (let i = 0; i < 5; i++) {
+        for (let i = 0; i < 50; i++) {
             const fakeMapping = getGlobalFakeMapping();
             fornecedores.push({
                 nome_fornecedor: fakeMapping.fornecedor.nome_fornecedor(),

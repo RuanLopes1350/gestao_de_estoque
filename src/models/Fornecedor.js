@@ -21,7 +21,7 @@ class Fornecedor {
             }
         )
         fornecedorSchema.plugin(mongoosePaginate);
-        this.model = mongoose.model('fornecedor', fornecedorSchema);
+        this.model = mongoose.model('fornecedores', fornecedorSchema);
     }
 }
 

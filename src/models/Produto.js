@@ -26,7 +26,7 @@ class Produto {
             }
         )
         produtoSchema.plugin(mongoosePaginate);
-        this.model = mongoose.model('produto', produtoSchema);
+        this.model = mongoose.model('produtos', produtoSchema);
     }
 }
 
