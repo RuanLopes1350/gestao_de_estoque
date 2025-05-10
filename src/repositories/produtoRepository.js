@@ -1,6 +1,7 @@
 import mongoose from "mongoose";
 import Produto from "../models/Produto.js";
 import { CommonResponse, CustomError, HttpStatusCodes, errorHandler, messages, StatusService, asyncWrapper } from '../utils/helpers/index.js';
+import { criarProdutoDto, atualizarProdutoDto } from "../dto/produtoDto.js";
 
 class ProdutoRepository {
     produtos = [];
@@ -54,13 +55,14 @@ class ProdutoRepository {
     }
 
     async deletarProduto(id) {
-        const produtoIndex = this.produtos.findIndex(produto => this.produtos.id === id);
+        const produtoIndex = this.produtos.findIndex(produto => produto.id === id);
 
         if(produtoIndex === -1) {
             return false;
         }
-
+        
         this.produtos.splice(produtoIndex, 1);
+        return true;
     }
 
 }

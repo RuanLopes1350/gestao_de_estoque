@@ -14,16 +14,16 @@ async function main() {
         console.log("Conexão com o banco de dados estabelecida.");
         
         const usuarios = await seedUsuario();
-        console.log("Seed de usuários concluído.");
+        console.log(`Seed de ${usuarios.length} usuários concluído.`);
         
         const fornecedores = await seedFornecedor();
-        console.log("Seed de fornecedores concluído.");
+        console.log(`Seed de ${fornecedores.length} fornecedores concluído.`);
         
-        const produtos = await seedProduto();
-        console.log("Seed de produtos concluído.");
+        const produtos = await seedProduto(fornecedores);
+        console.log(`Seed de ${produtos.length} produtos concluído.`);
         
-        const movimentacoes = await seedMovimentacao();
-        console.log("Seed de movimentações concluído.");
+        const movimentacoes = await seedMovimentacao(usuarios, produtos, fornecedores);
+        console.log(`Seed de ${movimentacoes.length} movimentações concluído.`);
         
         console.log("Todos os dados inseridos com sucesso!");
     } catch (erro) {
@@ -35,5 +35,4 @@ async function main() {
     }
 }
 
-// Execute a função principal
 main();

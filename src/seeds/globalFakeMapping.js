@@ -1,4 +1,5 @@
 import { faker } from '@faker-js/faker/locale/pt_BR';
+import { fakerPT_BR } from '@faker-js/faker';
 import mongoose from 'mongoose';
 // Importe todos os modelos necessários
 import Usuario from '../models/Usuario.js';
@@ -64,51 +65,51 @@ function getGlobalFakeMapping() {
     
     const fakeMapping = {
         usuario: {
-            nome_usuario: () => faker.person.fullName(),
-            matricula: () => faker.string.alphanumeric(6).toUpperCase(),
-            senha: () => faker.internet.password(15),
-            cargo: () => faker.helpers.arrayElement(['Gerente', 'Assistente', 'Operador', 'Analista', 'Supervisor']),
-            data_cadastro: () => faker.date.past(),
-            data_ultima_atualizacao: () => faker.date.recent(),
+            nome_usuario: () => fakerPT_BR.person.fullName(),
+            matricula: () => fakerPT_BR.string.alphanumeric(6).toUpperCase(),
+            senha: () => fakerPT_BR.internet.password(15),
+            cargo: () => fakerPT_BR.helpers.arrayElement(['Gerente', 'Assistente', 'Operador', 'Analista', 'Supervisor']),
+            data_cadastro: () => fakerPT_BR.date.past(),
+            data_ultima_atualizacao: () => fakerPT_BR.date.recent(),
         },
         fornecedor: {
-            nome_fornecedor: () => faker.company.name(),
-            cnpj: () => faker.string.numeric(14),
+            nome_fornecedor: () => fakerPT_BR.company.name(),
+            cnpj: () => fakerPT_BR.string.numeric(14),
             endereco: () => [{ 
-                telefone: faker.phone.number(),
-                email: faker.internet.email()
+                telefone: fakerPT_BR.phone.number(),
+                email: fakerPT_BR.internet.email()
             }]
         },
         produto: {
-            nome_produto: () => faker.commerce.productName(),
-            descricao: () => faker.commerce.productDescription(),
-            preco: () => parseFloat(faker.commerce.price()),
-            marca: () => faker.company.name(),
-            custo: () => parseFloat(faker.commerce.price({ min: 50, max: 200 })),
-            categoria: () => faker.helpers.arrayElement(['Eletrônicos', 'Alimentos', 'Vestuário', 'Higiene', 'Limpeza']),
-            estoque: () => faker.number.int({ min: 0, max: 1000 }),
-            estoque_min: () => faker.number.int({ min: 5, max: 50 }),
-            data_ultima_entrada: () => faker.date.recent(),
-            status: () => faker.datatype.boolean(),
-            id_fornecedor: () => faker.number.int({ min: 1, max: 100 }),
-            codigo_produto: () => faker.string.alphanumeric(10).toUpperCase(),
+            nome_produto: () => fakerPT_BR.commerce.productName(),
+            descricao: () => fakerPT_BR.commerce.productDescription(),
+            preco: () => parseFloat(fakerPT_BR.commerce.price()),
+            marca: () => fakerPT_BR.company.name(),
+            custo: () => parseFloat(fakerPT_BR.commerce.price({ min: 50, max: 200 })),
+            categoria: () => fakerPT_BR.helpers.arrayElement(['Eletrônicos', 'Alimentos', 'Vestuário', 'Higiene', 'Limpeza']),
+            estoque: () => fakerPT_BR.number.int({ min: 0, max: 1000 }),
+            estoque_min: () => fakerPT_BR.number.int({ min: 5, max: 50 }),
+            data_ultima_entrada: () => fakerPT_BR.date.recent(),
+            status: () => fakerPT_BR.datatype.boolean(),
+            id_fornecedor: () => fakerPT_BR.number.int({ min: 1, max: 100 }),
+            codigo_produto: () => fakerPT_BR.string.alphanumeric(10).toUpperCase(),
         },
         movimentacao: {
-            tipo: () => faker.helpers.arrayElement(['entrada', 'saida']),
-            destino: () => faker.company.name(),
-            data_movimentacao: () => faker.date.recent(),
+            tipo: () => fakerPT_BR.helpers.arrayElement(['entrada', 'saida']),
+            destino: () => fakerPT_BR.company.name(),
+            data_movimentacao: () => fakerPT_BR.date.recent(),
             id_usuario: () => new mongoose.Types.ObjectId(),
-            nome_usuario: () => faker.internet.userName(),
+            nome_usuario: () => fakerPT_BR.internet.userName(),
             produtos: {
                 produto_ref: () => new mongoose.Types.ObjectId(),
-                id_produto: () => faker.number.int({ min: 1, max: 1000 }),
-                codigo_produto: () => faker.string.alphanumeric(10).toUpperCase(),
-                nome_produto: () => faker.commerce.productName(),
-                quantidade_produtos: () => faker.number.int({ min: 1, max: 100 }),
-                preco: () => parseFloat(faker.commerce.price()),
-                custo: () => parseFloat(faker.commerce.price({ min: 50, max: 200 })),
-                id_fornecedor: () => faker.number.int({ min: 1, max: 100 }),
-                nome_fornecedor: () => faker.company.name(),
+                id_produto: () => fakerPT_BR.number.int({ min: 1, max: 1000 }),
+                codigo_produto: () => fakerPT_BR.string.alphanumeric(10).toUpperCase(),
+                nome_produto: () => fakerPT_BR.commerce.productName(),
+                quantidade_produtos: () => fakerPT_BR.number.int({ min: 1, max: 100 }),
+                preco: () => parseFloat(fakerPT_BR.commerce.price()),
+                custo: () => parseFloat(fakerPT_BR.commerce.price({ min: 50, max: 200 })),
+                id_fornecedor: () => fakerPT_BR.number.int({ min: 1, max: 100 }),
+                nome_fornecedor: () => fakerPT_BR.company.name(),
             }
         }
     };
