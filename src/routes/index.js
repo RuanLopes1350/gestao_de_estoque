@@ -1,10 +1,14 @@
-// src/routes/index.js
-
 import express from "express";
 import swaggerJsDoc from "swagger-jsdoc";
 import swaggerUI from "swagger-ui-express";
+import getSwaggerOptions from "../docs/config/head.js";
+import logRoutes from "../middlewares/LogRoutesMiddleware.js";
 
 import dotenv from "dotenv";
+
+
+
+// importar as rotas/endpoints
 
 dotenv.config();
 

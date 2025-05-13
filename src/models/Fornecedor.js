@@ -1,7 +1,7 @@
-import moongoose from 'mongoose';
-import moongoosePaginate from 'mongoose-paginate-v2';
+import mongoose from 'mongoose';
+import mongoosePaginate from 'mongoose-paginate-v2';
 
-export class Fornecedor {
+class Fornecedor {
     constructor() {
         const fornecedorSchema = new mongoose.Schema(
             {
@@ -17,8 +17,12 @@ export class Fornecedor {
             },
             {
                 timestamps: {createdAt: 'data_cadastro', updatedAt: 'data_ultima_atualizacao'},
-                versionKey: true,
+                versionKey: false,
             }
         )
+        fornecedorSchema.plugin(mongoosePaginate);
+        this.model = mongoose.model('fornecedores', fornecedorSchema);
     }
 }
+
+export default new Fornecedor().model;

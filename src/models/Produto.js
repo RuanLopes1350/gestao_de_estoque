@@ -2,7 +2,7 @@ import mongoose from 'mongoose';
 import mongoosePaginate from 'mongoose-paginate-v2';
 
 
-export class Produto {
+class Produto {
     constructor() {
         const produtoSchema = new mongoose.Schema(
             {
@@ -15,15 +15,18 @@ export class Produto {
                 estoque: {type: Number, required: true},
                 estoque_min: {type: Number, required: true},
                 data_ultima_entrada: {type: Date},
-                data_ultima_saida: {type: Date},
                 status: {type: Boolean, default: true},
                 id_fornecedor: {type: Number, required: true},
                 codigo_produto: {type: String, required: true, index: true},
             },
             {
                 timestamps: {createdAt: 'data_cadastro', updatedAt: 'data_ultima_atualizacao'},
-                versionKey: true,
+                versionKey: false,
             }
         )
+        produtoSchema.plugin(mongoosePaginate);
+        this.model = mongoose.model('produtos', produtoSchema);
     }
 }
+
+export default new Produto().model;
