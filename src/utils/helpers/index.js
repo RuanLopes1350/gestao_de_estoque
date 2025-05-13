@@ -10,8 +10,7 @@ export { default as asyncWrapper } from '../../middlewares/asyncWrapper.js';
 
 // Adicione outros exports conforme necessário
 
-/* Formas de importar
-   import { CommonResponse, CustomError, HttpStatusCodes, errorHandler, messages, StatusService, asyncWrapper } from '../utils/helpers/index.js';
-   import * as Helpers from '../utils/helpers/index.js';
-   import { CommonResponse as CR } from '../utils/helpers/index.js';
-*/
+// Formas de importar
+   // import { CommonResponse, CustomError, HttpStatusCodes, errorHandler, messages, StatusService, asyncWrapper } from '../utils/helpers/index.js';
+   // import * as Helpers from '../utils/helpers/index.js';
+   // import { CommonResponse as CR } from '../utils/helpers/index.js';

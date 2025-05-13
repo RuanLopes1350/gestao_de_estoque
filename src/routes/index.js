@@ -3,6 +3,7 @@ import swaggerJsDoc from "swagger-jsdoc";
 import swaggerUI from "swagger-ui-express";
 import getSwaggerOptions from "../docs/config/head.js";
 import logRoutes from "../middlewares/LogRoutesMiddleware.js";
+import rotasProdutos from "./produtoRoutes.js";
 
 import dotenv from "dotenv";
 
@@ -27,12 +28,14 @@ const routes = (app) => {
     swaggerUI.setup(swaggerDocs)(req, res, next);
   });
 
-  app.use(express.json());
+  app.use(express.json(),
+    rotasProdutos
+  );
 
   // Se não é nenhuma rota válida, produz 404
-  app.use((req, res) => {
-    res.status(404).json({ message: "Rota não encontrada" });
-  });
+  // app.use((req, res) => {
+  //   res.status(404).json({ message: "Rota não encontrada" });
+  // });
 };
 
 export default routes;

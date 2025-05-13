@@ -1,7 +1,7 @@
 // src/utils/helpers/errorHandler.js
 
 import { ZodError } from 'zod';
-import logger from '../logger.js';
+// import logger from '../logger.js';
 import CommonResponse from './CommonResponse.js';
 import StatusService from './StatusService.js';
 import { v4 as uuidv4 } from 'uuid';
@@ -28,7 +28,7 @@ const errorHandler = (err, req, res, next) => {
 
   // Tratamento para erros de validação do Zod
   if (err instanceof ZodError) {
-    logger.warn('Erro de validação', { errors: err.errors, path: req.path, requestId });
+    // logger.warn('Erro de validação', { errors: err.errors, path: req.path, requestId });
     return CommonResponse.error(
       res,
       400,
@@ -43,7 +43,7 @@ const errorHandler = (err, req, res, next) => {
   if (err.code === 11000) {
     const field = Object.keys(err.keyValue || {})[0];
     const value = err.keyValue ? err.keyValue[field] : 'duplicado';
-    logger.warn('Erro de chave duplicada', { field, value, path: req.path, requestId });
+    // logger.warn('Erro de chave duplicada', { field, value, path: req.path, requestId });
     return CommonResponse.error(
       res,
       409,
@@ -57,13 +57,13 @@ const errorHandler = (err, req, res, next) => {
   // Tratamento para erros de validação do Mongoose
   if (err instanceof mongoose.Error.ValidationError) {
     const detalhes = Object.values(err.errors).map(e => ({ path: e.path, message: e.message }));
-    logger.warn('Erro de validação do Mongoose', { details: detalhes, path: req.path, requestId });
+    // logger.warn('Erro de validação do Mongoose', { details: detalhes, path: req.path, requestId });
     return CommonResponse.error(res, 400, 'validationError', null, detalhes);
   }
 
   // Tratamento para erros de autenticação customizados (AuthenticationError e TokenExpiredError)
   if (err instanceof AuthenticationError || err instanceof TokenExpiredError) {
-    logger.warn('Erro de autenticação', { message: err.message, path: req.path, requestId });
+    // logger.warn('Erro de autenticação', { message: err.message, path: req.path, requestId });
     return CommonResponse.error(
       res,
       err.statusCode,
@@ -76,7 +76,7 @@ const errorHandler = (err, req, res, next) => {
 
   // Tratamento específico para CustomError com errorType 'tokenExpired'
   if (err instanceof CustomError && err.errorType === 'tokenExpired') {
-    logger.warn('Erro de token expirado', { message: err.message, path: req.path, requestId });
+    // logger.warn('Erro de token expirado', { message: err.message, path: req.path, requestId });
     return CommonResponse.error(
       res,
       err.statusCode || 401,
@@ -89,7 +89,7 @@ const errorHandler = (err, req, res, next) => {
 
   // Tratamento para erros operacionais (erros esperados na aplicação)
   if (err.isOperational) {
-    logger.warn('Erro operacional', { message: err.message, path: req.path, requestId });
+    // logger.warn('Erro operacional', { message: err.message, path: req.path, requestId });
     return CommonResponse.error(
       res,
       err.statusCode,
@@ -101,7 +101,7 @@ const errorHandler = (err, req, res, next) => {
   }
 
   // Tratamento para erros internos (não operacionais)
-  logger.error(`Erro interno [ID: ${errorId}]`, { message: err.message, stack: err.stack, requestId });
+  // logger.error(`Erro interno [ID: ${errorId}]`, { message: err.message, stack: err.stack, requestId });
   const detalhes = isProduction
     ? [{ message: `Erro interno do servidor. Referência: ${errorId}` }]
     : [{ message: err.message, stack: err.stack }];

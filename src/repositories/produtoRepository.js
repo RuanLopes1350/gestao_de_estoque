@@ -7,12 +7,15 @@ class ProdutoRepository {
     produtos = [];
     proximoId = 1;
 
-    async buscarTodosProdutos() {
+    async buscarTodosProdutos(req) {
+        const produto = await Produto.find()
+        console.log("TAMO AQUI",produto);
+        this.produtos.push(produto)
         return this.produtos;
     }
 
     async buscarProdutoPorID (id) {
-        const produto = this.produtos.find(produto => produto.id === id);
+        const produto = Produto.findById(id);
         return produto || null;
     }
 
@@ -67,3 +70,4 @@ class ProdutoRepository {
 
 }
 
+export default ProdutoRepository
