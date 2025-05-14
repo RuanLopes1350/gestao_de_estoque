@@ -61,7 +61,6 @@ function validateAllMappings(fakeMapping) {
 }
 
 function getGlobalFakeMapping() {
-    faker.locale = 'pt_BR';
     
     const fakeMapping = {
         usuario: {

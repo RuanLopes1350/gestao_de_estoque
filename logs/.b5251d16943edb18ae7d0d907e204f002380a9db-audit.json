@@ -1,0 +1,15 @@
+{
+    "keep": {
+        "days": true,
+        "amount": 30
+    },
+    "auditLog": "/Users/ruanlopes/Documents/gestao-de-estoque/logs/.b5251d16943edb18ae7d0d907e204f002380a9db-audit.json",
+    "files": [
+        {
+            "date": 1747163407000,
+            "name": "/Users/ruanlopes/Documents/gestao-de-estoque/logs/error-2025-05-13.log",
+            "hash": "ec87762c9c32c48e48ca8ca4bd958f9dd9e480c72410b7bfd2ef014ffc3365d3"
+        }
+    ],
+    "hashType": "sha256"
+}

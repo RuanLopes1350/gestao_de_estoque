@@ -1,69 +1,148 @@
-import mongoose from "mongoose";
-import Produto from "../models/Produto.js";
-import { CommonResponse, CustomError, HttpStatusCodes, errorHandler, messages, StatusService, asyncWrapper } from '../utils/helpers/index.js';
-import { criarProdutoDto, atualizarProdutoDto } from "../dto/produtoDto.js";
+import mongoose from 'mongoose';
+import Produto from '../models/Produto.js';
+import { CustomError, messages } from '../utils/helpers/index.js';
+import ProdutoFilterBuilder from './filters/ProdutoFilterBuilder.js';
 
 class ProdutoRepository {
-    produtos = [];
-    proximoId = 1;
-
-    async buscarTodosProdutos() {
-        return this.produtos;
+    constructor({ model = Produto } = {}) {
+        this.model = model;
     }
 
-    async buscarProdutoPorID (id) {
-        const produto = this.produtos.find(produto => produto.id === id);
-        return produto || null;
+    async listarProdutos(req) {
+        console.log('Estou no listar em ProdutoRepository');
+        
+        // Verifica se req.params existe antes de acessar id
+        const id = req.params ? req.params.id : null;
+    
+        if (id) {
+            const data = await this.model.findById(id)
+                .populate('id_fornecedor');
+    
+            if (!data) {
+                throw new CustomError({
+                    statusCode: 404,
+                    errorType: 'resourceNotFound',
+                    field: 'Produto',
+                    details: [],
+                    customMessage: messages.error.resourceNotFound('Produto')
+                });
+            }
+    
+            return data;
+        }
+    
+        // Para busca por filtros
+        const { nome_produto, categoria, codigo_produto, page = 1 } = req.query || {};
+        const limite = Math.min(parseInt(req.query?.limite, 10) || 10, 100);
+    
+        const filtros = {};
+        
+        if (nome_produto) {
+            filtros.nome_produto = { $regex: nome_produto, $options: 'i' };
+        }
+        
+        if (categoria) {
+            filtros.categoria = { $regex: categoria, $options: 'i' };
+        }
+        
+        if (codigo_produto) {
+            filtros.codigo_produto = { $regex: codigo_produto, $options: 'i' };
+        }
+    
+        const options = {
+            page: parseInt(page, 10),
+            limit: parseInt(limite, 10),
+            populate: 'id_fornecedor',
+            sort: { nome_produto: 1 },
+        };
+    
+        console.log('Filtros aplicados:', filtros);
+        const resultado = await this.model.paginate(filtros, options);
+        return resultado;
     }
 
-    async cadastrarProduto(criarProdutoDto) {
-        const dataAgora = new Date();
-        const novoProduto = {
-            id: this.proximoId++,
-            nome_produto: criarProdutoDto.nome_produto,
-            descricao: criarProdutoDto.descricao,
-            preco: criarProdutoDto.preco,
-            marca: criarProdutoDto.marca,
-            custo: criarProdutoDto.custo,
-            categoria: criarProdutoDto.categoria,
-            estoque: criarProdutoDto.estoque,
-            estoque_min: criarProdutoDto.estoque_min,
-            data_ultima_entrada: dataAgora,
-            status: criarProdutoDto.status,
-            id_fornecedor: criarProdutoDto.id_fornecedor,
-            codigo_produto: criarProdutoDto.codigo_produto,
+    async buscarProdutoPorID(id) {
+        const produto = await this.model.findById(id);
+        if (!produto) {
+            throw new CustomError({
+                statusCode: 404,
+                errorType: 'resourceNotFound',
+                field: 'Produto',
+                details: [],
+                customMessage: messages.error.resourceNotFound('Produto')
+            });
         }
-        this.produtos.push(novoProduto);
-        return novoProduto;
+        return produto;
     }
 
-    async atualizarProduto(id, atualizarProdutoDto) {
-        const produtoIndex = this.produtos.findIndex(produto => produto.id === id);
-
-        if(produtoIndex === -1) {
-            return null;
+    async cadastrarProduto(dadosProduto) {
+        const produtoExistente = await this.model.findOne({ codigo_produto: dadosProduto.codigo_produto });
+        if (produtoExistente) {
+            throw new CustomError({
+                statusCode: 400,
+                errorType: 'validationError',
+                field: 'codigo_produto',
+                details: [],
+                customMessage: 'Já existe um produto com este código.'
+            });
         }
 
-        const produtoAtualizado = {
-            ...this.produtos[produtoIndex],
-            ...atualizarProdutoDto,
-            data_ultima_entrada: new Date(),
+        const produto = new this.model(dadosProduto);
+        return await produto.save();
+    }
+
+    async atualizarProduto(id, dadosProduto) {
+        if (dadosProduto.codigo_produto) {
+            const produtoExistente = await this.model.findOne({ 
+                codigo_produto: dadosProduto.codigo_produto,
+                _id: { $ne: id }
+            });
+            
+            if (produtoExistente) {
+                throw new CustomError({
+                    statusCode: 400,
+                    errorType: 'validationError',
+                    field: 'codigo_produto',
+                    details: [],
+                    customMessage: 'Este código já está sendo usado por outro produto.'
+                });
+            }
         }
 
-        this.produtos[produtoIndex] = produtoAtualizado;
-        return produtoAtualizado;
+        const produto = await this.model.findByIdAndUpdate(id, dadosProduto, { new: true });
+        
+        if (!produto) {
+            throw new CustomError({
+                statusCode: 404,
+                errorType: 'resourceNotFound',
+                field: 'Produto',
+                details: [],
+                customMessage: messages.error.resourceNotFound('Produto')
+            });
+        }
+        
+        return produto;
     }
 
     async deletarProduto(id) {
-        const produtoIndex = this.produtos.findIndex(produto => produto.id === id);
-
-        if(produtoIndex === -1) {
-            return false;
+        const produto = await this.model.findByIdAndDelete(id);
+        if (!produto) {
+            throw new CustomError({
+                statusCode: 404,
+                errorType: 'resourceNotFound',
+                field: 'Produto',
+                details: [],
+                customMessage: messages.error.resourceNotFound('Produto')
+            });
         }
-        
-        this.produtos.splice(produtoIndex, 1);
-        return true;
+        return produto;
     }
 
+    async listarEstoqueBaixo() {
+        return await this.model.find({ 
+            $expr: { $lt: ["$estoque", "$estoque_min"] }
+        }).sort({ estoque: 1 });
+    }
 }
 
+export default ProdutoRepository;
