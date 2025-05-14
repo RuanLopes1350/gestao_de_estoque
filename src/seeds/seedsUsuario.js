@@ -9,16 +9,17 @@ async function seedUsuario() {
         await Usuario.deleteMany({});
         
         const usuarios = [];
+        const fakeMapping = getGlobalFakeMapping();
         
-        // Cria 5 usuários fake
+        // Cria 50 usuários fake
         for (let i = 0; i < 50; i++) {
             usuarios.push({
-                nome_usuario: getGlobalFakeMapping().usuario.nome_usuario(),
-                matricula: getGlobalFakeMapping().usuario.matricula(),
-                senha: getGlobalFakeMapping().usuario.senha(),
-                cargo: getGlobalFakeMapping().usuario.cargo(),
-                data_cadastro: getGlobalFakeMapping().usuario.data_cadastro(),
-                data_ultima_atualizacao: getGlobalFakeMapping().usuario.data_ultima_atualizacao(),
+                nome_usuario: fakeMapping.usuario.nome_usuario(),
+                matricula: fakeMapping.usuario.matricula(),
+                senha: fakeMapping.usuario.senha(),
+                cargo: fakeMapping.usuario.cargo(),
+                data_cadastro: fakeMapping.usuario.data_cadastro(),
+                data_ultima_atualizacao: fakeMapping.usuario.data_ultima_atualizacao(),
             });
         }
         
