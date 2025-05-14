@@ -10,24 +10,21 @@ async function seedProduto(fornecedores = []) {
         const produtos = [];
         const fakeMapping = getGlobalFakeMapping();
 
-        // Busca fornecedores se não foram fornecidos
+        // Garantir que temos fornecedores para referenciar
         if (fornecedores.length === 0) {
-            const Fornecedor = mongoose.model('fornecedores');
-            fornecedores = await Fornecedor.find();
-            console.log(`Encontrados ${fornecedores.length} fornecedores no banco`);
-        }
-
-        if (fornecedores.length === 0) {
-            console.warn("Aviso: Nenhum fornecedor encontrado. Produtos serão criados com IDs fictícios.");
+            throw new Error("Não há fornecedores disponíveis para criar produtos relacionados");
         }
 
         // Cria produtos associados a fornecedores reais
         for (let i = 0; i < 50; i++) {
             // Seleciona um fornecedor aleatório
-            const fornecedor = fornecedores.length > 0 
-                ? fornecedores[Math.floor(Math.random() * fornecedores.length)] 
-                : { _id: i+1, nome_fornecedor: `Fornecedor ${i+1}` };
-
+            const fornecedor = fornecedores[Math.floor(Math.random() * fornecedores.length)];
+            
+            // Extraímos o ID numeral do documento MongoDB
+            // Para mongo, normalmente seria o _id direto, mas o schema exige um número
+            const fornecedorId = fornecedor._id.toString().substring(0, 8);
+            const idNumerico = parseInt(fornecedorId, 16) % 1000; // Converter para um número inteiro gerenciável
+            
             produtos.push({
                 nome_produto: fakeMapping.produto.nome_produto(),
                 descricao: fakeMapping.produto.descricao(),
@@ -39,8 +36,8 @@ async function seedProduto(fornecedores = []) {
                 estoque_min: 10, 
                 data_ultima_entrada: new Date(),
                 status: true,
-                id_fornecedor: Number(fornecedor._id) || i+1,
-                codigo_produto: fakeMapping.produto.codigo_produto()
+                id_fornecedor: idNumerico, // ID numérico derivado do ObjectId
+                codigo_produto: `${fornecedor.nome_fornecedor.substring(0,3).toUpperCase()}-${fakeMapping.produto.codigo_produto()}`
             });
         }
 
