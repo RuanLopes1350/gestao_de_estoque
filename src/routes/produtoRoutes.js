@@ -7,7 +7,8 @@ const produtoController = new ProdutoController();
 
 router
     .get(
-        "/produtos", asyncWrapper(produtoController.listarProdutos.bind(produtoController))
+        "/produtos", 
+        asyncWrapper(produtoController.listarProdutos.bind(produtoController))
     )
     .get(
         "/produtos/:id",
@@ -19,7 +20,7 @@ router
     )
     .put(
         "/produtos/:id",
-        asyncWrapper(produtoController.deletarProduto.bind(produtoController))
+        asyncWrapper(produtoController.atualizarProduto.bind(produtoController))
     )
     .delete(
         "/produtos/:id",

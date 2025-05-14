@@ -34,24 +34,21 @@ class ProdutoController {
             return CommonResponse.success(
                 res,
                 produto,
-                HttpStatusCodes.ACCEPTED,
+                HttpStatusCodes.OK.code,
                 "Produto encontrado!");
         } catch (erro) {
-            if (erro.statusCode) {
-                return CommonResponse.error(res, erro.message, erro.statusCode);
-            }
-            return CommonResponse.error(res, erro.message || "Erro interno do servidor", HttpStatusCodes.INTERNAL_SERVER_ERROR);
+            return CommonResponse.error(res, erro);
         }
     }
 
     async atualizarProduto(req, res) {
         try {
-            const { id } = req.params; // Adicionar esta linha para obter o ID
+            const { id } = req.params;
             const produtoAtualizado = await this.service.atualizarProduto(id, req.body)
             return CommonResponse.success(
                 res,
                 produtoAtualizado,
-                HttpStatusCodes.ACCEPTED,
+                HttpStatusCodes.ACCEPTED.code,
                 "Dados do produto atualizados com sucesso!"
             )
         } catch (erro) {
@@ -61,13 +58,17 @@ class ProdutoController {
 
     async deletarProduto(req, res) {
         try {
-            const produtoDeletado = await this.service.deletarProduto(id)
+            const { id } = req.params;
+            await this.service.deletarProduto(id);
             return CommonResponse.success(
                 res,
-                HttpStatusCodes.OK,
+                null,
+                HttpStatusCodes.OK.code,
                 "Produto deletado com sucesso!"
-            )
-        } catch (erro) {}
+            );
+        } catch (erro) {
+            return CommonResponse.error(res, erro);
+        }
     }
 }
 

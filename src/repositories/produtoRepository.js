@@ -58,14 +58,18 @@ class ProdutoRepository {
     }
 
     async deletarProduto(id) {
-        const produtoIndex = this.produtos.findIndex(produto => produto.id === id);
-
-        if(produtoIndex === -1) {
-            return false;
+        try {
+            const resultado = await Produto.findByIdAndDelete(id);
+    
+            if (!resultado) {
+                throw new CustomError("Produto não encontrado", HttpStatusCodes.NOT_FOUND.code);
+            }
+    
+            return true;
+        } catch (erro) {
+            console.error("Erro ao deletar produto:", erro);
+            throw new CustomError("Erro ao deletar produto", HttpStatusCodes.INTERNAL_SERVER_ERROR.code);
         }
-        
-        this.produtos.splice(produtoIndex, 1);
-        return true;
     }
 
 }

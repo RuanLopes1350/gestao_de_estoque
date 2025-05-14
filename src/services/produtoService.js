@@ -32,8 +32,11 @@ class ProdutoService {
     }
 
     async deletarProduto(id) {
-        const produtoDeletado = await this.repository.deletarProduto(id)
-        return produtoDeletado;
+        if (!mongoose.Types.ObjectId.isValid(id)) {
+            throw new CustomError("ID do produto inválido", HttpStatusCodes.BAD_REQUEST);
+        }
+    
+        return await this.repository.deletarProduto(id);
     }
 }
 

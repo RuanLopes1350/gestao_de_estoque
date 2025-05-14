@@ -13,8 +13,6 @@
     "start": "node server.js"
   },
   "dependencies": {
-    "bcrypt": "^5.1.1",
-    "bcryptjs": "^2.4.3",
     "chai": "^5.1.2",
     "compression": "^1.7.4",
     "convert-csv-to-json": "^2.48.0",
