@@ -1,4 +1,4 @@
-import FornecedorRepository from "../repositories/FornecedorRepository";
+import FornecedorRepository from "../repositories/fornecedorRepository";
 class FornecedorService {
   constructor() {
     this.repository = new FornecedorRepository();
@@ -19,6 +19,18 @@ class FornecedorService {
   // GET /fornecedores/:id
   async buscarPorId(id) {
     const data = await this.repository.buscarPorId(id);
+    return data;
+  }
+
+  // PUT /fornecedores/:id
+  async atualizar(id, dados) {
+    const data = await this.repository.atualizar(id, dados);
+    return data;
+  }
+
+  // DELETE /fornecedores/:id
+  async deletar(id) {
+    const data = await this.repository.deletar(id);
     return data;
   }
 }
