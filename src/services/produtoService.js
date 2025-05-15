@@ -77,9 +77,8 @@ class ProdutoService {
             });
         }
 
-        // Criar um objeto de requisição simulado com o filtro de nome
         const req = {
-            params: {}, // Adicione um objeto params vazio para evitar erros
+            params: {},
             query: {
                 nome_produto: nome
             }

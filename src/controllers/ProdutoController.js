@@ -23,6 +23,19 @@ class ProdutoController {
             }
 
             const data = await this.service.listarProdutos(req);
+            
+            // Verificar se a lista está vazia
+            if (data.docs && data.docs.length === 0) {
+                return CommonResponse.error(
+                    res,
+                    404,
+                    'resourceNotFound',
+                    'Produto',
+                    [],
+                    'Nenhum produto encontrado com os critérios informados.'
+                );
+            }
+            
             return CommonResponse.success(res, data);
         } catch (error) {
             return CommonResponse.error(res, error);
@@ -34,20 +47,22 @@ class ProdutoController {
 
         try {
             const { id } = req.params || {};
-            if (!id) {
-                throw new CustomError({
-                    statusCode: HttpStatusCodes.BAD_REQUEST.code,
-                    errorType: 'validationError',
-                    field: 'id',
-                    details: [],
-                    customMessage: 'ID do produto é obrigatório.'
-                });
-            }
+            
 
             ProdutoIdSchema.parse(id);
             const data = await this.service.buscarProdutoPorID(id);
             return CommonResponse.success(res, data, 200, 'Produto encontrado com sucesso.');
         } catch (error) {
+            if (error.statusCode === 404 || error.message.includes('not found')) {
+                return CommonResponse.error(
+                    res,
+                    404,
+                    'resourceNotFound',
+                    'Produto',
+                    [],
+                    'Produto não encontrado. Verifique se o ID está correto.'
+                );
+            }
             return CommonResponse.error(res, error);
         }
     }
@@ -68,6 +83,19 @@ class ProdutoController {
             }
 
             const data = await this.service.buscarProdutosPorNome(query.nome);
+            
+            // Verificar se a busca retornou resultados
+            if (data.docs && data.docs.length === 0) {
+                return CommonResponse.error(
+                    res,
+                    404,
+                    'resourceNotFound',
+                    'Produto',
+                    [],
+                    `Nenhum produto encontrado com o nome: ${query.nome}`
+                );
+            }
+            
             return CommonResponse.success(res, data, 200, 'Produtos encontrados com sucesso.');
         } catch (error) {
             console.error('Erro na busca por nome:', error);
@@ -186,6 +214,19 @@ class ProdutoController {
 
         try {
             const data = await this.service.listarEstoqueBaixo();
+            
+            // Verificar se há produtos com estoque baixo
+            if (!data || data.length === 0) {
+                return CommonResponse.error(
+                    res, 
+                    404,
+                    'resourceNotFound',
+                    'Produto',
+                    [],
+                    'Nenhum produto com estoque baixo encontrado.'
+                );
+            }
+            
             return CommonResponse.success(res, data, 200, 'Lista de produtos com estoque baixo.');
         } catch (error) {
             return CommonResponse.error(res, error);

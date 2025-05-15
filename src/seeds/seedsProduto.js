@@ -16,7 +16,7 @@ async function seedProduto(fornecedores = []) {
         }
 
         // Cria produtos associados a fornecedores reais
-        for (let i = 0; i < 50; i++) {
+        for (let i = 0; i < 500; i++) {
             // Seleciona um fornecedor aleatório
             const fornecedor = fornecedores[Math.floor(Math.random() * fornecedores.length)];
             

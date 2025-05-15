@@ -11,7 +11,6 @@ class ProdutoRepository {
     async listarProdutos(req) {
         console.log('Estou no listar em ProdutoRepository');
 
-        // Verifica se req.params existe antes de acessar id
         const id = req.params ? req.params.id : null;
 
         if (id) {

@@ -16,7 +16,7 @@ async function seedMovimentacao(usuarios = [], produtos = [], fornecedores = [])
         const tipos = ['entrada', 'saida'];
         
         // Criar 25 movimentações usando os documentos existentes
-        for (let i = 0; i < 25; i++) {
+        for (let i = 0; i < 50; i++) {
             const tipo = tipos[Math.floor(Math.random() * tipos.length)];
             const usuario = usuarios[Math.floor(Math.random() * usuarios.length)];
             const produto = produtos[Math.floor(Math.random() * produtos.length)];
