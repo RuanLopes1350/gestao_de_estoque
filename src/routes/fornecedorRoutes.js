@@ -1,6 +1,6 @@
 import express from "express";
-import FornecedorController from "../controllers/FornecedorController";
 import { asyncWrapper } from "../utils/helpers/index.js";
+import FornecedorController from "../controllers/FornecedorController.js";
 
 const router = express.Router();
 

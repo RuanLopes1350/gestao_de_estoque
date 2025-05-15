@@ -1,8 +1,8 @@
-import { Fornecedor as FornecedorModel } from "../models/Fornecedor.js";
+import Fornecedor from "../models/Fornecedor.js";
 import FornecedorFilterBuilder from "./filters/FornecedorFilterBuilder.js";
 
 class FornecedorRepository {
-  constructor({ model = FornecedorModel } = {}) {
+  constructor({ model = Fornecedor } = {}) {
     this.model = model;
   }
 
@@ -11,7 +11,7 @@ class FornecedorRepository {
     return await fornecedor.save();
   }
 
-  // Método para listar turmas, podendo buscar por ID ou aplicar filtros simples (codigo_suap, descricao e curso)
+  // Método para listar fornecedores, podendo buscar por ID ou aplicar filtros simples
   async listar(req) {
     const { id } = req.params || null;
     if (id) {
@@ -40,10 +40,16 @@ class FornecedorRepository {
         errorType: "internalServerError",
         field: "Fornecedor",
         details: [],
-        customMessage: messages.error.internalServerError("Turma"),
+        customMessage: messages.error.internalServerError("Fornecedor"),
       });
     }
     const filtros = filterBuilder.build();
+
+    const options = {
+      page: parseInt(page, 10),
+      limit: parseInt(limite, 10),
+      sort: { nome_fornecedor: 1 },
+    };
 
     const resultado = await this.model.paginate(filtros, options);
     return resultado;
