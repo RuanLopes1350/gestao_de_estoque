@@ -1,4 +1,4 @@
-import FornecedorRepository from "../repositories/fornecedorRepository";
+import FornecedorRepository from "../repositories/fornecedorRepository.js";
 class FornecedorService {
   constructor() {
     this.repository = new FornecedorRepository();

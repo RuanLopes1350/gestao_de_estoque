@@ -1,4 +1,7 @@
-import FornecedorService from "../services/FornecedorService";
+import FornecedorService from "../services/fornecedorService.js";
+import CommonResponse from "../utils/helpers/CommonResponse.js";
+import HttpStatusCodes from "../utils/helpers/HttpStatusCodes.js";
+import { FornecedorIdSchema } from "../utils/validators/schemas/zod/querys/FornecedorQuerySchema.js";
 
 class FornecedorController {
   constructor() {
@@ -12,7 +15,7 @@ class FornecedorController {
       return CommonResponse.created(
         res,
         data,
-        HttpStatusCodes.CREATED,
+        HttpStatusCodes.CREATED.code,
         "Fornecedor adicionado"
       );
     } catch (error) {
@@ -29,12 +32,14 @@ class FornecedorController {
   // GET /fornecedores/:id
   async buscarPorId(req, res) {
     try {
+      const { id } = req.params || {};
+      FornecedorIdSchema.parse(id);
       const data = await this.service.buscarPorId(id);
       return CommonResponse.success(
         res,
         data,
-        HttpStatusCodes.OK,
-        "Turma encontrada com sucesso."
+        200,
+        "Fornecedor encontrado com sucesso."
       );
     } catch (error) {
       return CommonResponse.error(res, error);
@@ -49,7 +54,7 @@ class FornecedorController {
       return CommonResponse.success(
         res,
         data,
-        HttpStatusCodes.OK,
+        HttpStatusCodes.OK.code,
         "Fornecedor atualizada com sucesso."
       );
     } catch (error) {
@@ -65,8 +70,8 @@ class FornecedorController {
       return CommonResponse.success(
         res,
         data,
-        HttpStatusCodes.OK,
-        "Fornecedor deletada com sucesso."
+        HttpStatusCodes.OK.code,
+        "Fornecedor eliminado com sucesso."
       );
     } catch (error) {
       return CommonResponse.error(res, error);
