@@ -9,7 +9,7 @@ router
     // Rota para buscar todos os produtos
     // Exemplo: produtos
     .get(
-        "/produtos", 
+        "/produtos",
         asyncWrapper(produtoController.listarProdutos.bind(produtoController))
     )
     // Rota para buscar produtos com estoque baixo
@@ -38,7 +38,7 @@ router
     )
     // Rota para atualizar um produto
     // Exemplo: produtos/(id que deseja atualizar)
-    .put(
+    .patch(
         "/produtos/:id",
         asyncWrapper(produtoController.atualizarProduto.bind(produtoController))
     )

@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import mongoose from 'mongoose';
 
 export const ProdutoQuerySchema = z.object({
     nome: z.string().min(1, "O nome para busca deve conter pelo menos 1 caractere"),
@@ -14,7 +15,7 @@ export const ProdutoQuerySchema = z.object({
 });
 
 export const ProdutoIdSchema = z.string().refine(id => {
-    return /^[0-9a-fA-F]{24}$/.test(id);
+    return mongoose.Types.ObjectId.isValid(id);
 }, {
     message: 'ID do produto inválido'
 });

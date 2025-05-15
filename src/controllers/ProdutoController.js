@@ -54,7 +54,7 @@ class ProdutoController {
 
     async buscarProdutosPorNome(req, res) {
         console.log('Estou no buscarProdutosPorNome em ProdutoController');
-    
+
         try {
             const query = req.query || {};
             if (!query.nome) {
@@ -66,7 +66,7 @@ class ProdutoController {
                     customMessage: 'O parâmetro nome é obrigatório para esta busca.'
                 });
             }
-            
+
             const data = await this.service.buscarProdutosPorNome(query.nome);
             return CommonResponse.success(res, data, 200, 'Produtos encontrados com sucesso.');
         } catch (error) {
@@ -79,7 +79,6 @@ class ProdutoController {
         console.log('Estou no cadastrarProduto em ProdutoController');
 
         try {
-            // Valida os dados do produto
             const parsedData = ProdutoSchema.parse(req.body);
             const data = await this.service.cadastrarProduto(parsedData);
             return CommonResponse.created(res, data, HttpStatusCodes.CREATED.code, 'Produto cadastrado com sucesso.');
@@ -90,31 +89,57 @@ class ProdutoController {
 
     async atualizarProduto(req, res) {
         console.log('Estou no atualizarProduto em ProdutoController');
+        console.log('Dados recebidos:', JSON.stringify(req.body, null, 2));
+        console.log('ID do produto:', req.params.id);
 
         try {
-            const { id } = req.params || {};
+            const { id } = req.params;
             if (!id) {
                 throw new CustomError({
                     statusCode: HttpStatusCodes.BAD_REQUEST.code,
                     errorType: 'validationError',
                     field: 'id',
                     details: [],
-                    customMessage: 'ID do produto é obrigatório para atualizar.'
+                    customMessage: 'ID do produto é obrigatório.'
                 });
             }
 
             ProdutoIdSchema.parse(id);
-            const parsedData = ProdutoUpdateSchema.parse(req.body);
-            const data = await this.service.atualizarProduto(id, parsedData);
-            return CommonResponse.success(res, data, 200, 'Produto atualizado com sucesso.');
+
+            const dadosAtualizacao = req.body;
+
+            // Verifica se há dados para atualizar
+            if (Object.keys(dadosAtualizacao).length === 0) {
+                throw new CustomError({
+                    statusCode: HttpStatusCodes.BAD_REQUEST.code,
+                    errorType: 'validationError',
+                    field: 'body',
+                    details: [],
+                    customMessage: 'Nenhum dado fornecido para atualização.'
+                });
+            }
+
+            await ProdutoUpdateSchema.parseAsync(dadosAtualizacao);
+
+            const produtoAtualizado = await this.service.atualizarProduto(id, dadosAtualizacao);
+
+            console.log('Produto atualizado:', produtoAtualizado);
+
+            return CommonResponse.success(
+                res,
+                produtoAtualizado,
+                200,
+                'Produto atualizado com sucesso.'
+            );
         } catch (error) {
+            console.error('Erro ao atualizar produto:', error);
             return CommonResponse.error(res, error);
         }
     }
 
     async deletarProduto(req, res) {
         console.log('Estou no deletarProduto em ProdutoController');
-    
+
         try {
             const { id } = req.params || {};
             if (!id) {
@@ -126,7 +151,7 @@ class ProdutoController {
                     customMessage: 'ID do produto é obrigatório para deletar.'
                 });
             }
-    
+
             try {
                 ProdutoIdSchema.parse(id);
             } catch (error) {
@@ -138,15 +163,15 @@ class ProdutoController {
                     customMessage: 'ID do produto inválido.'
                 });
             }
-    
-            const data = await this.service.deletar(id);
+
+            const data = await this.service.deletarProduto(id);
             return CommonResponse.success(res, data, 200, 'Produto excluído com sucesso.');
         } catch (error) {
             if (error.statusCode === 404) {
                 return CommonResponse.error(
-                    res, 
-                    error.statusCode, 
-                    error.errorType, 
+                    res,
+                    error.statusCode,
+                    error.errorType,
                     error.field,
                     error.details,
                     'Produto não encontrado. Verifique se o ID está correto.'
