@@ -13,7 +13,7 @@ router
   )
   .get(
     "/fornecedores/:id",
-    asyncWrapper(fornecedorController.listar.bind(fornecedorController))
+    asyncWrapper(fornecedorController.buscarPorId.bind(fornecedorController))
   )
   .post(
     "/fornecedores",

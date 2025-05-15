@@ -40,5 +40,37 @@ class FornecedorController {
       return CommonResponse.error(res, error);
     }
   }
+
+  // PUT /fornecedores/:id
+  async atualizar(req, res) {
+    try {
+      const { id } = req.params;
+      const data = await this.service.atualizar(id, req.body);
+      return CommonResponse.success(
+        res,
+        data,
+        HttpStatusCodes.OK,
+        "Fornecedor atualizada com sucesso."
+      );
+    } catch (error) {
+      return CommonResponse.error(res, error);
+    }
+  }
+
+  // DELETE /fornecedores/:id
+  async deletar(req, res) {
+    try {
+      const { id } = req.params;
+      const data = await this.service.deletar(id);
+      return CommonResponse.success(
+        res,
+        data,
+        HttpStatusCodes.OK,
+        "Fornecedor deletada com sucesso."
+      );
+    } catch (error) {
+      return CommonResponse.error(res, error);
+    }
+  }
 }
 export default FornecedorController;

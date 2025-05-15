@@ -62,5 +62,30 @@ class FornecedorRepository {
     }
     return fornecedor;
   }
+
+  // Método para atualizar um fornecedor existente
+  async atualizar(id, dadosAtualizados) {
+    const fornecedor = await this.model.findByIdAndUpdate(
+      id,
+      dadosAtualizados,
+      { new: true }
+    );
+
+    if (!fornecedor) {
+      throw new CustomError({
+        statusCode: 404,
+        errorType: "resourceNotFound",
+        field: "Fornecedor",
+        customMessage: messages.error.resourceNotFound("Fornecedor"),
+      });
+    }
+    return fornecedor;
+  }
+
+  // Método para deletar um fornecedor
+  async deletar(id) {
+    const fornecedor = await this.model.findByIdAndDelete(id);
+    return fornecedor;
+  }
 }
 export default FornecedorRepository;
