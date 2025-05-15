@@ -29,7 +29,7 @@ const routes = (app) => {
   });
 
   app.use(express.json(),
-    rotasProdutos
+    rotasProdutos,
   );
 
   // Se não é nenhuma rota válida, produz 404

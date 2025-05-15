@@ -164,6 +164,24 @@ class ProdutoRepository {
             $expr: { $lt: ["$estoque", "$estoque_min"] }
         }).sort({ estoque: 1 });
     }
+
+    async desativarProduto(id) {
+        const produto = await this.model.findByIdAndUpdate (
+            id,
+            { status: false },
+            { new: true }
+        );
+        return produto;
+    }
+
+    async reativarProduto(id) {
+        const produto = await this.model.findByIdAndUpdate (
+            id,
+            { status: true },
+            { new: true }
+        );
+        return produto;
+    }
 }
 
 export default ProdutoRepository;

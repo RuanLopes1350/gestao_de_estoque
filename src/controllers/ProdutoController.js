@@ -191,6 +191,94 @@ class ProdutoController {
             return CommonResponse.error(res, error);
         }
     }
+
+    async desativarProduto(req, res) {
+        console.log('Estou no desativarProduto em ProdutoController');
+
+        try {
+            const { id } = req.params || {};
+            if (!id) {
+                throw new CustomError({
+                    statusCode: HttpStatusCodes.BAD_REQUEST.code,
+                    errorType: 'validationError',
+                    field: 'id',
+                    details: [],
+                    customMessage: 'ID do produto é obrigatório para desativar.'
+                });
+            }
+
+            try {
+                ProdutoIdSchema.parse(id);
+            } catch (error) {
+                throw new CustomError({
+                    statusCode: HttpStatusCodes.BAD_REQUEST.code,
+                    errorType: 'validationError',
+                    field: 'id',
+                    details: [],
+                    customMessage: 'ID do produto inválido.'
+                });
+            }
+
+            const data = await this.service.desativarProduto(id);
+            return CommonResponse.success(res, data, 200, 'Produto desativado com sucesso.');
+        } catch (error) {
+            if (error.statusCode === 404) {
+                return CommonResponse.error(
+                    res,
+                    error.statusCode,
+                    error.errorType,
+                    error.field,
+                    error.details,
+                    'Produto não encontrado. Verifique se o ID está correto.'
+                );
+            }
+            return CommonResponse.error(res, error);
+        }
+    }
+
+    async reativarProduto(req, res) {
+        console.log('Estou no reativarProduto em ProdutoController');
+
+        try {
+            const { id } = req.params || {};
+            if (!id) {
+                throw new CustomError({
+                    statusCode: HttpStatusCodes.BAD_REQUEST.code,
+                    errorType: 'validationError',
+                    field: 'id',
+                    details: [],
+                    customMessage: 'ID do produto é obrigatório para reativar.'
+                });
+            }
+
+            try {
+                ProdutoIdSchema.parse(id);
+            } catch (error) {
+                throw new CustomError({
+                    statusCode: HttpStatusCodes.BAD_REQUEST.code,
+                    errorType: 'validationError',
+                    field: 'id',
+                    details: [],
+                    customMessage: 'ID do produto inválido.'
+                });
+            }
+
+            const data = await this.service.reativarProduto(id);
+            return CommonResponse.success(res, data, 200, 'Produto reativado com sucesso.');
+        } catch (error) {
+            if (error.statusCode === 404) {
+                return CommonResponse.error(
+                    res,
+                    error.statusCode,
+                    error.errorType,
+                    error.field,
+                    error.details,
+                    'Produto não encontrado. Verifique se o ID está correto.'
+                );
+            }
+            return CommonResponse.error(res, error);
+        }
+    }
 }
 
 export default ProdutoController;

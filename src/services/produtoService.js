@@ -115,6 +115,40 @@ class ProdutoService {
         const data = await this.repository.listarEstoqueBaixo();
         return data;
     }
+
+    async desativarProduto(id) {
+        console.log('Estou no desativarProduto em ProdutoService');
+
+        if (!mongoose.Types.ObjectId.isValid(id)) {
+            throw new CustomError({
+                statusCode: HttpStatusCodes.BAD_REQUEST.code,
+                errorType: 'validationError',
+                field: 'id',
+                details: [],
+                customMessage: 'ID do produto inválido.'
+            });
+        }
+
+        const data = await this.repository.desativarProduto(id);
+        return data;
+    }
+
+    async reativarProduto(id) {
+        console.log('Estou no reativarProduto em ProdutoService');
+
+        if (!mongoose.Types.ObjectId.isValid(id)) {
+            throw new CustomError({
+                statusCode: HttpStatusCodes.BAD_REQUEST.code,
+                errorType: 'validationError',
+                field: 'id',
+                details: [],
+                customMessage: 'ID do produto inválido.'
+            });
+        }
+
+        const data = await this.repository.reativarProduto(id);
+        return data;
+    }
 }
 
 export default ProdutoService;

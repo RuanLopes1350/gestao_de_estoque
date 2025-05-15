@@ -42,6 +42,16 @@ router
         "/produtos/:id",
         asyncWrapper(produtoController.atualizarProduto.bind(produtoController))
     )
+    // Rota para desativar um produto
+    // Exemplo: produtos/desativar/(id que deseja desativar)
+    .patch(
+        "/produtos/desativar/:id",
+        asyncWrapper(produtoController.desativarProduto.bind(produtoController))
+    )
+    .patch(
+        "/produtos/reativar/:id",
+        asyncWrapper(produtoController.reativarProduto.bind(produtoController))
+    )
     // Rota para deletar um produto
     // Exemplo: produtos/(id que deseja deletar)
     .delete(
