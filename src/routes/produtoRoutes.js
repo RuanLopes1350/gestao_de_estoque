@@ -32,6 +32,18 @@ router
         "/produtos/reativar/:id",
         asyncWrapper(produtoController.reativarProduto.bind(produtoController))
     )
+    .get(
+        "/produtos/busca/categoria",
+        asyncWrapper(produtoController.buscarProdutosPorCategoria.bind(produtoController))
+    )
+    .get(
+        "/produtos/busca/codigo",
+        asyncWrapper(produtoController.buscarProdutosPorCodigo.bind(produtoController))
+    )
+    .get(
+        "/produtos/busca/fornecedor",
+        asyncWrapper(produtoController.buscarProdutosPorFornecedor.bind(produtoController))
+    )
     // Rotas com parâmetros por último
     .get(
         "/produtos/:id",

@@ -10,13 +10,13 @@ class ProdutoRepository {
 
     async listarProdutos(req) {
         console.log('Estou no listar em ProdutoRepository');
-
+    
         const id = req.params ? req.params.id : null;
-
+    
         if (id) {
             const data = await this.model.findById(id)
                 .populate('id_fornecedor');
-
+    
             if (!data) {
                 throw new CustomError({
                     statusCode: 404,
@@ -26,35 +26,44 @@ class ProdutoRepository {
                     customMessage: messages.error.resourceNotFound('Produto')
                 });
             }
-
+    
             return data;
         }
-
+    
         // Para busca por filtros
-        const { nome_produto, categoria, codigo_produto, page = 1 } = req.query || {};
+        const { nome_produto, categoria, codigo_produto, id_fornecedor, page = 1 } = req.query || {};
         const limite = Math.min(parseInt(req.query?.limite, 10) || 10, 100);
-
+    
         const filtros = {};
-
+    
         if (nome_produto) {
             filtros.nome_produto = { $regex: nome_produto, $options: 'i' };
+            console.log(`Aplicando filtro por nome: "${nome_produto}"`);
         }
-
+    
         if (categoria) {
             filtros.categoria = { $regex: categoria, $options: 'i' };
+            console.log(`Aplicando filtro por categoria: "${categoria}"`);
         }
-
+    
         if (codigo_produto) {
             filtros.codigo_produto = { $regex: codigo_produto, $options: 'i' };
+            console.log(`Aplicando filtro por código: "${codigo_produto}"`);
         }
-
+    
+        if (id_fornecedor) {
+            // Como id_fornecedor é um Number no modelo, convertemos para número
+            filtros.id_fornecedor = parseInt(id_fornecedor);
+            console.log(`Aplicando filtro por fornecedor: "${id_fornecedor}"`);
+        }
+    
         const options = {
             page: parseInt(page, 10),
             limit: parseInt(limite, 10),
             populate: 'id_fornecedor',
             sort: { nome_produto: 1 },
         };
-
+    
         console.log('Filtros aplicados:', filtros);
         const resultado = await this.model.paginate(filtros, options);
         return resultado;

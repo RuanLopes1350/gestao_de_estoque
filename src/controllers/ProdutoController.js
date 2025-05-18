@@ -23,7 +23,7 @@ class ProdutoController {
             }
 
             const data = await this.service.listarProdutos(req);
-            
+
             // Verificar se a lista está vazia
             if (data.docs && data.docs.length === 0) {
                 return CommonResponse.error(
@@ -35,7 +35,7 @@ class ProdutoController {
                     'Nenhum produto encontrado com os critérios informados.'
                 );
             }
-            
+
             return CommonResponse.success(res, data);
         } catch (error) {
             return CommonResponse.error(res, error);
@@ -47,7 +47,7 @@ class ProdutoController {
 
         try {
             const { id } = req.params || {};
-            
+
 
             ProdutoIdSchema.parse(id);
             const data = await this.service.buscarProdutoPorID(id);
@@ -83,7 +83,7 @@ class ProdutoController {
             }
 
             const data = await this.service.buscarProdutosPorNome(query.nome);
-            
+
             // Verificar se a busca retornou resultados
             if (data.docs && data.docs.length === 0) {
                 return CommonResponse.error(
@@ -95,10 +95,116 @@ class ProdutoController {
                     `Nenhum produto encontrado com o nome: ${query.nome}`
                 );
             }
-            
+
             return CommonResponse.success(res, data, 200, 'Produtos encontrados com sucesso.');
         } catch (error) {
             console.error('Erro na busca por nome:', error);
+            return CommonResponse.error(res, error);
+        }
+    }
+
+    // Adicione esses novos métodos
+    async buscarProdutosPorCategoria(req, res) {
+        console.log('Estou no buscarProdutosPorCategoria em ProdutoController');
+
+        try {
+            const query = req.query || {};
+            if (!query.categoria) {
+                throw new CustomError({
+                    statusCode: HttpStatusCodes.BAD_REQUEST.code,
+                    errorType: 'validationError',
+                    field: 'categoria',
+                    details: [],
+                    customMessage: 'O parâmetro categoria é obrigatório para esta busca.'
+                });
+            }
+
+            const data = await this.service.buscarProdutosPorCategoria(query.categoria);
+
+            if (data.docs && data.docs.length === 0) {
+                return CommonResponse.error(
+                    res,
+                    404,
+                    'resourceNotFound',
+                    'Produto',
+                    [],
+                    `Nenhum produto encontrado na categoria: ${query.categoria}`
+                );
+            }
+
+            return CommonResponse.success(res, data, 200, 'Produtos encontrados com sucesso.');
+        } catch (error) {
+            console.error('Erro na busca por categoria:', error);
+            return CommonResponse.error(res, error);
+        }
+    }
+
+    async buscarProdutosPorCodigo(req, res) {
+        console.log('Estou no buscarProdutosPorCodigo em ProdutoController');
+
+        try {
+            const query = req.query || {};
+            if (!query.codigo) {
+                throw new CustomError({
+                    statusCode: HttpStatusCodes.BAD_REQUEST.code,
+                    errorType: 'validationError',
+                    field: 'codigo',
+                    details: [],
+                    customMessage: 'O parâmetro codigo é obrigatório para esta busca.'
+                });
+            }
+
+            const data = await this.service.buscarProdutosPorCodigo(query.codigo);
+
+            if (data.docs && data.docs.length === 0) {
+                return CommonResponse.error(
+                    res,
+                    404,
+                    'resourceNotFound',
+                    'Produto',
+                    [],
+                    `Nenhum produto encontrado com o código: ${query.codigo}`
+                );
+            }
+
+            return CommonResponse.success(res, data, 200, 'Produtos encontrados com sucesso.');
+        } catch (error) {
+            console.error('Erro na busca por código:', error);
+            return CommonResponse.error(res, error);
+        }
+    }
+
+    async buscarProdutosPorFornecedor(req, res) {
+        console.log('Estou no buscarProdutosPorFornecedor em ProdutoController');
+
+        try {
+            const query = req.query || {};
+            if (!query.fornecedor) {
+                throw new CustomError({
+                    statusCode: HttpStatusCodes.BAD_REQUEST.code,
+                    errorType: 'validationError',
+                    field: 'fornecedor',
+                    details: [],
+                    customMessage: 'O parâmetro fornecedor é obrigatório para esta busca.'
+                });
+            }
+
+            const data = await this.service.buscarProdutosPorFornecedor(query.fornecedor);
+
+            if (data.docs && data.docs.length === 0) {
+                return CommonResponse.error(
+                    res,
+                    404,
+                    'resourceNotFound',
+                    'Produto',
+                    [],
+                    `Nenhum produto encontrado para o fornecedor ID: ${query.fornecedor}`
+                );
+            }
+
+            return CommonResponse.success(res, data, 200, 'Produtos encontrados com sucesso.');
+        } catch (error) {
+            console.error('Erro na busca por fornecedor:', error);
             return CommonResponse.error(res, error);
         }
     }
@@ -214,11 +320,11 @@ class ProdutoController {
 
         try {
             const data = await this.service.listarEstoqueBaixo();
-            
+
             // Verificar se há produtos com estoque baixo
             if (!data || data.length === 0) {
                 return CommonResponse.error(
-                    res, 
+                    res,
                     404,
                     'resourceNotFound',
                     'Produto',
@@ -226,7 +332,7 @@ class ProdutoController {
                     'Nenhum produto com estoque baixo encontrado.'
                 );
             }
-            
+
             return CommonResponse.success(res, data, 200, 'Lista de produtos com estoque baixo.');
         } catch (error) {
             return CommonResponse.error(res, error);
