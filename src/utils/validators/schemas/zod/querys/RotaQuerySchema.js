@@ -28,7 +28,7 @@ export const RotaQuerySchema = z.object({
     page: z
         .string()
         .optional()
-        .transform((val) => (val ? parseInt(val, 10) : 1))
+        .transform((val) => (val ? parseInt(val, 100) : 1))
         .refine((val) => Number.isInteger(val) && val > 0, {
             message: "Page deve ser um número inteiro maior que 0",
         }),

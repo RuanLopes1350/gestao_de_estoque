@@ -44,15 +44,26 @@ app.use(express.urlencoded({ extended: true }));
 routes(app);
 
 // Middleware para lidar com rotas não encontradas (404)
-app.use((req, res, next) => {
-    return CommonResponse.error(
-        res,
-        404,
-        'resourceNotFound',
-        null,
-        [{ message: 'Rota não encontrada.' }]
-    );
-});
+app.use((err, req, res, next) => {
+    console.error(err);
+    
+    if (req.path.startsWith('/produtos')) {
+      return res.status(404).json({
+        message: "Rota de produto não encontrada",
+        path: req.originalUrl
+      });
+    }
+    
+    if (err.name === 'NotFoundError' || err.statusCode === 404) {
+      return res.status(404).json({
+        message: err.message || "Recurso não encontrado"
+      });
+    }
+    
+    res.status(err.statusCode || 500).json({
+      message: err.message || "Erro interno do servidor"
+    });
+  });
 
 
 // Listener para erros não tratados (opcional, mas recomendado)

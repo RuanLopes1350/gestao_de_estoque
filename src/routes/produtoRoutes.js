@@ -6,47 +6,64 @@ const router = express.Router();
 const produtoController = new ProdutoController();
 
 router
-    // Rota para buscar todos os produtos
-    // Exemplo: produtos
+    // Rotas gerais primeiro
     .get(
-        "/produtos", 
+        "/produtos",
         asyncWrapper(produtoController.listarProdutos.bind(produtoController))
     )
-    // Rota para buscar produtos com estoque baixo
-    // Exemplo: produtos/estoque-baixo
-    .get(
-        "/produtos/estoque-baixo",
-        asyncWrapper(produtoController.listarEstoqueBaixo.bind(produtoController))
-    )
-    // Rota para buscar produtos por nome
-    // Exemplo: produtos/busca?nome=(nome que deseja buscar)
-    .get(
-        "/produtos/busca",
-        asyncWrapper(produtoController.buscarProdutosPorNome.bind(produtoController))
-    )
-    // Rota para buscar produtos por ID
-    // Exemplo: produtos/(id que deseja buscar)
-    .get(
-        "/produtos/:id",
-        asyncWrapper(produtoController.buscarProdutoPorID.bind(produtoController))
-    )
-    // Rota para cadastrar um novo produto
-    // Exemplo: produtos
     .post(
         "/produtos",
         asyncWrapper(produtoController.cadastrarProduto.bind(produtoController))
     )
-    // Rota para atualizar um produto
-    // Exemplo: produtos/(id que deseja atualizar)
-    .put(
+    // Rotas específicas antes das rotas com parâmetros
+    .get(
+        "/produtos/estoque-baixo",
+        asyncWrapper(produtoController.listarEstoqueBaixo.bind(produtoController))
+    )
+    .get(
+        "/produtos/busca",
+        asyncWrapper(produtoController.buscarProdutosPorNome.bind(produtoController))
+    )
+    .patch(
+        "/produtos/desativar/:id",
+        asyncWrapper(produtoController.desativarProduto.bind(produtoController))
+    )
+    .patch(
+        "/produtos/reativar/:id",
+        asyncWrapper(produtoController.reativarProduto.bind(produtoController))
+    )
+    .get(
+        "/produtos/busca/categoria",
+        asyncWrapper(produtoController.buscarProdutosPorCategoria.bind(produtoController))
+    )
+    .get(
+        "/produtos/busca/codigo",
+        asyncWrapper(produtoController.buscarProdutosPorCodigo.bind(produtoController))
+    )
+    .get(
+        "/produtos/busca/fornecedor",
+        asyncWrapper(produtoController.buscarProdutosPorFornecedor.bind(produtoController))
+    )
+    // Rotas com parâmetros por último
+    .get(
+        "/produtos/:id",
+        asyncWrapper(produtoController.buscarProdutoPorID.bind(produtoController))
+    )
+    .patch(
         "/produtos/:id",
         asyncWrapper(produtoController.atualizarProduto.bind(produtoController))
     )
-    // Rota para deletar um produto
-    // Exemplo: produtos/(id que deseja deletar)
     .delete(
         "/produtos/:id",
         asyncWrapper(produtoController.deletarProduto.bind(produtoController))
     );
+
+// Middleware para rotas inexistentes
+router.use('/produtos/*', (req, res) => {
+    res.status(404).json({
+        message: "Rota de produto não encontrada",
+        path: req.originalUrl
+    });
+});
 
 export default router;
