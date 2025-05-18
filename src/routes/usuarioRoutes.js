@@ -1,31 +1,45 @@
 import express from 'express';
 import UsuarioController from '../controllers/UsuarioController.js';
 import asyncWrapper from '../middlewares/asyncWrapper.js';
-import UsuarioController from '../controllers/UsuarioController.js';
 
 const router = express.Router();
-const UsuarioController = new UsuarioController();
+const usuarioController = new UsuarioController();
 
 router
+    // Rotas gerais primeiro
     .get(
         "/usuarios",
-        asyncWrapper(UsuarioController.listarUsuario.bind(UsuarioController))
-    )
-    .get(
-        "/usuarios/:matricula",
-        asyncWrapper(UsuarioController.buscarUsuarioPorMatricula.bind(UsuarioController))
+        asyncWrapper(usuarioController.listarUsuarios.bind(usuarioController))
     )
     .post(
-        "/usuarios",
-        asyncWrapper(UsuarioController.cadastrarUsuario.bind(UsuarioController))
+        "/usuarios", 
+        asyncWrapper(usuarioController.cadastrarUsuario.bind(usuarioController))
     )
-    .put(
-        "usuarios/:matricula",
-        asyncWrapper(UsuarioController.deletarUsuario.bind(UsuarioController))
+    // Rotas específicas antes das rotas com parâmetros
+    .get(
+        "/usuarios/busca",
+        asyncWrapper(usuarioController.buscarUsuarioPorMatricula.bind(usuarioController))
     )
-    delete(
-        "/usuarios/:matricula",
-        asyncWrapper(UsuarioController.deletarUsuario.bind(UsuarioController))
+    // Rotas com parâmetros por último
+    .get(
+        "/usuarios/:id",
+        asyncWrapper(usuarioController.buscarUsuarioPorID.bind(usuarioController))
+    )
+    .patch(
+        "/usuarios/:id",
+        asyncWrapper(usuarioController.atualizarUsuario.bind(usuarioController))
+    )
+    .delete(
+        "/usuarios/:id",
+        asyncWrapper(usuarioController.deletarUsuario.bind(usuarioController))
     );
+
+// Middleware para rotas inexistentes
+router.use('/usuarios/*', (req, res) => {
+    res.status(404).json({
+        message: "Rota de usuário não encontrada",
+        path: req.originalUrl
+    });
+});
 
 export default router;
