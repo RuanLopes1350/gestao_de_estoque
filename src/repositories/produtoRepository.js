@@ -31,7 +31,7 @@ class ProdutoRepository {
         }
     
         // Para busca por filtros
-        const { nome_produto, categoria, codigo_produto, id_fornecedor, page = 1 } = req.query || {};
+        const { nome_produto, categoria, codigo_produto, id_fornecedor, nome_fornecedor, page = 1 } = req.query || {};
         const limite = Math.min(parseInt(req.query?.limite, 10) || 10, 100);
     
         const filtros = {};
@@ -54,7 +54,45 @@ class ProdutoRepository {
         if (id_fornecedor) {
             // Como id_fornecedor é um Number no modelo, convertemos para número
             filtros.id_fornecedor = parseInt(id_fornecedor);
-            console.log(`Aplicando filtro por fornecedor: "${id_fornecedor}"`);
+            console.log(`Aplicando filtro por ID de fornecedor: "${id_fornecedor}"`);
+        }
+    
+        // Adicionando suporte para busca por nome do fornecedor
+        if (nome_fornecedor) {
+            // Para esta busca, precisamos primeiro encontrar o ID do fornecedor pelo nome
+            // e depois buscar produtos que têm esse ID
+            const Fornecedor = mongoose.model('fornecedores');
+            const fornecedores = await Fornecedor.find({
+                nome_fornecedor: { $regex: nome_fornecedor, $options: 'i' }
+            }).select('_id');
+            
+            // Extrair os ids numéricos para pesquisa
+            if (fornecedores.length > 0) {
+                const fornecedorIds = fornecedores.map(f => {
+                    // Extraindo um ID numérico do ObjectId do MongoDB
+                    const tempId = f._id.toString().substring(0, 8);
+                    return parseInt(tempId, 16) % 1000;
+                });
+                
+                // Usar $in para buscar produtos de qualquer um dos fornecedores encontrados
+                filtros.id_fornecedor = { $in: fornecedorIds };
+                console.log(`Aplicando filtro por nome de fornecedor: "${nome_fornecedor}" (IDs: ${fornecedorIds.join(', ')})`);
+            } else {
+                // Se não encontrar nenhum fornecedor, retornar lista vazia
+                console.log(`Nenhum fornecedor encontrado com o nome: "${nome_fornecedor}"`);
+                return {
+                    docs: [],
+                    totalDocs: 0,
+                    limit: limite,
+                    totalPages: 0,
+                    page: parseInt(page, 10),
+                    pagingCounter: 0,
+                    hasPrevPage: false,
+                    hasNextPage: false,
+                    prevPage: null,
+                    nextPage: null
+                };
+            }
         }
     
         const options = {

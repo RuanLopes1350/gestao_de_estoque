@@ -67,23 +67,41 @@ class ProdutoController {
         }
     }
 
-    async buscarProdutosPorNome(req, res) {
-        console.log('Estou no buscarProdutosPorNome em ProdutoController');
-
+    async buscarProdutos(req, res) {
+        console.log('Estou no buscarProdutos em ProdutoController');
+        console.log('Query params:', req.query);
+    
         try {
             const query = req.query || {};
-            if (!query.nome) {
+            const page = parseInt(query.page) || 1;
+            const limite = Math.min(parseInt(query.limite) || 10, 100);
+            
+            let data = null;
+            let tipoFiltro = null;
+            
+            // Verificar qual filtro foi passado
+            if (query.nome) {
+                tipoFiltro = 'nome';
+                data = await this.service.buscarProdutosPorNome(query.nome, page, limite);
+            } else if (query.categoria) {
+                tipoFiltro = 'categoria';
+                data = await this.service.buscarProdutosPorCategoria(query.categoria, page, limite);
+            } else if (query.codigo) {
+                tipoFiltro = 'codigo';
+                data = await this.service.buscarProdutosPorCodigo(query.codigo, page, limite);
+            } else if (query.fornecedor) {
+                tipoFiltro = 'fornecedor';
+                data = await this.service.buscarProdutosPorFornecedor(query.fornecedor, page, limite, true);
+            } else {
                 throw new CustomError({
                     statusCode: HttpStatusCodes.BAD_REQUEST.code,
                     errorType: 'validationError',
-                    field: 'nome',
+                    field: 'query',
                     details: [],
-                    customMessage: 'O parâmetro nome é obrigatório para esta busca.'
+                    customMessage: 'É necessário informar ao menos um parâmetro de busca: nome, categoria, codigo ou fornecedor.'
                 });
             }
-
-            const data = await this.service.buscarProdutosPorNome(query.nome);
-
+            
             // Verificar se a busca retornou resultados
             if (data.docs && data.docs.length === 0) {
                 return CommonResponse.error(
@@ -92,119 +110,13 @@ class ProdutoController {
                     'resourceNotFound',
                     'Produto',
                     [],
-                    `Nenhum produto encontrado com o nome: ${query.nome}`
+                    `Nenhum produto encontrado com o(a) ${tipoFiltro}: ${query[tipoFiltro]}`
                 );
             }
-
+            
             return CommonResponse.success(res, data, 200, 'Produtos encontrados com sucesso.');
         } catch (error) {
-            console.error('Erro na busca por nome:', error);
-            return CommonResponse.error(res, error);
-        }
-    }
-
-    // Adicione esses novos métodos
-    async buscarProdutosPorCategoria(req, res) {
-        console.log('Estou no buscarProdutosPorCategoria em ProdutoController');
-
-        try {
-            const query = req.query || {};
-            if (!query.categoria) {
-                throw new CustomError({
-                    statusCode: HttpStatusCodes.BAD_REQUEST.code,
-                    errorType: 'validationError',
-                    field: 'categoria',
-                    details: [],
-                    customMessage: 'O parâmetro categoria é obrigatório para esta busca.'
-                });
-            }
-
-            const data = await this.service.buscarProdutosPorCategoria(query.categoria);
-
-            if (data.docs && data.docs.length === 0) {
-                return CommonResponse.error(
-                    res,
-                    404,
-                    'resourceNotFound',
-                    'Produto',
-                    [],
-                    `Nenhum produto encontrado na categoria: ${query.categoria}`
-                );
-            }
-
-            return CommonResponse.success(res, data, 200, 'Produtos encontrados com sucesso.');
-        } catch (error) {
-            console.error('Erro na busca por categoria:', error);
-            return CommonResponse.error(res, error);
-        }
-    }
-
-    async buscarProdutosPorCodigo(req, res) {
-        console.log('Estou no buscarProdutosPorCodigo em ProdutoController');
-
-        try {
-            const query = req.query || {};
-            if (!query.codigo) {
-                throw new CustomError({
-                    statusCode: HttpStatusCodes.BAD_REQUEST.code,
-                    errorType: 'validationError',
-                    field: 'codigo',
-                    details: [],
-                    customMessage: 'O parâmetro codigo é obrigatório para esta busca.'
-                });
-            }
-
-            const data = await this.service.buscarProdutosPorCodigo(query.codigo);
-
-            if (data.docs && data.docs.length === 0) {
-                return CommonResponse.error(
-                    res,
-                    404,
-                    'resourceNotFound',
-                    'Produto',
-                    [],
-                    `Nenhum produto encontrado com o código: ${query.codigo}`
-                );
-            }
-
-            return CommonResponse.success(res, data, 200, 'Produtos encontrados com sucesso.');
-        } catch (error) {
-            console.error('Erro na busca por código:', error);
-            return CommonResponse.error(res, error);
-        }
-    }
-
-    async buscarProdutosPorFornecedor(req, res) {
-        console.log('Estou no buscarProdutosPorFornecedor em ProdutoController');
-
-        try {
-            const query = req.query || {};
-            if (!query.fornecedor) {
-                throw new CustomError({
-                    statusCode: HttpStatusCodes.BAD_REQUEST.code,
-                    errorType: 'validationError',
-                    field: 'fornecedor',
-                    details: [],
-                    customMessage: 'O parâmetro fornecedor é obrigatório para esta busca.'
-                });
-            }
-
-            const data = await this.service.buscarProdutosPorFornecedor(query.fornecedor);
-
-            if (data.docs && data.docs.length === 0) {
-                return CommonResponse.error(
-                    res,
-                    404,
-                    'resourceNotFound',
-                    'Produto',
-                    [],
-                    `Nenhum produto encontrado para o fornecedor ID: ${query.fornecedor}`
-                );
-            }
-
-            return CommonResponse.success(res, data, 200, 'Produtos encontrados com sucesso.');
-        } catch (error) {
-            console.error('Erro na busca por fornecedor:', error);
+            console.error('Erro na busca de produtos:', error);
             return CommonResponse.error(res, error);
         }
     }
