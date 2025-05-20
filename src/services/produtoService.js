@@ -8,11 +8,73 @@ class ProdutoService {
         this.repository = new ProdutoRepository();
     }
 
+    // Método utilitário para adicionar nome do fornecedor aos resultados
+    async enriquecerComNomesFornecedores(data) {
+        // Enriquecer os resultados com os nomes dos fornecedores
+        if (data.docs && data.docs.length > 0) {
+            const Fornecedor = mongoose.model('fornecedores');
+            const fornecedores = await Fornecedor.find().lean();
+            
+            // Criar um mapa de ID para nome de fornecedor
+            const fornecedorMap = {};
+            fornecedores.forEach(fornecedor => {
+                const tempId = fornecedor._id.toString().substring(0, 8);
+                const idNumerico = parseInt(tempId, 16) % 1000;
+                fornecedorMap[idNumerico] = fornecedor.nome_fornecedor;
+            });
+            
+            // Adicionar o nome do fornecedor a cada produto
+            data.docs = data.docs.map(doc => {
+                const docObj = typeof doc.toObject === 'function' ? doc.toObject() : {...doc};
+                docObj.nome_fornecedor = fornecedorMap[doc.id_fornecedor] || 'Fornecedor não encontrado';
+                return docObj;
+            });
+            
+            return data;
+        } else if (data && !data.docs && data.id_fornecedor) {
+            // Caso seja apenas um produto (não paginado)
+            const Fornecedor = mongoose.model('fornecedores');
+            const fornecedores = await Fornecedor.find().lean();
+            
+            const fornecedorMap = {};
+            fornecedores.forEach(fornecedor => {
+                const tempId = fornecedor._id.toString().substring(0, 8);
+                const idNumerico = parseInt(tempId, 16) % 1000;
+                fornecedorMap[idNumerico] = fornecedor.nome_fornecedor;
+            });
+            
+            const dataObj = typeof data.toObject === 'function' ? data.toObject() : {...data};
+            dataObj.nome_fornecedor = fornecedorMap[data.id_fornecedor] || 'Fornecedor não encontrado';
+            return dataObj;
+        } else if (Array.isArray(data) && data.length > 0) {
+            // Caso seja um array de produtos (ex: listarEstoqueBaixo)
+            const Fornecedor = mongoose.model('fornecedores');
+            const fornecedores = await Fornecedor.find().lean();
+            
+            const fornecedorMap = {};
+            fornecedores.forEach(fornecedor => {
+                const tempId = fornecedor._id.toString().substring(0, 8);
+                const idNumerico = parseInt(tempId, 16) % 1000;
+                fornecedorMap[idNumerico] = fornecedor.nome_fornecedor;
+            });
+            
+            return data.map(item => {
+                const itemObj = typeof item.toObject === 'function' ? item.toObject() : {...item};
+                itemObj.nome_fornecedor = fornecedorMap[item.id_fornecedor] || 'Fornecedor não encontrado';
+                return itemObj;
+            });
+        }
+        
+        return data;
+    }
+
     async listarProdutos(req) {
         console.log('Estou no listar em ProdutoService');
         const data = await this.repository.listarProdutos(req);
+        const resultado = await this.enriquecerComNomesFornecedores(data);
+        
         console.log('Estou retornando os dados em ProdutoService');
-        return data;
+        return resultado;
     }
 
     async cadastrarProduto(dadosProduto) {
@@ -61,7 +123,7 @@ class ProdutoService {
         }
 
         const data = await this.repository.buscarProdutoPorID(id);
-        return data;
+        return await this.enriquecerComNomesFornecedores(data);
     }
 
     async buscarProdutosPorNome(nome, page = 1, limite = 10) {
@@ -87,7 +149,7 @@ class ProdutoService {
         };
     
         const data = await this.repository.listarProdutos(req);
-        return data;
+        return await this.enriquecerComNomesFornecedores(data);
     }
     
     async buscarProdutosPorCategoria(categoria, page = 1, limite = 10) {
@@ -113,7 +175,7 @@ class ProdutoService {
         };
     
         const data = await this.repository.listarProdutos(req);
-        return data;
+        return await this.enriquecerComNomesFornecedores(data);
     }
     
     async buscarProdutosPorCodigo(codigo, page = 1, limite = 10) {
@@ -139,7 +201,7 @@ class ProdutoService {
         };
     
         const data = await this.repository.listarProdutos(req);
-        return data;
+        return await this.enriquecerComNomesFornecedores(data);
     }
     
     async buscarProdutosPorFornecedor(fornecedor, page = 1, limite = 10, ehNome = false) {
@@ -171,7 +233,7 @@ class ProdutoService {
         }
     
         const data = await this.repository.listarProdutos(req);
-        return data;
+        return await this.enriquecerComNomesFornecedores(data);
     }
 
     async deletarProduto(id) {
@@ -198,7 +260,7 @@ class ProdutoService {
     async listarEstoqueBaixo() {
         console.log('Estou no listarEstoqueBaixo em ProdutoService');
         const data = await this.repository.listarEstoqueBaixo();
-        return data;
+        return await this.enriquecerComNomesFornecedores(data);
     }
 
     async desativarProduto(id) {
