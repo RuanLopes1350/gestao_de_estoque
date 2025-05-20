@@ -82,10 +82,20 @@ function getGlobalFakeMapping() {
         produto: {
             nome_produto: () => fakerPT_BR.commerce.productName(),
             descricao: () => fakerPT_BR.commerce.productDescription(),
-            preco: () => parseFloat(fakerPT_BR.commerce.price()),
+            preco: () => parseFloat(fakerPT_BR.commerce.price({min: 15, max: 10000})),
             marca: () => fakerPT_BR.company.name(),
-            custo: () => parseFloat(fakerPT_BR.commerce.price({ min: 50, max: 200 })),
-            categoria: () => fakerPT_BR.helpers.arrayElement(['Eletrônicos', 'Alimentos', 'Vestuário', 'Higiene', 'Limpeza']),
+            custo: () => parseFloat(fakerPT_BR.commerce.price({ min: 5, max: 8000 })),
+            categoria: function() {
+                if (this.preco >= 1001.00) {
+                    return 'A';
+                }
+                else if (this.preco >= 500.00) {
+                    return 'B';
+                }
+                else {
+                    return 'C';
+                }
+            },
             estoque: () => fakerPT_BR.number.int({ min: 0, max: 1000 }),
             estoque_min: () => fakerPT_BR.number.int({ min: 5, max: 50 }),
             data_ultima_entrada: () => fakerPT_BR.date.recent(),
