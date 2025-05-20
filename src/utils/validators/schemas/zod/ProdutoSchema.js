@@ -6,7 +6,7 @@ export const ProdutoSchema = z.object({
     preco: z.number().positive('Preço deve ser um valor positivo'),
     marca: z.string().optional(),
     custo: z.number().positive('Custo deve ser um valor positivo'),
-    categoria: z.string().min(2, 'Categoria deve ter pelo menos 2 caracteres'),
+    categoria: z.string(),
     estoque: z.number().int('Estoque deve ser um número inteiro').nonnegative('Estoque não pode ser negativo'),
     estoque_min: z.number().int('Estoque mínimo deve ser um número inteiro').nonnegative('Estoque mínimo não pode ser negativo'),
     data_ultima_entrada: z.date().optional().or(z.string().datetime()),
