@@ -22,7 +22,7 @@ router
     )
     .get(
         "/produtos/busca",
-        asyncWrapper(produtoController.buscarProdutosPorNome.bind(produtoController))
+        asyncWrapper(produtoController.buscarProdutos.bind(produtoController))
     )
     .patch(
         "/produtos/desativar/:id",
@@ -31,18 +31,6 @@ router
     .patch(
         "/produtos/reativar/:id",
         asyncWrapper(produtoController.reativarProduto.bind(produtoController))
-    )
-    .get(
-        "/produtos/busca/categoria",
-        asyncWrapper(produtoController.buscarProdutosPorCategoria.bind(produtoController))
-    )
-    .get(
-        "/produtos/busca/codigo",
-        asyncWrapper(produtoController.buscarProdutosPorCodigo.bind(produtoController))
-    )
-    .get(
-        "/produtos/busca/fornecedor",
-        asyncWrapper(produtoController.buscarProdutosPorFornecedor.bind(produtoController))
     )
     // Rotas com parâmetros por último
     .get(

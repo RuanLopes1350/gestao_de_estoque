@@ -64,9 +64,9 @@ class ProdutoService {
         return data;
     }
 
-    async buscarProdutosPorNome(nome) {
+    async buscarProdutosPorNome(nome, page = 1, limite = 10) {
         console.log('Estou no buscarProdutosPorNome em ProdutoService');
-
+    
         if (!nome || nome.trim() === '') {
             throw new CustomError({
                 statusCode: HttpStatusCodes.BAD_REQUEST.code,
@@ -76,22 +76,23 @@ class ProdutoService {
                 customMessage: 'Nome de produto válido é obrigatório para busca.'
             });
         }
-
+    
         const req = {
             params: {},
             query: {
-                nome_produto: nome
+                nome_produto: nome,
+                page: page,
+                limite: limite
             }
         };
-
+    
         const data = await this.repository.listarProdutos(req);
         return data;
     }
-
-    // Adicione esses novos métodos
-    async buscarProdutosPorCategoria(categoria) {
+    
+    async buscarProdutosPorCategoria(categoria, page = 1, limite = 10) {
         console.log('Estou no buscarProdutosPorCategoria em ProdutoService');
-
+    
         if (!categoria || categoria.trim() === '') {
             throw new CustomError({
                 statusCode: HttpStatusCodes.BAD_REQUEST.code,
@@ -101,21 +102,23 @@ class ProdutoService {
                 customMessage: 'Categoria válida é obrigatória para busca.'
             });
         }
-
+    
         const req = {
             params: {},
             query: {
-                categoria: categoria
+                categoria: categoria,
+                page: page,
+                limite: limite
             }
         };
-
+    
         const data = await this.repository.listarProdutos(req);
         return data;
     }
-
-    async buscarProdutosPorCodigo(codigo) {
+    
+    async buscarProdutosPorCodigo(codigo, page = 1, limite = 10) {
         console.log('Estou no buscarProdutosPorCodigo em ProdutoService');
-
+    
         if (!codigo || codigo.trim() === '') {
             throw new CustomError({
                 statusCode: HttpStatusCodes.BAD_REQUEST.code,
@@ -125,38 +128,48 @@ class ProdutoService {
                 customMessage: 'Código de produto válido é obrigatório para busca.'
             });
         }
-
+    
         const req = {
             params: {},
             query: {
-                codigo_produto: codigo
+                codigo_produto: codigo,
+                page: page,
+                limite: limite
             }
         };
-
+    
         const data = await this.repository.listarProdutos(req);
         return data;
     }
-
-    async buscarProdutosPorFornecedor(id_fornecedor) {
+    
+    async buscarProdutosPorFornecedor(fornecedor, page = 1, limite = 10, ehNome = false) {
         console.log('Estou no buscarProdutosPorFornecedor em ProdutoService');
-
-        if (!id_fornecedor) {
+    
+        if (!fornecedor || (typeof fornecedor === 'string' && fornecedor.trim() === '')) {
             throw new CustomError({
                 statusCode: HttpStatusCodes.BAD_REQUEST.code,
                 errorType: 'validationError',
-                field: 'id_fornecedor',
+                field: ehNome ? 'nome_fornecedor' : 'id_fornecedor',
                 details: [],
-                customMessage: 'ID de fornecedor válido é obrigatório para busca.'
+                customMessage: `${ehNome ? 'Nome' : 'ID'} de fornecedor válido é obrigatório para busca.`
             });
         }
-
+    
         const req = {
             params: {},
             query: {
-                id_fornecedor: id_fornecedor
+                page: page,
+                limite: limite
             }
         };
-
+    
+        // Definir o parâmetro correto com base em ehNome
+        if (ehNome) {
+            req.query.nome_fornecedor = fornecedor;
+        } else {
+            req.query.id_fornecedor = fornecedor;
+        }
+    
         const data = await this.repository.listarProdutos(req);
         return data;
     }
