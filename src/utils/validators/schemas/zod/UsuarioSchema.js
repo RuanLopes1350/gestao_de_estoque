@@ -1,5 +1,10 @@
 import { z } from 'zod';
 
+export const LoginSchema = z.object({
+    matricula: z.string().min(1, 'Matrícula não pode ser vazia'),
+    senha: z.string().min(6, 'Senha deve ter pelo menos 6 caracteres')
+})
+
 export const UsuarioSchema = z.object({
     nome_usuario: z.string().min(3, 'Nome do usuário deve ter pelo menos 3 caracteres'),
     matricula: z.string().min(1, 'Matrícula não pode ser vazia'),
