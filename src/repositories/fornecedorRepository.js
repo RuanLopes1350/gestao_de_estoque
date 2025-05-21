@@ -3,17 +3,7 @@ import Fornecedor from "../models/Fornecedor.js";
 import FornecedorFilterBuilder from "./filters/FornecedorFilterBuilder.js";
 import CustomError from "../utils/helpers/CustomError.js";
 import messages from "../utils/helpers/messages.js";
-
-const validateId = (id) => {
-  if (!validate(id)) {
-    throw new CustomError({
-      statusCode: 400,
-      errorType: "invalidRequest",
-      field: "id",
-      customMessage: messages.error.invalidRequest("ID inválido"),
-    });
-  }
-};
+import Validator from "../utils/Validator.js";
 
 class FornecedorRepository {
   constructor({ model = Fornecedor } = {}) {
@@ -29,7 +19,7 @@ class FornecedorRepository {
   async listar(req) {
     const { id } = req.params || null;
     if (id) {
-      validateId(id);
+      Validator.validarMongoID(id);
       const fornecedor = await this.model.findById(id);
       if (!fornecedor) {
         throw new CustomError({
@@ -72,7 +62,7 @@ class FornecedorRepository {
 
   // Método para buscar um fornecedor por ID
   async buscarPorId(id) {
-    validateId(id);
+    Validator.validarMongoID(id);
     const fornecedor = await this.model.findById(id);
     if (!fornecedor) {
       throw new CustomError({
@@ -87,7 +77,7 @@ class FornecedorRepository {
 
   // Método para atualizar um fornecedor existente
   async atualizar(id, dadosAtualizados) {
-    validateId(id);
+    Validator.validarMongoID(id);
     const fornecedor = await this.model.findByIdAndUpdate(
       id,
       dadosAtualizados,
@@ -107,7 +97,7 @@ class FornecedorRepository {
 
   // Método para deletar um fornecedor
   async deletar(id) {
-    validateId(id);
+    Validator.validarMongoID(id);
     const fornecedor = await this.model.findByIdAndDelete(id);
     return fornecedor;
   }

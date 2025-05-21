@@ -1,4 +1,7 @@
 import i18n from '../config/i18nConfig.js';
+import mongoose from 'mongoose';
+import CustomError from './helpers/CustomError.js';
+
 
 class Validator {
     constructor(locale = 'pt') {
@@ -194,6 +197,18 @@ class Validator {
     // Método para validar e retornar a primeira mensagem de erro encontrada
     validar() {
         return this._erro;
+    }
+
+    validarMongoID(id) {
+        if (!mongoose.Types.ObjectId.isValid(id)) {
+            throw new CustomError({
+                statusCode: 400,
+                errorType: 'validationError',
+                field: 'id',
+                details: [],
+                customMessage: 'ID do produto inválido'
+            });
+        }
     }
 }
 
