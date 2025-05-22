@@ -1,12 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<coverage generated="1747876535393" clover="3.2.0">
-  <project timestamp="1747876535393" name="All files">
-    <metrics statements="3" coveredstatements="3" conditionals="0" coveredconditionals="0" methods="1" coveredmethods="1" elements="4" coveredelements="4" complexity="0" loc="3" ncloc="3" packages="1" files="1" classes="1"/>
+<coverage generated="1747879802737" clover="3.2.0">
+  <project timestamp="1747879802737" name="All files">
+    <metrics statements="6" coveredstatements="6" conditionals="0" coveredconditionals="0" methods="2" coveredmethods="2" elements="8" coveredelements="8" complexity="0" loc="6" ncloc="6" packages="1" files="2" classes="2"/>
     <file name="Produto.js" path="/home/ruanlopes/Documentos/gestao-de-estoque/src/models/Produto.js">
       <metrics statements="3" coveredstatements="3" conditionals="0" coveredconditionals="0" methods="1" coveredmethods="1"/>
       <line num="9" count="1" type="stmt"/>
       <line num="29" count="1" type="stmt"/>
       <line num="30" count="1" type="stmt"/>
+    </file>
+    <file name="Usuario.js" path="/home/ruanlopes/Documentos/gestao-de-estoque/src/models/Usuario.js">
+      <metrics statements="3" coveredstatements="3" conditionals="0" coveredconditionals="0" methods="1" coveredmethods="1"/>
+      <line num="6" count="1" type="stmt"/>
+      <line num="25" count="1" type="stmt"/>
+      <line num="26" count="1" type="stmt"/>
     </file>
   </project>
 </coverage>
