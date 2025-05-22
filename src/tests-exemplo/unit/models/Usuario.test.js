@@ -1,6 +1,6 @@
 // src/tests/unit/models/Usuario.test.js
 import mongoose from 'mongoose';
-import Usuario from '../../../../src/models/Usuario.js';
+import Usuario from '../../../models/Usuario.js';
 import { MongoMemoryServer } from 'mongodb-memory-server';
 
 // src/tests/unit/models/Usuario.test.js
