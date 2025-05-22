@@ -1,0 +1,13 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Modelo de Produto deve falhar ao criar um produto com codigo de produto duplicado 1`] = `"E11000 duplicate key error collection: test.produtos index: codigo_produto_1 dup key: { codigo_produto: "PROD123" }"`;
+
+exports[`Modelo de Produto deve falhar ao criar um produto com nome duplicado 1`] = `"E11000 duplicate key error collection: test.produtos index: nome_produto_1 dup key: { nome_produto: "Produto Teste" }"`;
+
+exports[`Modelo de Produto deve falhar ao criar um produto sem categoria 1`] = `"produtos validation failed: categoria: Path \`categoria\` is required."`;
+
+exports[`Modelo de Produto deve falhar ao criar um produto sem id_fornecedor 1`] = `"produtos validation failed: id_fornecedor: Path \`id_fornecedor\` is required."`;
+
+exports[`Modelo de Produto deve falhar ao criar um produto sem nome 1`] = `"produtos validation failed: nome_produto: Path \`nome_produto\` is required."`;
+
+exports[`Modelo de Produto deve falhar ao criar um produto sem preço 1`] = `"produtos validation failed: preco: Path \`preco\` is required."`;

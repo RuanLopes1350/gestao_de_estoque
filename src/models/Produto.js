@@ -1,3 +1,5 @@
+import Unique from 'faker-br/lib/unique';
+import unique from 'faker-br/vendor/unique';
 import mongoose from 'mongoose';
 import mongoosePaginate from 'mongoose-paginate-v2';
 
@@ -6,7 +8,7 @@ class Produto {
     constructor() {
         const produtoSchema = new mongoose.Schema(
             {
-                nome_produto: {type: String, index: true, required: true},
+                nome_produto: {type: String, index: true, required: true, unique: true},
                 descricao: {type: String},
                 preco: {type: Number, required: true},
                 marca: {type: String, index: true},
@@ -17,7 +19,7 @@ class Produto {
                 data_ultima_entrada: {type: Date},
                 status: {type: Boolean, default: true},
                 id_fornecedor: {type: Number, index:true, required: true},
-                codigo_produto: {type: String, required: true, index: true},
+                codigo_produto: {type: String, required: true, index: true, unique: true},
             },
             {
                 timestamps: {createdAt: 'data_cadastro', updatedAt: 'data_ultima_atualizacao'},
