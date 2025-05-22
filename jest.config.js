@@ -4,6 +4,6 @@ export default {
   },
   testPathIgnorePatterns: [
     "/node_modules/",
-    "/tests/"
+    "/tests-exemplo/"
   ]
 };
