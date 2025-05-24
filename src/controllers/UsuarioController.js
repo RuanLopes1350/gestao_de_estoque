@@ -174,6 +174,94 @@ class UsuarioController {
             return CommonResponse.error(res, error);
         }
     }
+
+    async desativarUsuario(req,res) {
+        console.log('Estou no desativarUsuario em UsuarioController');
+
+        try {
+            const { matricula } = req.params || {};
+            if (!matricula) {
+                throw new CustomError({
+                    statusCode: HttpStatusCodes.BAD_REQUEST.code,
+                    errorType: 'validationError',
+                    field: 'matricula',
+                    details: [],
+                    customMessage: 'Matricula do usuario é obrigatorio para desativar.'
+                });
+            }
+
+            try {
+                UsuarioIdSchema.parse(matricula);
+            } catch (error) {
+                throw new CustomError({
+                    statusCode: HttpStatusCodes.BAD_REQUEST.code,
+                    errorType: 'validationError',
+                    field: 'matricula',
+                    details: [],
+                    customMessage: 'Matricula do usuario invalído.'
+                })
+            }
+
+            const data = await this.service.desativarUsuario(matricula);
+            return CommonResponse.success(res, data, 200, 'Usuario desativado com sucesso');
+        } catch (error) {
+            if (error.statusCode === 404) {
+                return CommonResponse.error(
+                    res,
+                    error.statusCode,
+                    error.errorType,
+                    error.field,
+                    error.details,
+                    'Usuario não encontrado. Verifique se a matricula está correta'
+                );
+            }
+            return CommonResponse.error(res, error);
+        }
+    }
+
+    async reativarUsuario(req, res) {
+        console.log('Estou no reativarUsuario em UsuarioController');
+
+        try {
+            const { matricula } = req.params || {};
+            if (!matricula) {
+                throw new CustomError({
+                    statusCode: HttpStatusCodes.BAD_REQUEST.code,
+                    errorType: 'validationError',
+                    field: 'matricula',
+                    details: [],
+                    customMessage: 'Matricula do usuario é obrigatório para reativar.'
+                });
+            }
+
+            try {
+                UsuarioIdSchema.parse(matricula);
+            } catch (error) {
+                throw new CustomError({
+                    statusCode: HttpStatusCodes.BAD_REQUEST.code,
+                    errorType: 'validationError',
+                    field: 'id',
+                    details: [],
+                    customMessage: 'Matricula do usuario inválido.'
+                });
+            }
+
+            const data = await this.service.reativarUsuario(matricula);
+            return CommonResponse.success(res, data, 200, 'Usuario reativado com sucesso.');
+        } catch (error) {
+            if (error.statusCode === 404) {
+                return CommonResponse.error(
+                    res,
+                    error.statusCode,
+                    error.errorType,
+                    error.field,
+                    error.details,
+                    'Usuario não encontrado. Verifique se a matricula está correta.'
+                );
+            }
+            return CommonResponse.error(res, error);
+        }
+    }
 }
 
 export default UsuarioController;
