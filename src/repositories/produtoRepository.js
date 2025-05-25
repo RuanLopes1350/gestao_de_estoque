@@ -70,7 +70,7 @@ class ProdutoRepository {
             if (fornecedores.length > 0) {
                 const fornecedorIds = fornecedores.map(f => {
                     // Extraindo um ID numérico do ObjectId do MongoDB
-                    const tempId = f._id.toString().substring(0, 8);
+                    const tempId = f._id.toString().substring(0, 8); 
                     return parseInt(tempId, 16) % 1000;
                 });
                 
