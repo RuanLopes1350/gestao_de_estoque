@@ -75,22 +75,21 @@ describe('ProdutoRepository', () => {
     beforeEach(() => {
         jest.clearAllMocks();
         
-        mockModel = {
-            findById: jest.fn(),
-            findOne: jest.fn(),
-            find: jest.fn(() => ({ sort: jest.fn().mockResolvedValue([]) })),
-            paginate: jest.fn(),
-            findByIdAndUpdate: jest.fn(),
-            findByIdAndDelete: jest.fn()
-        };
-        
-        mockModel.mockImplementation = function(data) {
+        function MockModel(data) {
             return {
                 ...data,
                 save: jest.fn().mockResolvedValue(data)
             };
-        };
+        }
         
+        MockModel.findById = jest.fn();
+        MockModel.findOne = jest.fn();
+        MockModel.find = jest.fn(() => ({ sort: jest.fn().mockResolvedValue([]) }));
+        MockModel.paginate = jest.fn();
+        MockModel.findByIdAndUpdate = jest.fn();
+        MockModel.findByIdAndDelete = jest.fn();
+        
+        mockModel = MockModel;
         produtoRepository = new ProdutoRepository({ model: mockModel });
     });
 
