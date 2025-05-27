@@ -1,5 +1,3 @@
-import Unique from 'faker-br/lib/unique';
-import unique from 'faker-br/vendor/unique';
 import mongoose from 'mongoose';
 import mongoosePaginate from 'mongoose-paginate-v2';
 
