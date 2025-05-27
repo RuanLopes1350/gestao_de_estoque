@@ -23,30 +23,30 @@
         <div class='clearfix'>
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">0% </span>
+                <span class="strong">94.11% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>0/15</span>
+                <span class='fraction'>16/17</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">0% </span>
+                <span class="strong">61.9% </span>
                 <span class="quiet">Branches</span>
-                <span class='fraction'>0/19</span>
+                <span class='fraction'>13/21</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">0% </span>
+                <span class="strong">85.71% </span>
                 <span class="quiet">Functions</span>
-                <span class='fraction'>0/7</span>
+                <span class='fraction'>6/7</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">0% </span>
+                <span class="strong">94.11% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>0/15</span>
+                <span class='fraction'>16/17</span>
             </div>
         
             
@@ -61,7 +61,7 @@
             </div>
         </template>
     </div>
-    <div class='status-line low'></div>
+    <div class='status-line high'></div>
     <pre><table class="coverage">
 <tr><td class="line-count quiet"><a name='L1'></a><a href='#L1'>1</a>
 <a name='L2'></a><a href='#L2'>2</a>
@@ -126,19 +126,25 @@
 <a name='L61'></a><a href='#L61'>61</a>
 <a name='L62'></a><a href='#L62'>62</a>
 <a name='L63'></a><a href='#L63'>63</a>
-<a name='L64'></a><a href='#L64'>64</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
+<a name='L64'></a><a href='#L64'>64</a>
+<a name='L65'></a><a href='#L65'>65</a>
+<a name='L66'></a><a href='#L66'>66</a>
+<a name='L67'></a><a href='#L67'>67</a>
+<a name='L68'></a><a href='#L68'>68</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">10x</span>
+<span class="cline-any cline-yes">10x</span>
+<span class="cline-any cline-yes">10x</span>
+<span class="cline-any cline-yes">10x</span>
+<span class="cline-any cline-yes">10x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">10x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -146,25 +152,27 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">4x</span>
+<span class="cline-any cline-yes">4x</span>
+<span class="cline-any cline-yes">4x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-yes">2x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">2x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-yes">2x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -194,40 +202,44 @@
 import StatusService from './StatusService.js';
 &nbsp;
 class CommonResponse {
-<span class="fstat-no" title="function not covered" >    co</span>nstructor(message, data = <span class="branch-0 cbranch-no" title="branch not covered" >null,</span> errors = <span class="branch-0 cbranch-no" title="branch not covered" >[])</span> {
-<span class="cstat-no" title="statement not covered" >        this.message = message;</span>
-<span class="cstat-no" title="statement not covered" >        this.data = data;</span>
-<span class="cstat-no" title="statement not covered" >        this.errors = errors;</span>
+    constructor(message, data = <span class="branch-0 cbranch-no" title="branch not covered" >null,</span> errors = <span class="branch-0 cbranch-no" title="branch not covered" >[],</span> error = <span class="branch-0 cbranch-no" title="branch not covered" >false,</span> code = <span class="branch-0 cbranch-no" title="branch not covered" >200)</span> {
+        this.message = message;
+        this.data = data;
+        this.errors = errors;
+        this.error = error;
+        this.code = code;
     }
 &nbsp;
-<span class="fstat-no" title="function not covered" >    to</span>JSON() {
-<span class="cstat-no" title="statement not covered" >        return {</span>
+    toJSON() {
+        return {
+            error: this.error,
+            code: this.code,
             message: this.message,
             data: this.data,
             errors: this.errors
         };
     }
 &nbsp;
-<span class="fstat-no" title="function not covered" >    st</span>atic success(res, data, code = <span class="branch-0 cbranch-no" title="branch not covered" >200,</span> message = <span class="branch-0 cbranch-no" title="branch not covered" >null)</span> {
-        const statusMessage = <span class="cstat-no" title="statement not covered" >message || StatusService.getHttpCodeMessage(code);</span>
-        const response = <span class="cstat-no" title="statement not covered" >new CommonResponse(statusMessage, data, []);</span>
-<span class="cstat-no" title="statement not covered" >        return res.status(code).json(response);</span>
+    static success(res, data, code = 200, message = null) {
+        const statusMessage = message || StatusService.getHttpCodeMessage(code);
+        const response = new CommonResponse(statusMessage, data, [], false, code);
+        return res.status(code).json(response);
     }
 &nbsp;
-<span class="fstat-no" title="function not covered" >    st</span>atic error(res, code, errorType, field = <span class="branch-0 cbranch-no" title="branch not covered" >null,</span> errors = <span class="branch-0 cbranch-no" title="branch not covered" >[],</span> customMessage = <span class="branch-0 cbranch-no" title="branch not covered" >null)</span> {
-        const errorMessage = <span class="cstat-no" title="statement not covered" >customMessage || StatusService.getErrorMessage(errorType, field);</span>
-        const response = <span class="cstat-no" title="statement not covered" >new CommonResponse(errorMessage, null, errors);</span>
-<span class="cstat-no" title="statement not covered" >        return res.status(code).json(response);</span>
+    static error(res, code, errorType, field = null, errors = [], customMessage = null) {
+        const errorMessage = customMessage || StatusService.getErrorMessage(errorType, field);
+        const response = new CommonResponse(errorMessage, null, errors, true, code);
+        return res.status(code).json(response);
     }
 &nbsp;
-<span class="fstat-no" title="function not covered" >    st</span>atic created(res, data, message = <span class="branch-0 cbranch-no" title="branch not covered" >null)</span> {
-<span class="cstat-no" title="statement not covered" >        return this.success(res, data, 201, message);</span>
+    static created(res, data, message = null) {
+        return this.success(res, data, 201, message);
     }
 &nbsp;
-<span class="fstat-no" title="function not covered" >    st</span>atic serverError(res, message = <span class="branch-0 cbranch-no" title="branch not covered" >null)</span> {
-        const errorMessage = <span class="cstat-no" title="statement not covered" >message || StatusService.getErrorMessage('serverError');</span>
-        const response = <span class="cstat-no" title="statement not covered" >new CommonResponse(errorMessage, null, []);</span>
-<span class="cstat-no" title="statement not covered" >        return res.status(500).json(response);</span>
+    static serverError(res, message = null) {
+        const errorMessage = message || StatusService.getErrorMessage('serverError');
+        const response = new CommonResponse(errorMessage, null, [], true, 500);
+        return res.status(500).json(response);
     }
 &nbsp;
     /**
@@ -259,7 +271,7 @@ export default CommonResponse;
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2025-05-27T21:16:17.676Z
+                at 2025-05-27T22:32:21.318Z
             </div>
         <script src="../../prettify.js"></script>
         <script>

@@ -39,7 +39,7 @@ const messages = {
         resourceInUse: (fieldName) => `Recurso em uso em ${fieldName}.`,
         authenticationError: (fieldName) => `Erro de autenticação em ${fieldName}.`,
         permissionError: (fieldName) => `Erro de permissão em ${fieldName}.`,
-        resourceNotFound: (fieldName) => `Recurso não encontrado em ${fieldName}.`,
+        resourceNotFound: (field) => `${field} não encontrado(a).`,
     },
 
     // Mensagens de Validação
