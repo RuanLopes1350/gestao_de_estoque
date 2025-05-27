@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<coverage generated="1747879802737" clover="3.2.0">
-  <project timestamp="1747879802737" name="All files">
+<coverage generated="1748370441766" clover="3.2.0">
+  <project timestamp="1748370441766" name="All files">
     <metrics statements="6" coveredstatements="6" conditionals="0" coveredconditionals="0" methods="2" coveredmethods="2" elements="8" coveredelements="8" complexity="0" loc="6" ncloc="6" packages="1" files="2" classes="2"/>
-    <file name="Produto.js" path="/home/ruanlopes/Documentos/gestao-de-estoque/src/models/Produto.js">
+    <file name="Produto.js" path="/Users/ruanlopes/Documents/gestao-de-estoque/src/models/Produto.js">
       <metrics statements="3" coveredstatements="3" conditionals="0" coveredconditionals="0" methods="1" coveredmethods="1"/>
       <line num="9" count="1" type="stmt"/>
       <line num="29" count="1" type="stmt"/>
       <line num="30" count="1" type="stmt"/>
     </file>
-    <file name="Usuario.js" path="/home/ruanlopes/Documentos/gestao-de-estoque/src/models/Usuario.js">
+    <file name="Usuario.js" path="/Users/ruanlopes/Documents/gestao-de-estoque/src/models/Usuario.js">
       <metrics statements="3" coveredstatements="3" conditionals="0" coveredconditionals="0" methods="1" coveredmethods="1"/>
       <line num="6" count="1" type="stmt"/>
       <line num="25" count="1" type="stmt"/>
