@@ -1,4 +1,4 @@
-import FornecedorService from "../services/FornecedorService.js";
+import FornecedorService from "../services/fornecedorService.js";
 import CommonResponse from "../utils/helpers/CommonResponse.js";
 import HttpStatusCodes from "../utils/helpers/HttpStatusCodes.js";
 import { FornecedorIdSchema } from "../utils/validators/schemas/zod/querys/FornecedorQuerySchema.js";
