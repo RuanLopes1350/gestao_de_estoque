@@ -177,10 +177,10 @@ A tabela a seguir contém a relação dos Requisitos Funcionais elicitados, com 
 |RF-001 |O sistema deve permitir cadastro, edição e exclusão de peças|###################|
 |RF-002 |O sistema deve categorizar automaticamente as peças por valor|• Categoria A: R$1.001,00 até R$10.000,00 - Categoria B: R$500,00 até R$1.000,00 - Categoria C: R$0,00 até R$499,00|
 |RF-003 |O sistema deve registrar entrada e saída de peças do estoque|###################|
-|RF-004 |O sistema deve gerar alertas quando o estoque atingir níveis críticos|###################|
+|RF-004 |O sistema deve atualizar o estoque automaticamente após cada venda|###################|
 |RF-005 |O sistema deve integrar-se com o sistema de PDV para registrar vendas|###################|
-|RF-006 |O sistema deve integrar-se com o sistema de notas fiscais para emissão de NF-e|###################|
-|RF-007 |O sistema deve atualizar o estoque automaticamente após cada venda|###################|
+|RF-006 |O sistema deve gerar alertas quando o estoque atingir níveis críticos|###################|
+|RF-007 |O sistema deve integrar-se com o sistema de notas fiscais para emissão de NF-e|###################|
 |RF-008 |O sistema deve gerar relatórios de estoque atual|###################|
 |RF-009 |O sistema deve gerar relatórios de movimentação (entradas/saídas)|###################|
 |RF-010 |O sistema deve gerar relatórios de vendas por categoria de valor|###################|
