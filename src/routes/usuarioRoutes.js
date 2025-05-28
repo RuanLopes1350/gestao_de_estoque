@@ -22,15 +22,15 @@ router
     )
     // Rotas com parâmetros por último
     .get(
-        "/usuarios/:id",
+        "/usuarios/:matricula",
         asyncWrapper(usuarioController.buscarUsuarioPorID.bind(usuarioController))
     )
     .patch(
-        "/usuarios/:id",
+        "/usuarios/:matricula",
         asyncWrapper(usuarioController.atualizarUsuario.bind(usuarioController))
     )
     .delete(
-        "/usuarios/:id",
+        "/usuarios/:matricula",
         asyncWrapper(usuarioController.deletarUsuario.bind(usuarioController))
     );
 

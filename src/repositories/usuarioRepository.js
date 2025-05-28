@@ -31,30 +31,24 @@ class UsuarioRepository {
     
         // Para busca por filtros
         // Mapeia o nome da query para nome_usuario no banco
-        const { nome, nome_usuario, matricula, cargo, email, page = 1 } = req.query || {};
+        const { nome_usuario, matricula, senha, cargo, data_cadastro, data_ultima_atualizacao, page = 1 } = req.query || {};
         const limite = Math.min(parseInt(req.query?.limite, 10) || 10, 100);
     
         const filtros = {};
     
-        // Aceita tanto "nome" quanto "nome_usuario" como parâmetros de busca
-        if (nome || nome_usuario) {
-            filtros.nome_usuario = { 
-                $regex: (nome || nome_usuario), 
-                $options: 'i' 
-            };
-            console.log(`Aplicando filtro por nome: "${nome || nome_usuario}" no campo nome_usuario`);
+        if (nome_usuario) {
+            filtros.nome_usuario = { $regex: nome_usuario, $options: 'i' };
+            console.log(`Aplicando filtro por nome: "${nome_usuario}"`);
         }
     
         if (matricula) {
             filtros.matricula = { $regex: matricula, $options: 'i' };
+            console.log(`Aplicando filtro por matricula: "${matricula}"`);
         }
     
         if (cargo) {
             filtros.cargo = { $regex: cargo, $options: 'i' };
-        }
-    
-        if (email) {
-            filtros.email = { $regex: email, $options: 'i' };
+            console.log(`Aplicando filtro por cargo: "${cargo}"`);
         }
     
         const options = {
@@ -67,32 +61,6 @@ class UsuarioRepository {
         const resultado = await this.model.paginate(filtros, options);
         console.log(`Encontrados ${resultado.docs?.length || 0} usuários`);
         return resultado;
-    }
-
-    async buscarUsuarioPorID(id) {
-        console.log('Estou no buscarUsuarioPorID em UsuarioRepository');
-        
-        if (!mongoose.Types.ObjectId.isValid(id)) {
-            throw new CustomError({
-                statusCode: 400,
-                errorType: 'validationError',
-                field: 'id',
-                details: [],
-                customMessage: 'ID do usuário inválido'
-            });
-        }
-        
-        const usuario = await this.model.findById(id);
-        if (!usuario) {
-            throw new CustomError({
-                statusCode: 404,
-                errorType: 'resourceNotFound',
-                field: 'Usuario',
-                details: [],
-                customMessage: messages.error.resourceNotFound('Usuario')
-            });
-        }
-        return usuario;
     }
 
     async buscarUsuarioPorMatricula(matricula) {
@@ -127,37 +95,20 @@ class UsuarioRepository {
                 });
             }
         }
-        
-        // Verificar se já existe um usuário com o mesmo email
-        if (dadosUsuario.email) {
-            const emailExistente = await this.model.findOne({ email: dadosUsuario.email });
-            if (emailExistente) {
-                throw new CustomError({
-                    statusCode: 400,
-                    errorType: 'validationError',
-                    field: 'email',
-                    details: [],
-                    customMessage: 'Este email já está cadastrado para outro usuário.'
-                });
-            }
-        }
-
-        const usuario = new this.model(dadosUsuario);
-        return await usuario.save();
     }
 
-    async atualizarUsuario(id, dadosAtualizacao) {
-        console.log('Repositório - atualizando usuário:', id);
+    async atualizarUsuario(matricula, dadosAtualizacao) {
+        console.log('Repositório - atualizando usuário:', matricula);
         console.log('Dados de atualização:', JSON.stringify(dadosAtualizacao, null, 2));
 
         // Verificar se o ID é válido
-        if (!mongoose.Types.ObjectId.isValid(id)) {
+        if (!mongoose.Types.ObjectId.isValid(matricula)) {
             throw new CustomError({
                 statusCode: 400,
                 errorType: 'validationError',
-                field: 'id',
+                field: 'matricula',
                 details: [],
-                customMessage: 'ID do usuário inválido'
+                customMessage: 'Matricula do usuário inválido'
             });
         }
 
@@ -179,27 +130,9 @@ class UsuarioRepository {
             }
         }
 
-        // Verificar se o email já existe (se estiver sendo atualizado)
-        if (dadosAtualizacao.email) {
-            const usuarioExistente = await this.model.findOne({
-                email: dadosAtualizacao.email,
-                _id: { $ne: id }
-            });
-
-            if (usuarioExistente) {
-                throw new CustomError({
-                    statusCode: 400,
-                    errorType: 'validationError',
-                    field: 'email',
-                    details: [],
-                    customMessage: 'Este email já está sendo usado por outro usuário.'
-                });
-            }
-        }
-
         // Garantir que estamos usando as opções corretas
         const usuario = await this.model.findByIdAndUpdate(
-            id,
+            matricula,
             dadosAtualizacao,
             { new: true, runValidators: true }
         );
@@ -219,20 +152,20 @@ class UsuarioRepository {
         return usuario;
     }
 
-    async deletarUsuario(id) {
+    async deletarUsuario(matricula) {
         console.log('Estou no deletarUsuario em UsuarioRepository');
         
-        if (!mongoose.Types.ObjectId.isValid(id)) {
+        if (!mongoose.Types.ObjectId.isValid(matricula)) {
             throw new CustomError({
                 statusCode: 400,
                 errorType: 'validationError',
-                field: 'id',
+                field: 'matricula',
                 details: [],
-                customMessage: 'ID do usuário inválido'
+                customMessage: 'Matricula do usuário inválido'
             });
         }
         
-        const usuario = await this.model.findByIdAndDelete(id);
+        const usuario = await this.model.findByIdAndDelete(matricula);
         if (!usuario) {
             throw new CustomError({
                 statusCode: 404,
@@ -246,4 +179,4 @@ class UsuarioRepository {
     }
 }
 
-export default UsuarioRepository;
+export default UsuarioRepository; 
