@@ -200,7 +200,6 @@ RNF-006 |O sistema deve implementar controle de acesso baseado em perfis|#######
 RNF-007 |As senhas dos usuários devem ser armazenadas com criptografia|###################|
 RNF-008 |O sistema deve estar disponível 99,5% do tempo em horário comercial|###################|
 RNF-009 |O sistema deve realizar backup automático diário dos dados|###################|
-RNF-010 |O sistema deve ter mecanismo de recuperação de falhas|###################|
 
 
 # Prototipagem
@@ -230,12 +229,12 @@ RNF-010 |O sistema deve ter mecanismo de recuperação de falhas|###############
 |5. O usuário é redirecionado para o dashboard correspondente ao seu perfil (aluno ou professor).|
 |**FLUXOS ALTERNATIVOS / EXCESSÕES:** |
 |**A1: Usuário insere credenciais inválidas** |
-|1. O sistema informa que o e-mail ou senha estão incorretos
+|1. O sistema informa que o matricula ou senha estão incorretos
 |2. O usuário pode tentar novamente ou utilizar a opção de recuperação de senha.|
 |**A2:  Usuário esqueceu a senha** |
 |1. O usuário seleciona a opção "Esqueci minha senha".|
-|2. O sistema solicita o e-mail cadastrado.|
-|3. O usuário insere o e-mail e confirma.|
+|2. O sistema solicita o matricula cadastrado.|
+|3. O usuário insere o matricula e confirma.|
 |4. O sistema envia um link de recuperação de senha para o e-mail informado.|
 |5. O usuário redefine a senha e tenta realizar login novamente.|
 
