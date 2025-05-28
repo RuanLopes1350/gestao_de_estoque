@@ -100,6 +100,29 @@ const errorHandler = (err, req, res, next) => {
     );
   }
 
+  if (err instanceof CustomError) {
+    return CommonResponse.error(
+        res,
+        err.statusCode,
+        err.errorType,
+        err.field,
+        err.details,
+        err.customMessage
+    );
+}
+
+// Adicione casos específicos para outros tipos de erros
+if (err instanceof AuthenticationError || err instanceof TokenExpiredError) {
+    return CommonResponse.error(
+        res,
+        err.statusCode,
+        err.errorType || 'authError',
+        null,
+        [],
+        err.message
+    );
+}
+
   // Tratamento para erros internos (não operacionais)
   // logger.error(`Erro interno [ID: ${errorId}]`, { message: err.message, stack: err.stack, requestId });
   const detalhes = isProduction

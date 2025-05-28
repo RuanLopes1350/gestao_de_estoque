@@ -174,17 +174,18 @@ A tabela a seguir contém a relação dos Requisitos Funcionais elicitados, com 
 
 | IDENTIFICADOR | NOME | DESCRIÇÃO |
 :---|:---|:---|
-|RF-001 |O sistema deve permitir cadastro, edição e exclusão de peças|###################|
-|RF-002 |O sistema deve categorizar automaticamente as peças por valor|• Categoria A: R$1.001,00 até R$10.000,00 - Categoria B: R$500,00 até R$1.000,00 - Categoria C: R$0,00 até R$499,00|
-|RF-003 |O sistema deve registrar entrada e saída de peças do estoque|###################|
-|RF-004 |O sistema deve gerar alertas quando o estoque atingir níveis críticos|###################|
-|RF-005 |O sistema deve integrar-se com o sistema de PDV para registrar vendas|###################|
-|RF-006 |O sistema deve integrar-se com o sistema de notas fiscais para emissão de NF-e|###################|
-|RF-007 |O sistema deve atualizar o estoque automaticamente após cada venda|###################|
+|RF-001 |O sistema deve registrar entrada e saída de peças do estoque (movimentações)|###################|
+|RF-002 |O sistema deve permitir cadastro, edição e exclusão de peças|###################|
+|RF-003 |O sistema deve categorizar automaticamente as peças por valor|• Categoria A: R$1.001,00 até R$10.000,00 - Categoria B: R$500,00 até R$1.000,00 - Categoria C: R$0,00 até R$499,00|
+|RF-004 |O sistema deve atualizar o estoque automaticamente após cada movimentação| MILESTONE 3|
+|RF-005 |O sistema deve integrar-se com o sistema de PDV para registrar vendas| *fora do escopo* |
+|RF-006 |O sistema deve gerar alertas quando o estoque atingir níveis críticos|###################|
+|RF-007 |O sistema deve integrar-se com o sistema de notas fiscais para emissão de NF-e|*fora do escopo*|
 |RF-008 |O sistema deve gerar relatórios de estoque atual|###################|
 |RF-009 |O sistema deve gerar relatórios de movimentação (entradas/saídas)|###################|
 |RF-010 |O sistema deve gerar relatórios de vendas por categoria de valor|###################|
 |RF-011 |O sistema deve gerar relatórios de vendas por Peça|###################|
+|RF-012 |O sistema deve cancelar uma movimentação (regenerando o estoque) |###################|
 
 ## Requisitos Não Funcionais
 A tabela a seguir contém a relação com os Requisitos Não Funcionais identificados, contendo identificador, nome, descrição e prioridade:
@@ -200,7 +201,6 @@ RNF-006 |O sistema deve implementar controle de acesso baseado em perfis|#######
 RNF-007 |As senhas dos usuários devem ser armazenadas com criptografia|###################|
 RNF-008 |O sistema deve estar disponível 99,5% do tempo em horário comercial|###################|
 RNF-009 |O sistema deve realizar backup automático diário dos dados|###################|
-RNF-010 |O sistema deve ter mecanismo de recuperação de falhas|###################|
 
 
 # Prototipagem
@@ -224,18 +224,18 @@ RNF-010 |O sistema deve ter mecanismo de recuperação de falhas|###############
 |**Pós-condições:** O usuário terá acesso ao dashboard e às funcionalidades conforme seu nível de permissão.|
 |**FLUXO PRINCIPAL / BÁSICO:**|
 |1. O usuário acessa a página de login do sistema. |
-|2. O sistema exibe os campos para inserção de credenciais (e-mail e senha).|
+|2. O sistema exibe os campos para inserção de credenciais (matricula e senha).|
 |3. O usuário insere suas credenciais e confirma o login.|
 |4. O sistema valida as credenciais e autentica o usuário.|
 |5. O usuário é redirecionado para o dashboard correspondente ao seu perfil (aluno ou professor).|
 |**FLUXOS ALTERNATIVOS / EXCESSÕES:** |
 |**A1: Usuário insere credenciais inválidas** |
-|1. O sistema informa que o e-mail ou senha estão incorretos
+|1. O sistema informa que o matricula ou senha estão incorretos
 |2. O usuário pode tentar novamente ou utilizar a opção de recuperação de senha.|
 |**A2:  Usuário esqueceu a senha** |
 |1. O usuário seleciona a opção "Esqueci minha senha".|
-|2. O sistema solicita o e-mail cadastrado.|
-|3. O usuário insere o e-mail e confirma.|
+|2. O sistema solicita o matricula cadastrado.|
+|3. O usuário insere o matricula e confirma.|
 |4. O sistema envia um link de recuperação de senha para o e-mail informado.|
 |5. O usuário redefine a senha e tenta realizar login novamente.|
 

@@ -9,9 +9,10 @@ beforeAll(async () => {
     mongoServer = await MongoMemoryServer.create();
     const uri = mongoServer.getUri();
 
-    await mongoose.connect(uri, {
-        // Opções de conexão não são necessárias no Mongoose 6+
-    });
+    await mongoose.connect(uri);
+    
+    // Força a criação dos índices antes de executar os testes
+    await mongoose.model('produtos').createIndexes();
 });
 
 // Limpeza após todos os testes
