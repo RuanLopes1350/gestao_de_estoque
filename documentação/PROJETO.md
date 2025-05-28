@@ -185,6 +185,7 @@ A tabela a seguir contém a relação dos Requisitos Funcionais elicitados, com 
 |RF-009 |O sistema deve gerar relatórios de movimentação (entradas/saídas)|###################|
 |RF-010 |O sistema deve gerar relatórios de vendas por categoria de valor|###################|
 |RF-011 |O sistema deve gerar relatórios de vendas por Peça|###################|
+|RF-012 |O sistema deve cancelar uma movimentação (regenerando o estoque) |###################|
 
 ## Requisitos Não Funcionais
 A tabela a seguir contém a relação com os Requisitos Não Funcionais identificados, contendo identificador, nome, descrição e prioridade:
