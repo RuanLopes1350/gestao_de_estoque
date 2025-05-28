@@ -224,7 +224,7 @@ RNF-010 |O sistema deve ter mecanismo de recuperação de falhas|###############
 |**Pós-condições:** O usuário terá acesso ao dashboard e às funcionalidades conforme seu nível de permissão.|
 |**FLUXO PRINCIPAL / BÁSICO:**|
 |1. O usuário acessa a página de login do sistema. |
-|2. O sistema exibe os campos para inserção de credenciais (e-mail e senha).|
+|2. O sistema exibe os campos para inserção de credenciais (matricula e senha).|
 |3. O usuário insere suas credenciais e confirma o login.|
 |4. O sistema valida as credenciais e autentica o usuário.|
 |5. O usuário é redirecionado para o dashboard correspondente ao seu perfil (aluno ou professor).|
