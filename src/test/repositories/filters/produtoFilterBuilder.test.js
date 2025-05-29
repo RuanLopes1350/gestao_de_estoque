@@ -44,11 +44,11 @@ describe('ProdutoFilterBuilder', () => {
 
     describe('comCategoria', () => {
         test('deve adicionar filtro de categoria quando valor é válido', () => {
-            produtoFilterBuilder.comCategoria('Eletrônicos');
+            produtoFilterBuilder.comCategoria('A');
             const filtros = produtoFilterBuilder.build();
 
             expect(filtros).toHaveProperty('categoria');
-            expect(filtros.categoria).toEqual({ $regex: 'Eletrônicos', $options: 'i' });
+            expect(filtros.categoria).toEqual({ $regex: 'A', $options: 'i' });
         });
 
         test('não deve adicionar filtro de categoria quando valor é vazio', () => {
@@ -185,7 +185,7 @@ describe('ProdutoFilterBuilder', () => {
     test('deve permitir encadeamento de filtros', () => {
         const filtros = produtoFilterBuilder
             .comNome('Teclado')
-            .comCategoria('Eletrônicos')
+            .comCategoria('A')
             .comCodigo('TEC123')
             .comPrecoMinimo(50)
             .comPrecoMaximo(150)
@@ -196,7 +196,7 @@ describe('ProdutoFilterBuilder', () => {
 
         expect(filtros).toEqual({
             nome_produto: { $regex: 'Teclado', $options: 'i' },
-            categoria: { $regex: 'Eletrônicos', $options: 'i' },
+            categoria: { $regex: 'A', $options: 'i' },
             codigo_produto: { $regex: 'TEC123', $options: 'i' },
             preco: { $gte: 50, $lte: 150 },
             estoque: { $gte: 10 },
