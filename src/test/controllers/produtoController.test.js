@@ -7,26 +7,26 @@ import { ProdutoQuerySchema, ProdutoIdSchema } from '../../utils/validators/sche
 // Mock das dependências
 jest.mock('../../services/produtoService.js');
 jest.mock('../../utils/validators/schemas/zod/ProdutoSchema.js', () => ({
-  ProdutoSchema: { 
-    parse: jest.fn() 
+  ProdutoSchema: {
+    parse: jest.fn()
   },
-  ProdutoUpdateSchema: { 
-    parseAsync: jest.fn() 
+  ProdutoUpdateSchema: {
+    parseAsync: jest.fn()
   }
 }));
 
 jest.mock('../../utils/validators/schemas/zod/querys/ProdutoQuerySchema.js', () => ({
-  ProdutoQuerySchema: { 
-    parseAsync: jest.fn() 
+  ProdutoQuerySchema: {
+    parseAsync: jest.fn()
   },
-  ProdutoIdSchema: { 
-    parse: jest.fn() 
+  ProdutoIdSchema: {
+    parse: jest.fn()
   }
 }));
 
 jest.mock('../../utils/helpers/index.js', () => {
   const originalModule = jest.requireActual('../../utils/helpers/index.js');
-  
+
   return {
     ...originalModule,
     CommonResponse: {
@@ -89,7 +89,7 @@ describe('ProdutoController', () => {
       query: {},
       body: {}
     };
-    
+
     res = {
       status: jest.fn().mockReturnThis(),
       json: jest.fn()
@@ -105,14 +105,14 @@ describe('ProdutoController', () => {
         limit: 10,
         page: 1
       };
-      
+
       mockService.listarProdutos.mockResolvedValue(mockProdutos);
-      
+
       await produtoController.listarProdutos(req, res);
-      
+
       expect(mockService.listarProdutos).toHaveBeenCalledWith(req);
       expect(CommonResponse.success).toHaveBeenCalledWith(
-        res, 
+        res,
         mockProdutos
       );
     });
@@ -124,11 +124,11 @@ describe('ProdutoController', () => {
         limit: 10,
         page: 1
       };
-      
+
       mockService.listarProdutos.mockResolvedValue(mockProdutos);
-      
+
       await produtoController.listarProdutos(req, res);
-      
+
       expect(mockService.listarProdutos).toHaveBeenCalledWith(req);
       expect(CommonResponse.error).toHaveBeenCalledWith(
         res,
@@ -143,11 +143,11 @@ describe('ProdutoController', () => {
     it('deve validar ID quando fornecido nos parâmetros', async () => {
       req.params = { id: '123' };
       const mockProduto = { _id: '123', nome_produto: 'Produto Teste' };
-      
+
       mockService.listarProdutos.mockResolvedValue(mockProduto);
-      
+
       await produtoController.listarProdutos(req, res);
-      
+
       expect(ProdutoIdSchema.parse).toHaveBeenCalledWith('123');
       expect(mockService.listarProdutos).toHaveBeenCalledWith(req);
       expect(CommonResponse.success).toHaveBeenCalled();
@@ -161,11 +161,11 @@ describe('ProdutoController', () => {
         limit: 10,
         page: 1
       };
-      
+
       mockService.listarProdutos.mockResolvedValue(mockProdutos);
-      
+
       await produtoController.listarProdutos(req, res);
-      
+
       expect(ProdutoQuerySchema.parseAsync).toHaveBeenCalledWith(req.query);
       expect(mockService.listarProdutos).toHaveBeenCalledWith(req);
       expect(CommonResponse.success).toHaveBeenCalled();
@@ -174,9 +174,9 @@ describe('ProdutoController', () => {
     it('deve tratar erros adequadamente', async () => {
       const error = new Error('Erro de teste');
       mockService.listarProdutos.mockRejectedValue(error);
-      
+
       await produtoController.listarProdutos(req, res);
-      
+
       expect(CommonResponse.error).toHaveBeenCalledWith(res, error);
     });
   });
@@ -186,11 +186,11 @@ describe('ProdutoController', () => {
     it('deve encontrar um produto pelo ID com sucesso', async () => {
       req.params = { id: '123' };
       const mockProduto = { _id: '123', nome_produto: 'Produto Teste' };
-      
+
       mockService.buscarProdutoPorID.mockResolvedValue(mockProduto);
-      
+
       await produtoController.buscarProdutoPorID(req, res);
-      
+
       expect(ProdutoIdSchema.parse).toHaveBeenCalledWith('123');
       expect(mockService.buscarProdutoPorID).toHaveBeenCalledWith('123');
       expect(CommonResponse.success).toHaveBeenCalledWith(
@@ -210,11 +210,11 @@ describe('ProdutoController', () => {
         details: [],
         customMessage: 'Produto não encontrado'
       });
-      
+
       mockService.buscarProdutoPorID.mockRejectedValue(error);
-      
+
       await produtoController.buscarProdutoPorID(req, res);
-      
+
       expect(ProdutoIdSchema.parse).toHaveBeenCalledWith('123');
       expect(mockService.buscarProdutoPorID).toHaveBeenCalledWith('123');
       expect(CommonResponse.error).toHaveBeenCalledWith(
@@ -230,11 +230,11 @@ describe('ProdutoController', () => {
     it('deve tratar outros erros adequadamente', async () => {
       req.params = { id: '123' };
       const error = new Error('Erro de teste');
-      
+
       mockService.buscarProdutoPorID.mockRejectedValue(error);
-      
+
       await produtoController.buscarProdutoPorID(req, res);
-      
+
       expect(CommonResponse.error).toHaveBeenCalledWith(res, error);
     });
   });
@@ -249,11 +249,11 @@ describe('ProdutoController', () => {
         limit: 10,
         page: 1
       };
-      
+
       mockService.buscarProdutosPorNome.mockResolvedValue(mockProdutos);
-      
+
       await produtoController.buscarProdutos(req, res);
-      
+
       expect(mockService.buscarProdutosPorNome).toHaveBeenCalledWith('Teste', 1, 10);
       expect(CommonResponse.success).toHaveBeenCalledWith(
         res,
@@ -271,11 +271,11 @@ describe('ProdutoController', () => {
         limit: 10,
         page: 1
       };
-      
+
       mockService.buscarProdutosPorCategoria.mockResolvedValue(mockProdutos);
-      
+
       await produtoController.buscarProdutos(req, res);
-      
+
       expect(mockService.buscarProdutosPorCategoria).toHaveBeenCalledWith('Eletrônicos', 1, 10);
       expect(CommonResponse.success).toHaveBeenCalledWith(
         res,
@@ -293,11 +293,11 @@ describe('ProdutoController', () => {
         limit: 10,
         page: 1
       };
-      
+
       mockService.buscarProdutosPorCodigo.mockResolvedValue(mockProdutos);
-      
+
       await produtoController.buscarProdutos(req, res);
-      
+
       expect(mockService.buscarProdutosPorCodigo).toHaveBeenCalledWith('ABC123', 1, 10);
       expect(CommonResponse.success).toHaveBeenCalledWith(
         res,
@@ -315,11 +315,11 @@ describe('ProdutoController', () => {
         limit: 10,
         page: 1
       };
-      
+
       mockService.buscarProdutosPorFornecedor.mockResolvedValue(mockProdutos);
-      
+
       await produtoController.buscarProdutos(req, res);
-      
+
       expect(mockService.buscarProdutosPorFornecedor).toHaveBeenCalledWith('Fornecedor A', 1, 10, true);
       expect(CommonResponse.success).toHaveBeenCalledWith(
         res,
@@ -331,9 +331,9 @@ describe('ProdutoController', () => {
 
     it('deve retornar erro quando nenhum filtro é fornecido', async () => {
       req.query = {};
-      
+
       await produtoController.buscarProdutos(req, res);
-      
+
       expect(CommonResponse.error).toHaveBeenCalled();
       expect(mockService.buscarProdutosPorNome).not.toHaveBeenCalled();
       expect(mockService.buscarProdutosPorCategoria).not.toHaveBeenCalled();
@@ -344,11 +344,11 @@ describe('ProdutoController', () => {
     it('deve retornar erro quando a busca não encontra resultados', async () => {
       req.query = { nome: 'ProdutoInexistente' };
       const mockProdutos = { docs: [], totalDocs: 0, limit: 10, page: 1 };
-      
+
       mockService.buscarProdutosPorNome.mockResolvedValue(mockProdutos);
-      
+
       await produtoController.buscarProdutos(req, res);
-      
+
       expect(mockService.buscarProdutosPorNome).toHaveBeenCalledWith('ProdutoInexistente', 1, 10);
       expect(CommonResponse.error).toHaveBeenCalledWith(
         res,
@@ -363,11 +363,11 @@ describe('ProdutoController', () => {
     it('deve tratar erros adequadamente', async () => {
       req.query = { nome: 'Teste' };
       const error = new Error('Erro de teste');
-      
+
       mockService.buscarProdutosPorNome.mockRejectedValue(error);
-      
+
       await produtoController.buscarProdutos(req, res);
-      
+
       expect(CommonResponse.error).toHaveBeenCalledWith(res, error);
     });
   });
@@ -380,14 +380,14 @@ describe('ProdutoController', () => {
         codigo_produto: 'NP001',
         preco: 99.99
       };
-      
+
       const produtoCadastrado = { ...req.body, _id: '123' };
-      
+
       ProdutoSchema.parse.mockReturnValue(req.body);
       mockService.cadastrarProduto.mockResolvedValue(produtoCadastrado);
-      
+
       await produtoController.cadastrarProduto(req, res);
-      
+
       expect(ProdutoSchema.parse).toHaveBeenCalledWith(req.body);
       expect(mockService.cadastrarProduto).toHaveBeenCalledWith(req.body);
       expect(CommonResponse.created).toHaveBeenCalledWith(
@@ -401,31 +401,30 @@ describe('ProdutoController', () => {
     it('deve tratar erros de validação', async () => {
       req.body = { nome_produto: 'Novo Produto' }; // Falta código e preço
       const validationError = new Error('Erro de validação');
-      
+
       ProdutoSchema.parse.mockImplementation(() => { throw validationError; });
-      
+
       await produtoController.cadastrarProduto(req, res);
-      
+
       expect(ProdutoSchema.parse).toHaveBeenCalledWith(req.body);
       expect(mockService.cadastrarProduto).not.toHaveBeenCalled();
       expect(CommonResponse.error).toHaveBeenCalledWith(res, validationError);
     });
 
     it('deve tratar erros do service', async () => {
-      req.body = {
-        nome_produto: 'Novo Produto',
-        codigo_produto: 'NP001',
-        preco: 99.99
-      };
-      
+      req.params = { id: '123' };
+      req.body = { nome_produto: 'Produto Atualizado' };
+
       const serviceError = new Error('Erro no service');
-      
-      ProdutoSchema.parse.mockReturnValue(req.body);
-      mockService.cadastrarProduto.mockRejectedValue(serviceError);
-      
-      await produtoController.cadastrarProduto(req, res);
-      
-      expect(mockService.cadastrarProduto).toHaveBeenCalledWith(req.body);
+
+      ProdutoIdSchema.parse.mockReturnValue('123');
+      ProdutoUpdateSchema.parseAsync.mockResolvedValue(req.body);
+      mockService.atualizarProduto.mockRejectedValue(serviceError);
+
+      await produtoController.atualizarProduto(req, res);
+
+      expect(mockService.atualizarProduto).toHaveBeenCalledWith('123', req.body);
+
       expect(CommonResponse.error).toHaveBeenCalledWith(res, serviceError);
     });
   });
@@ -435,15 +434,15 @@ describe('ProdutoController', () => {
     it('deve atualizar um produto com sucesso', async () => {
       req.params = { id: '123' };
       req.body = { nome_produto: 'Produto Atualizado' };
-      
+
       const produtoAtualizado = { _id: '123', nome_produto: 'Produto Atualizado' };
-      
+
       ProdutoIdSchema.parse.mockReturnValue('123');
       ProdutoUpdateSchema.parseAsync.mockResolvedValue(req.body);
       mockService.atualizarProduto.mockResolvedValue(produtoAtualizado);
-      
+
       await produtoController.atualizarProduto(req, res);
-      
+
       expect(ProdutoIdSchema.parse).toHaveBeenCalledWith('123');
       expect(ProdutoUpdateSchema.parseAsync).toHaveBeenCalledWith(req.body);
       expect(mockService.atualizarProduto).toHaveBeenCalledWith('123', req.body);
@@ -458,9 +457,9 @@ describe('ProdutoController', () => {
     it('deve retornar erro quando o ID não é fornecido', async () => {
       req.params = {};
       req.body = { nome_produto: 'Produto Atualizado' };
-      
+
       await produtoController.atualizarProduto(req, res);
-      
+
       expect(ProdutoIdSchema.parse).not.toHaveBeenCalled();
       expect(mockService.atualizarProduto).not.toHaveBeenCalled();
       expect(CommonResponse.error).toHaveBeenCalled();
@@ -469,28 +468,54 @@ describe('ProdutoController', () => {
     it('deve retornar erro quando o corpo da requisição está vazio', async () => {
       req.params = { id: '123' };
       req.body = {};
-      
+
       ProdutoIdSchema.parse.mockReturnValue('123');
-      
+
+      const validationError = new CustomError({
+        statusCode: 400,
+        errorType: 'validationError',
+        field: 'body',
+        details: [],
+        customMessage: 'Nenhum dado fornecido para atualização.'
+      });
+
       await produtoController.atualizarProduto(req, res);
-      
+
       expect(ProdutoIdSchema.parse).toHaveBeenCalledWith('123');
+
       expect(ProdutoUpdateSchema.parseAsync).not.toHaveBeenCalled();
+
       expect(mockService.atualizarProduto).not.toHaveBeenCalled();
-      expect(CommonResponse.error).toHaveBeenCalled();
+
+      expect(CommonResponse.error).toHaveBeenCalledWith(
+        res,
+        expect.objectContaining({
+          statusCode: 400,
+          errorType: 'validationError',
+          field: 'body',
+          customMessage: 'Nenhum dado fornecido para atualização.'
+        })
+      );
     });
 
     it('deve tratar erros de validação', async () => {
       req.params = { id: '123' };
       req.body = { preco: 'não é um número' };
-      
-      const validationError = new Error('Erro de validação');
-      
+
+      const validationError = new CustomError({
+        statusCode: 400,
+        errorType: 'validationError',
+        field: 'preco',
+        details: [],
+        customMessage: 'Erro de validação: preco deve ser um número'
+      });
+
       ProdutoIdSchema.parse.mockReturnValue('123');
       ProdutoUpdateSchema.parseAsync.mockRejectedValue(validationError);
-      
+
       await produtoController.atualizarProduto(req, res);
-      
+
+      expect(ProdutoIdSchema.parse).toHaveBeenCalledWith('123');
       expect(ProdutoUpdateSchema.parseAsync).toHaveBeenCalledWith(req.body);
       expect(mockService.atualizarProduto).not.toHaveBeenCalled();
       expect(CommonResponse.error).toHaveBeenCalledWith(res, validationError);
@@ -499,17 +524,30 @@ describe('ProdutoController', () => {
     it('deve tratar erros do service', async () => {
       req.params = { id: '123' };
       req.body = { nome_produto: 'Produto Atualizado' };
-      
-      const serviceError = new Error('Erro no service');
-      
+
+      const serviceError = new CustomError({
+        statusCode: 500,
+        errorType: 'internalServerError',
+        field: 'server',
+        details: [],
+        customMessage: 'Erro no service'
+      });
+
       ProdutoIdSchema.parse.mockReturnValue('123');
       ProdutoUpdateSchema.parseAsync.mockResolvedValue(req.body);
+
       mockService.atualizarProduto.mockRejectedValue(serviceError);
-      
+
       await produtoController.atualizarProduto(req, res);
-      
+
       expect(mockService.atualizarProduto).toHaveBeenCalledWith('123', req.body);
-      expect(CommonResponse.error).toHaveBeenCalledWith(res, serviceError);
+
+      expect(CommonResponse.error).toHaveBeenCalledWith(res, expect.objectContaining({
+        statusCode: 500,
+        errorType: 'internalServerError',
+        field: 'server',
+        customMessage: 'Erro no service'
+      }));
     });
   });
 
@@ -518,12 +556,12 @@ describe('ProdutoController', () => {
     it('deve deletar um produto com sucesso', async () => {
       req.params = { id: '123' };
       const produtoDeletado = { _id: '123', nome_produto: 'Produto Deletado' };
-      
+
       ProdutoIdSchema.parse.mockReturnValue('123');
       mockService.deletarProduto.mockResolvedValue(produtoDeletado);
-      
+
       await produtoController.deletarProduto(req, res);
-      
+
       expect(ProdutoIdSchema.parse).toHaveBeenCalledWith('123');
       expect(mockService.deletarProduto).toHaveBeenCalledWith('123');
       expect(CommonResponse.success).toHaveBeenCalledWith(
@@ -536,9 +574,9 @@ describe('ProdutoController', () => {
 
     it('deve retornar erro quando o ID não é fornecido', async () => {
       req.params = {};
-      
+
       await produtoController.deletarProduto(req, res);
-      
+
       expect(mockService.deletarProduto).not.toHaveBeenCalled();
       expect(CommonResponse.error).toHaveBeenCalled();
     });
@@ -546,11 +584,11 @@ describe('ProdutoController', () => {
     it('deve retornar erro quando o ID é inválido', async () => {
       req.params = { id: '123' };
       const validationError = new Error('ID inválido');
-      
+
       ProdutoIdSchema.parse.mockImplementation(() => { throw validationError; });
-      
+
       await produtoController.deletarProduto(req, res);
-      
+
       expect(ProdutoIdSchema.parse).toHaveBeenCalledWith('123');
       expect(mockService.deletarProduto).not.toHaveBeenCalled();
       expect(CommonResponse.error).toHaveBeenCalled();
@@ -565,12 +603,12 @@ describe('ProdutoController', () => {
         details: [],
         customMessage: 'Produto não encontrado'
       });
-      
+
       ProdutoIdSchema.parse.mockReturnValue('123');
       mockService.deletarProduto.mockRejectedValue(notFoundError);
-      
+
       await produtoController.deletarProduto(req, res);
-      
+
       expect(mockService.deletarProduto).toHaveBeenCalledWith('123');
       expect(CommonResponse.error).toHaveBeenCalled();
     });
@@ -582,11 +620,11 @@ describe('ProdutoController', () => {
       const mockProdutos = [
         { nome_produto: 'Produto Crítico', estoque: 5, estoque_min: 10 }
       ];
-      
+
       mockService.listarEstoqueBaixo.mockResolvedValue(mockProdutos);
-      
+
       await produtoController.listarEstoqueBaixo(req, res);
-      
+
       expect(mockService.listarEstoqueBaixo).toHaveBeenCalled();
       expect(CommonResponse.success).toHaveBeenCalledWith(
         res,
@@ -598,9 +636,9 @@ describe('ProdutoController', () => {
 
     it('deve retornar erro quando não há produtos com estoque baixo', async () => {
       mockService.listarEstoqueBaixo.mockResolvedValue([]);
-      
+
       await produtoController.listarEstoqueBaixo(req, res);
-      
+
       expect(mockService.listarEstoqueBaixo).toHaveBeenCalled();
       expect(CommonResponse.error).toHaveBeenCalledWith(
         res,
@@ -615,9 +653,9 @@ describe('ProdutoController', () => {
     it('deve tratar erros adequadamente', async () => {
       const error = new Error('Erro de teste');
       mockService.listarEstoqueBaixo.mockRejectedValue(error);
-      
+
       await produtoController.listarEstoqueBaixo(req, res);
-      
+
       expect(CommonResponse.error).toHaveBeenCalledWith(res, error);
     });
   });
@@ -627,12 +665,12 @@ describe('ProdutoController', () => {
     it('deve desativar um produto com sucesso', async () => {
       req.params = { id: '123' };
       const produtoDesativado = { _id: '123', nome_produto: 'Produto', status: false };
-      
+
       ProdutoIdSchema.parse.mockReturnValue('123');
       mockService.desativarProduto.mockResolvedValue(produtoDesativado);
-      
+
       await produtoController.desativarProduto(req, res);
-      
+
       expect(ProdutoIdSchema.parse).toHaveBeenCalledWith('123');
       expect(mockService.desativarProduto).toHaveBeenCalledWith('123');
       expect(CommonResponse.success).toHaveBeenCalledWith(
@@ -645,9 +683,9 @@ describe('ProdutoController', () => {
 
     it('deve retornar erro quando o ID não é fornecido', async () => {
       req.params = {};
-      
+
       await produtoController.desativarProduto(req, res);
-      
+
       expect(mockService.desativarProduto).not.toHaveBeenCalled();
       expect(CommonResponse.error).toHaveBeenCalled();
     });
@@ -655,11 +693,11 @@ describe('ProdutoController', () => {
     it('deve retornar erro quando o ID é inválido', async () => {
       req.params = { id: '123' };
       const validationError = new Error('ID inválido');
-      
+
       ProdutoIdSchema.parse.mockImplementation(() => { throw validationError; });
-      
+
       await produtoController.desativarProduto(req, res);
-      
+
       expect(ProdutoIdSchema.parse).toHaveBeenCalledWith('123');
       expect(mockService.desativarProduto).not.toHaveBeenCalled();
       expect(CommonResponse.error).toHaveBeenCalled();
@@ -674,12 +712,12 @@ describe('ProdutoController', () => {
         details: [],
         customMessage: 'Produto não encontrado'
       });
-      
+
       ProdutoIdSchema.parse.mockReturnValue('123');
       mockService.desativarProduto.mockRejectedValue(notFoundError);
-      
+
       await produtoController.desativarProduto(req, res);
-      
+
       expect(mockService.desativarProduto).toHaveBeenCalledWith('123');
       expect(CommonResponse.error).toHaveBeenCalled();
     });
@@ -690,12 +728,12 @@ describe('ProdutoController', () => {
     it('deve reativar um produto com sucesso', async () => {
       req.params = { id: '123' };
       const produtoReativado = { _id: '123', nome_produto: 'Produto', status: true };
-      
+
       ProdutoIdSchema.parse.mockReturnValue('123');
       mockService.reativarProduto.mockResolvedValue(produtoReativado);
-      
+
       await produtoController.reativarProduto(req, res);
-      
+
       expect(ProdutoIdSchema.parse).toHaveBeenCalledWith('123');
       expect(mockService.reativarProduto).toHaveBeenCalledWith('123');
       expect(CommonResponse.success).toHaveBeenCalledWith(
@@ -708,9 +746,9 @@ describe('ProdutoController', () => {
 
     it('deve retornar erro quando o ID não é fornecido', async () => {
       req.params = {};
-      
+
       await produtoController.reativarProduto(req, res);
-      
+
       expect(mockService.reativarProduto).not.toHaveBeenCalled();
       expect(CommonResponse.error).toHaveBeenCalled();
     });
@@ -718,11 +756,11 @@ describe('ProdutoController', () => {
     it('deve retornar erro quando o ID é inválido', async () => {
       req.params = { id: '123' };
       const validationError = new Error('ID inválido');
-      
+
       ProdutoIdSchema.parse.mockImplementation(() => { throw validationError; });
-      
+
       await produtoController.reativarProduto(req, res);
-      
+
       expect(ProdutoIdSchema.parse).toHaveBeenCalledWith('123');
       expect(mockService.reativarProduto).not.toHaveBeenCalled();
       expect(CommonResponse.error).toHaveBeenCalled();
@@ -737,12 +775,12 @@ describe('ProdutoController', () => {
         details: [],
         customMessage: 'Produto não encontrado'
       });
-      
+
       ProdutoIdSchema.parse.mockReturnValue('123');
       mockService.reativarProduto.mockRejectedValue(notFoundError);
-      
+
       await produtoController.reativarProduto(req, res);
-      
+
       expect(mockService.reativarProduto).toHaveBeenCalledWith('123');
       expect(CommonResponse.error).toHaveBeenCalled();
     });
