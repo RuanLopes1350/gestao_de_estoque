@@ -212,6 +212,102 @@ describe('ProdutoRepository', () => {
                 expect.anything()
             );
         });
+
+        it('deve aplicar filtro por categoria', async () => {
+            const mockProdutos = {
+              docs: [{ categoria: 'A' }],
+              totalDocs: 1,
+              limit: 10,
+              page: 1
+            };
+            const req = {
+              query: { categoria: 'A' },
+              params: {}
+            };
+            mockModel.paginate.mockResolvedValue(mockProdutos);
+          
+            await produtoRepository.listarProdutos(req);
+          
+            expect(mockModel.paginate).toHaveBeenCalledWith(
+              expect.objectContaining({ 
+                categoria: { $regex: 'A', $options: 'i' } 
+              }),
+              expect.anything()
+            );
+          });
+          
+          it('deve aplicar filtro por código do produto', async () => {
+            const mockProdutos = {
+              docs: [{ codigo_produto: 'ABC123' }],
+              totalDocs: 1,
+              limit: 10,
+              page: 1
+            };
+            const req = {
+              query: { codigo_produto: 'ABC123' },
+              params: {}
+            };
+            mockModel.paginate.mockResolvedValue(mockProdutos);
+          
+            await produtoRepository.listarProdutos(req);
+          
+            expect(mockModel.paginate).toHaveBeenCalledWith(
+              expect.objectContaining({ 
+                codigo_produto: { $regex: 'ABC123', $options: 'i' } 
+              }),
+              expect.anything()
+            );
+          });
+          
+          it('deve aplicar filtro por ID do fornecedor', async () => {
+            const mockProdutos = {
+              docs: [{ id_fornecedor: 123 }],
+              totalDocs: 1,
+              limit: 10,
+              page: 1
+            };
+            const req = {
+              query: { id_fornecedor: '123' },
+              params: {}
+            };
+            mockModel.paginate.mockResolvedValue(mockProdutos);
+          
+            await produtoRepository.listarProdutos(req);
+          
+            expect(mockModel.paginate).toHaveBeenCalledWith(
+              expect.objectContaining({ 
+                id_fornecedor: 123
+              }),
+              expect.anything()
+            );
+          });
+          
+          it('deve aplicar filtro por nome do fornecedor', async () => {
+            const mockProdutos = {
+              docs: [{ id_fornecedor: 123 }],
+              totalDocs: 1,
+              limit: 10,
+              page: 1
+            };
+            
+            const mockFornecedores = [{ _id: '60d21b4667d0d8992e610c85' }];
+            mongoose.model.mockReturnValue({
+              find: jest.fn().mockReturnValue({
+                select: jest.fn().mockResolvedValue(mockFornecedores)
+              })
+            });
+            
+            const req = {
+              query: { nome_fornecedor: 'Fornecedor Teste' },
+              params: {}
+            };
+            mockModel.paginate.mockResolvedValue(mockProdutos);
+          
+            await produtoRepository.listarProdutos(req);
+          
+            expect(mongoose.model).toHaveBeenCalledWith('fornecedores');
+            expect(mockModel.paginate).toHaveBeenCalled();
+          });
     });
 
     describe('atualizarProduto', () => {
@@ -247,6 +343,33 @@ describe('ProdutoRepository', () => {
                 expect.objectContaining({ new: true })
             );
         });
+
+        it('deve lançar erro para ID inválido', async () => {
+            const id = 'invalid-id';
+            const dados = { nome_produto: 'Produto Teste' };
+            
+            mongoose.Types.ObjectId.isValid.mockReturnValue(false);
+            
+            await expect(produtoRepository.atualizarProduto(id, dados))
+              .rejects.toThrow(CustomError);
+          });
+          
+          it('deve lançar erro para código duplicado em outro produto', async () => {
+            const id = '123';
+            const dados = { codigo_produto: 'PROD001' };
+            const produtoExistente = { _id: '456', codigo_produto: 'PROD001' };
+            
+            mongoose.Types.ObjectId.isValid.mockReturnValue(true);
+            mockModel.findOne.mockResolvedValue(produtoExistente);
+            
+            await expect(produtoRepository.atualizarProduto(id, dados))
+              .rejects.toThrow(CustomError);
+            
+            expect(mockModel.findOne).toHaveBeenCalledWith({
+              codigo_produto: 'PROD001',
+              _id: { $ne: id }
+            });
+          });
     });
 
     describe('deletarProduto', () => {
@@ -310,6 +433,14 @@ describe('ProdutoRepository', () => {
                 { new: true }
             );
         });
+
+        it('deve retornar null quando produto não é encontrado para desativação', async () => {
+            const id = '123';
+            mockModel.findByIdAndUpdate.mockResolvedValue(null);
+            
+            const result = await produtoRepository.desativarProduto(id);
+            expect(result).toBeNull();
+          });
     });
     
     describe('reativarProduto', () => {
@@ -329,4 +460,12 @@ describe('ProdutoRepository', () => {
             );
         });
     });
+
+    it('deve retornar null quando produto não é encontrado para reativação', async () => {
+        const id = '123';
+        mockModel.findByIdAndUpdate.mockResolvedValue(null);
+        
+        const result = await produtoRepository.reativarProduto(id);
+        expect(result).toBeNull();
+      });
 });
