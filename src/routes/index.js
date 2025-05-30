@@ -6,7 +6,7 @@ import logRoutes from "../middlewares/LogRoutesMiddleware.js";
 import rotasProdutos from "./produtoRoutes.js";
 import rotasFornecedores from "./fornecedorRoutes.js";
 import rotasUsuarios from "./usuarioRoutes.js"
-import rotasMovimentacoes from './movimentacoesRoutes.js';
+import rotasMovimentacoes from './movimentacaoRoutes.js';
 
 
 import dotenv from "dotenv";

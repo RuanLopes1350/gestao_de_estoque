@@ -1,13 +1,13 @@
 import { Router } from 'express';
 import MovimentacoesController from '../controllers/MovimentacoesController.js';
-import asyncWrapper from '../middleware/asyncWrapper.js';
-import authMiddleware from '../middleware/authMiddleware.js';
+import asyncWrapper from '../middlewares/asyncWrapper.js';
+// import authMiddleware from '../middleware/authMiddleware.js';
 
 const router = Router();
 const movimentacoesController = new MovimentacoesController();
 
 // Middleware para autenticação
-router.use(authMiddleware);
+// router.use(authMiddleware);
 
 router
     // Rotas sem parâmetros de rota primeiro

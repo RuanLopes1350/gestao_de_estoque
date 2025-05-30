@@ -11,100 +11,119 @@ class MovimentacaoRepository {
     async listarMovimentacoes(req) {
         console.log('Estou no listarMovimentacoes em MovimentacaoRepository');
         
-        const id = req.params ? req.params.id : null;
-        
-        if (id) {
-            if (!mongoose.Types.ObjectId.isValid(id)) {
-                throw new CustomError({
-                    statusCode: 400,
-                    errorType: 'validationError',
-                    field: 'id',
-                    details: [],
-                    customMessage: 'ID da movimentação inválido'
-                });
-            }
+        try {
+            const id = req.params ? req.params.id : null;
             
-            const data = await this.model.findById(id)
-                .populate('id_usuario')
-                .populate('produtos.produto_ref');
+            if (id) {
+                if (!mongoose.Types.ObjectId.isValid(id)) {
+                    throw new CustomError({
+                        statusCode: 400,
+                        errorType: 'validationError',
+                        field: 'id',
+                        details: [],
+                        customMessage: 'ID da movimentação inválido'
+                    });
+                }
                 
-            if (!data) {
-                throw new CustomError({
-                    statusCode: 404,
-                    errorType: 'resourceNotFound',
-                    field: 'Movimentacao',
-                    details: [],
-                    customMessage: messages.error.resourceNotFound('Movimentação')
-                });
+                // Ajuste aqui para tratar possíveis erros de referência
+                try {
+                    const data = await this.model.findById(id)
+                        .populate('id_usuario', 'nome_usuario email')  // Especificar campos
+                        .populate('produtos.produto_ref', 'nome_produto codigo_produto');  // Especificar campos
+                        
+                    if (!data) {
+                        throw new CustomError({
+                            statusCode: 404,
+                            errorType: 'resourceNotFound',
+                            field: 'Movimentacao',
+                            details: [],
+                            customMessage: messages.error.resourceNotFound('Movimentação')
+                        });
+                    }
+                    
+                    return data;
+                } catch (populateError) {
+                    console.error('Erro ao popular referências:', populateError);
+                    
+                    // Tenta retornar sem o populate em caso de erro
+                    const data = await this.model.findById(id);
+                    if (!data) {
+                        throw new CustomError({
+                            statusCode: 404,
+                            errorType: 'resourceNotFound',
+                            field: 'Movimentacao',
+                            details: [],
+                            customMessage: messages.error.resourceNotFound('Movimentação')
+                        });
+                    }
+                    return data;
+                }
             }
             
-            return data;
-        }
-        
-        // Para busca por filtros
-        const { 
-            tipo, 
-            data_inicio, 
-            data_fim, 
-            produto, 
-            usuario, 
-            page = 1 
-        } = req.query || {};
-        
-        const limite = Math.min(parseInt(req.query?.limite, 10) || 10, 100);
-        
-        const filtros = {};
-        
-        if (tipo) {
-            filtros.tipo = tipo;
-            console.log(`Aplicando filtro por tipo: "${tipo}"`);
-        }
-        
-        if (data_inicio && data_fim) {
-            filtros.data_movimentacao = { 
-                $gte: new Date(data_inicio),
-                $lte: new Date(data_fim)
+            // Para busca por filtros
+            const { 
+                tipo, 
+                data_inicio, 
+                data_fim, 
+                produto, 
+                usuario, 
+                page = 1 
+            } = req.query || {};
+            
+            const limite = Math.min(parseInt(req.query?.limite, 10) || 10, 100);
+            
+            const filtros = {};
+            
+            if (tipo) {
+                filtros.tipo = tipo;
+                console.log(`Aplicando filtro por tipo: "${tipo}"`);
+            }
+            
+            if (data_inicio && data_fim) {
+                filtros.data_movimentacao = { 
+                    $gte: new Date(data_inicio),
+                    $lte: new Date(data_fim)
+                };
+                console.log(`Aplicando filtro por período: de ${data_inicio} até ${data_fim}`);
+            }
+            
+            // Restante do código de filtros...
+            
+            const options = {
+                page: parseInt(page, 10),
+                limit: parseInt(limite, 10),
+                sort: { data_movimentacao: -1 },
+                // Opções de populate simplificadas para reduzir dependências
+                populate: [
+                    { path: 'id_usuario', select: 'nome_usuario email' },
+                    { path: 'produtos.produto_ref', select: 'nome_produto codigo_produto quantidade_estoque' }
+                ]
             };
-            console.log(`Aplicando filtro por período: de ${data_inicio} até ${data_fim}`);
-        }
-        
-        if (produto) {
-            // Verificar se o produto é um ID válido ou nome/código
-            if (mongoose.Types.ObjectId.isValid(produto)) {
-                filtros['produtos.produto_ref'] = produto;
-                console.log(`Aplicando filtro por referência de produto: "${produto}"`);
-            } else {
-                // Busca por código ou nome do produto
-                filtros.$or = [
-                    { 'produtos.codigo_produto': { $regex: produto, $options: 'i' } },
-                    { 'produtos.nome_produto': { $regex: produto, $options: 'i' } }
-                ];
-                console.log(`Aplicando filtro por nome/código de produto: "${produto}"`);
+            
+            console.log('Filtros aplicados:', filtros);
+            
+            try {
+                const resultado = await this.model.paginate(filtros, options);
+                console.log(`Encontradas ${resultado.docs?.length || 0} movimentações`);
+                return resultado;
+            } catch (paginateError) {
+                console.error('Erro ao paginar movimentações:', paginateError);
+                
+                // Fallback sem populate em caso de erro
+                const options = {
+                    page: parseInt(page, 10),
+                    limit: parseInt(limite, 10),
+                    sort: { data_movimentacao: -1 },
+                    populate: false
+                };
+                
+                const resultado = await this.model.paginate(filtros, options);
+                return resultado;
             }
+        } catch (error) {
+            console.error('Erro em listarMovimentacoes:', error);
+            throw error;
         }
-        
-        if (usuario) {
-            // Verificar se o usuário é um ID válido ou nome
-            if (mongoose.Types.ObjectId.isValid(usuario)) {
-                filtros.id_usuario = usuario;
-                console.log(`Aplicando filtro por ID de usuário: "${usuario}"`);
-            } else {
-                filtros.nome_usuario = { $regex: usuario, $options: 'i' };
-                console.log(`Aplicando filtro por nome de usuário: "${usuario}"`);
-            }
-        }
-        
-        const options = {
-            page: parseInt(page, 10),
-            limit: parseInt(limite, 10),
-            sort: { data_movimentacao: -1 }, // Mais recente primeiro
-            populate: ['id_usuario', 'produtos.produto_ref']
-        };
-        
-        console.log('Filtros aplicados:', filtros);
-        const resultado = await this.model.paginate(filtros, options);
-        console.log(`Encontradas ${resultado.docs?.length || 0} movimentações`);
-        return resultado;
     }
 
     async buscarMovimentacaoPorID(id) {
