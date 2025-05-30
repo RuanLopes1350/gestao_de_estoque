@@ -9,3 +9,4 @@
 - Revisão completa do Figma final e cada tela (Henrique Zorzi)
 - Elaboração do gráfico de Burndown (Ruan Lopes)
 - Revisão modelagem banco de dados MongoDB (Ruan Lopes)
+- Apresentação (Henrique Zorzi)
