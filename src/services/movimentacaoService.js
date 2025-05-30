@@ -456,6 +456,39 @@ class MovimentacaoService {
         const data = await this.repository.deletarMovimentacao(id);
         return data;
     }
+
+    async filtrarMovimentacoesAvancado(filtros = {}, opcoesPaginacao = {}) {
+        console.log('Estou no filtrarMovimentacoesAvancado em MovimentacaoService');
+        
+        // Validações básicas
+        if (filtros.dataInicio && filtros.dataFim) {
+            const dataInicioObj = new Date(filtros.dataInicio);
+            const dataFimObj = new Date(filtros.dataFim);
+            
+            if (isNaN(dataInicioObj.getTime()) || isNaN(dataFimObj.getTime())) {
+                throw new CustomError({
+                    statusCode: HttpStatusCodes.BAD_REQUEST.code,
+                    errorType: 'validationError',
+                    field: 'data',
+                    details: [],
+                    customMessage: 'Formato de data inválido. Use o formato YYYY-MM-DD.'
+                });
+            }
+            
+            if (dataInicioObj > dataFimObj) {
+                throw new CustomError({
+                    statusCode: HttpStatusCodes.BAD_REQUEST.code,
+                    errorType: 'validationError',
+                    field: 'periodo',
+                    details: [],
+                    customMessage: 'Data de início não pode ser posterior à data de fim.'
+                });
+            }
+        }
+        
+        // Chamada ao repository com filtro avançado
+        return this.repository.filtrarMovimentacoesAvancado(filtros, opcoesPaginacao);
+    }
 }
 
 export default MovimentacaoService;

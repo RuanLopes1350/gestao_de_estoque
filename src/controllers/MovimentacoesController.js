@@ -69,15 +69,15 @@ class MovimentacoesController {
     async buscarMovimentacoes(req, res) {
         console.log('Estou no buscarMovimentacoes em MovimentacoesController');
         console.log('Query params:', req.query);
-    
+
         try {
             const query = req.query || {};
             const page = parseInt(query.page) || 1;
             const limite = Math.min(parseInt(query.limite) || 10, 100);
-            
+
             let data = null;
             let tipoFiltro = null;
-            
+
             // Verificar qual filtro foi passado
             if (query.tipo) {
                 tipoFiltro = 'tipo';
@@ -100,7 +100,7 @@ class MovimentacoesController {
                     customMessage: 'É necessário informar ao menos um parâmetro de busca: tipo, periodo, produto ou usuario.'
                 });
             }
-            
+
             // Verificar se a busca retornou resultados
             if (data.docs && data.docs.length === 0) {
                 return CommonResponse.error(
@@ -112,7 +112,7 @@ class MovimentacoesController {
                     `Nenhuma movimentação encontrada com o(a) ${tipoFiltro} informado.`
                 );
             }
-            
+
             return CommonResponse.success(res, data, 200, 'Movimentações encontradas com sucesso.');
         } catch (error) {
             console.error('Erro na busca de movimentações:', error);
@@ -127,9 +127,9 @@ class MovimentacoesController {
             const parsedData = await MovimentacaoSchema.parseAsync(req.body);
             const data = await this.service.cadastrarMovimentacao(parsedData);
             return CommonResponse.created(
-                res, 
-                data, 
-                HttpStatusCodes.CREATED.code, 
+                res,
+                data,
+                HttpStatusCodes.CREATED.code,
                 'Movimentação registrada com sucesso.'
             );
         } catch (error) {
@@ -227,6 +227,79 @@ class MovimentacoesController {
                     'Movimentação não encontrada. Verifique se o ID está correto.'
                 );
             }
+            return CommonResponse.error(res, error);
+        }
+    }
+
+    async filtrarMovimentacoesAvancado(req, res) {
+        console.log('Estou no filtrarMovimentacoesAvancado em MovimentacoesController');
+
+        try {
+            // Extrair parâmetros de filtro da requisição
+            const {
+                tipo,
+                destino,
+                data,
+                data_inicio,
+                data_fim,
+                id_usuario,
+                nome_usuario,
+                id_produto,
+                codigo_produto,
+                nome_produto,
+                id_fornecedor,
+                nome_fornecedor,
+                quantidade_min,
+                quantidade_max,
+                page,
+                limite
+            } = req.query;
+
+            // Converter para o formato esperado pelo serviço
+            const filtros = {
+                tipo,
+                destino,
+                data,
+                dataInicio: data_inicio,
+                dataFim: data_fim,
+                idUsuario: id_usuario,
+                nomeUsuario: nome_usuario,
+                idProduto: id_produto,
+                codigoProduto: codigo_produto,
+                nomeProduto: nome_produto,
+                idFornecedor: id_fornecedor,
+                nomeFornecedor: nome_fornecedor,
+                quantidadeMin: quantidade_min !== undefined ? Number(quantidade_min) : undefined,
+                quantidadeMax: quantidade_max !== undefined ? Number(quantidade_max) : undefined
+            };
+
+            const opcoesPaginacao = {
+                page,
+                limite
+            };
+
+            // Chamada ao service
+            const resultado = await this.service.filtrarMovimentacoesAvancado(filtros, opcoesPaginacao);
+
+            if (resultado.docs.length === 0) {
+                return CommonResponse.error(
+                    res,
+                    404,
+                    'resourceNotFound',
+                    'Movimentacao',
+                    [],
+                    'Nenhuma movimentação encontrada com os critérios informados.'
+                );
+            }
+
+            return CommonResponse.success(
+                res,
+                resultado,
+                200,
+                'Movimentações encontradas com sucesso.'
+            );
+        } catch (error) {
+            console.error('Erro ao filtrar movimentações:', error);
             return CommonResponse.error(res, error);
         }
     }
