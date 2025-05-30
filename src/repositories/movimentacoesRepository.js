@@ -1,5 +1,6 @@
 import mongoose from 'mongoose';
 import Movimentacao from '../models/Movimentacao.js';
+import MovimentacaoFilterBuilder from './filters/movimentacaoFilterBuilder.js';
 import { CustomError, messages } from '../utils/helpers/index.js';
 
 class MovimentacaoRepository {
@@ -265,6 +266,67 @@ class MovimentacaoRepository {
         
         console.log('Movimentação excluída com sucesso');
         return movimentacao;
+    }
+
+    async filtrarMovimentacoesAvancado(opcoesFiltro = {}, opcoesPaginacao = {}) {
+        console.log('Estou no filtrarMovimentacoesAvancado em MovimentacaoRepository');
+        
+        try {
+            const builder = new MovimentacaoFilterBuilder();
+            
+            // Aplicar filtros básicos
+            if (opcoesFiltro.tipo) builder.comTipo(opcoesFiltro.tipo);
+            if (opcoesFiltro.destino) builder.comDestino(opcoesFiltro.destino);
+            
+            // Filtros de data
+            if (opcoesFiltro.data) {
+                builder.comData(opcoesFiltro.data);
+            } else if (opcoesFiltro.dataInicio && opcoesFiltro.dataFim) {
+                builder.comPeriodo(opcoesFiltro.dataInicio, opcoesFiltro.dataFim);
+            } else {
+                if (opcoesFiltro.dataInicio) builder.comDataApos(opcoesFiltro.dataInicio);
+                if (opcoesFiltro.dataFim) builder.comDataAntes(opcoesFiltro.dataFim);
+            }
+            
+            // Filtros de usuário
+            if (opcoesFiltro.idUsuario) builder.comUsuarioId(opcoesFiltro.idUsuario);
+            if (opcoesFiltro.nomeUsuario) builder.comUsuarioNome(opcoesFiltro.nomeUsuario);
+            
+            // Filtros de produto
+            if (opcoesFiltro.idProduto) builder.comProdutoId(opcoesFiltro.idProduto);
+            if (opcoesFiltro.codigoProduto) builder.comProdutoCodigo(opcoesFiltro.codigoProduto);
+            if (opcoesFiltro.nomeProduto) builder.comProdutoNome(opcoesFiltro.nomeProduto);
+            
+            // Filtros de fornecedor
+            if (opcoesFiltro.idFornecedor) builder.comFornecedorId(opcoesFiltro.idFornecedor);
+            if (opcoesFiltro.nomeFornecedor) builder.comFornecedorNome(opcoesFiltro.nomeFornecedor);
+            
+            // Filtros de quantidade
+            if (opcoesFiltro.quantidadeMin !== undefined) 
+                builder.comQuantidadeMinima(opcoesFiltro.quantidadeMin);
+            if (opcoesFiltro.quantidadeMax !== undefined) 
+                builder.comQuantidadeMaxima(opcoesFiltro.quantidadeMax);
+            
+            // Construir os filtros
+            const filtros = builder.build();
+            console.log('Filtros aplicados:', JSON.stringify(filtros, null, 2));
+            
+            // Configurar paginação
+            const { page = 1, limite = 10 } = opcoesPaginacao;
+            const options = {
+                page: parseInt(page, 10),
+                limit: Math.min(parseInt(limite, 10), 100),
+                sort: { data_movimentacao: -1 },
+                populate: ['id_usuario', 'produtos.produto_ref']
+            };
+            
+            const resultado = await this.model.paginate(filtros, options);
+            console.log(`Encontradas ${resultado.docs?.length || 0} movimentações`);
+            return resultado;
+        } catch (error) {
+            console.error('Erro ao filtrar movimentações:', error);
+            throw error;
+        }
     }
 }
 

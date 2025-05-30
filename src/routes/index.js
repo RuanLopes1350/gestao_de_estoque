@@ -6,6 +6,7 @@ import logRoutes from "../middlewares/LogRoutesMiddleware.js";
 import rotasProdutos from "./produtoRoutes.js";
 import rotasFornecedores from "./fornecedorRoutes.js";
 import rotasUsuarios from "./usuarioRoutes.js"
+import rotasMovimentacoes from './movimentacoesRoutes.js';
 
 
 import dotenv from "dotenv";
@@ -32,7 +33,8 @@ const routes = (app) => {
   app.use(express.json(),
     rotasProdutos,
     rotasFornecedores,
-    rotasUsuarios
+    rotasUsuarios,
+    rotasMovimentacoes
   );
 
   app.use('/produtos/*', (req, res) => {
