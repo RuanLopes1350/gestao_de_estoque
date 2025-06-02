@@ -14,6 +14,7 @@ class ProdutoRepository {
         const id = req.params ? req.params.id : null;
     
         if (id) {
+            // Se tem ID, busca específica por ID - mantém o código original
             const data = await this.model.findById(id)
                 .populate('id_fornecedor');
     
@@ -31,73 +32,65 @@ class ProdutoRepository {
         }
     
         // Para busca por filtros
-        const { nome_produto, categoria, codigo_produto, id_fornecedor, nome_fornecedor, page = 1 } = req.query || {};
+        const { nome_produto, categoria, codigo_produto, id_fornecedor, nome_fornecedor } = req.query || {};
+        
+        // Garantir que os parâmetros de paginação sejam sempre processados corretamente
+        const page = parseInt(req.query?.page, 10) || 1;
         const limite = Math.min(parseInt(req.query?.limite, 10) || 10, 100);
     
-        const filtros = {};
+        // Use o ProdutoFilterBuilder para construir filtros
+        const filterBuilder = new ProdutoFilterBuilder()
+            .comNome(nome_produto || '')
+            .comCategoria(categoria || '')
+            .comCodigo(codigo_produto || '')
+            .comFornecedor(id_fornecedor || '')
+            .comStatus(req.query?.status);
     
-        if (nome_produto) {
-            filtros.nome_produto = { $regex: nome_produto, $options: 'i' };
-            console.log(`Aplicando filtro por nome: "${nome_produto}"`);
-        }
-    
-        if (categoria) {
-            filtros.categoria = { $regex: categoria, $options: 'i' };
-            console.log(`Aplicando filtro por categoria: "${categoria}"`);
-        }
-    
-        if (codigo_produto) {
-            filtros.codigo_produto = { $regex: codigo_produto, $options: 'i' };
-            console.log(`Aplicando filtro por código: "${codigo_produto}"`);
-        }
-    
-        if (id_fornecedor) {
-            // Como id_fornecedor é um Number no modelo, convertemos para número
-            filtros.id_fornecedor = parseInt(id_fornecedor);
-            console.log(`Aplicando filtro por ID de fornecedor: "${id_fornecedor}"`);
-        }
-    
-        // Adicionando suporte para busca por nome do fornecedor
+        // Obter os filtros finais
+        const filtros = filterBuilder.build();
+        
+        // Processar busca por nome de fornecedor (se houver)
         if (nome_fornecedor) {
-            // Para esta busca, precisamos primeiro encontrar o ID do fornecedor pelo nome
-            // e depois buscar produtos que têm esse ID
-            const Fornecedor = mongoose.model('fornecedores');
-            const fornecedores = await Fornecedor.find({
-                nome_fornecedor: { $regex: nome_fornecedor, $options: 'i' }
-            }).select('_id');
-            
-            // Extrair os ids numéricos para pesquisa
-            if (fornecedores.length > 0) {
-                const fornecedorIds = fornecedores.map(f => {
-                    // Extraindo um ID numérico do ObjectId do MongoDB
-                    const tempId = f._id.toString().substring(0, 8); 
-                    return parseInt(tempId, 16) % 1000;
-                });
+            try {
+                // Para esta busca, precisamos primeiro encontrar o ID do fornecedor pelo nome
+                const Fornecedor = mongoose.model('fornecedores');
+                const fornecedores = await Fornecedor.find({
+                    nome_fornecedor: { $regex: nome_fornecedor, $options: 'i' }
+                }).select('_id');
                 
-                // Usar $in para buscar produtos de qualquer um dos fornecedores encontrados
-                filtros.id_fornecedor = { $in: fornecedorIds };
-                console.log(`Aplicando filtro por nome de fornecedor: "${nome_fornecedor}" (IDs: ${fornecedorIds.join(', ')})`);
-            } else {
-                // Se não encontrar nenhum fornecedor, retornar lista vazia
-                console.log(`Nenhum fornecedor encontrado com o nome: "${nome_fornecedor}"`);
-                return {
-                    docs: [],
-                    totalDocs: 0,
-                    limit: limite,
-                    totalPages: 0,
-                    page: parseInt(page, 10),
-                    pagingCounter: 0,
-                    hasPrevPage: false,
-                    hasNextPage: false,
-                    prevPage: null,
-                    nextPage: null
-                };
+                // Se encontrou fornecedores, adiciona aos filtros
+                if (fornecedores.length > 0) {
+                    const fornecedorIds = fornecedores.map(f => {
+                        const tempId = f._id.toString().substring(0, 8); 
+                        return parseInt(tempId, 16) % 1000;
+                    });
+                    
+                    filtros.id_fornecedor = { $in: fornecedorIds };
+                    console.log(`Aplicando filtro por nome de fornecedor: "${nome_fornecedor}" (IDs: ${fornecedorIds.join(', ')})`);
+                } else {
+                    // Se não encontrar fornecedores, retorna resultado vazio paginado
+                    console.log(`Nenhum fornecedor encontrado com o nome: "${nome_fornecedor}"`);
+                    return {
+                        docs: [],
+                        totalDocs: 0,
+                        limit: limite,
+                        totalPages: 0,
+                        page: page,
+                        pagingCounter: 0,
+                        hasPrevPage: false,
+                        hasNextPage: false,
+                        prevPage: null,
+                        nextPage: null
+                    };
+                }
+            } catch (error) {
+                console.error('Erro ao buscar fornecedor por nome:', error);
             }
         }
     
         const options = {
-            page: parseInt(page, 10),
-            limit: parseInt(limite, 10),
+            page: page,
+            limit: limite,
             populate: 'id_fornecedor',
             sort: { nome_produto: 1 },
         };

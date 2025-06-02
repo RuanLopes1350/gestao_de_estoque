@@ -10,20 +10,25 @@ class ProdutoController {
 
     async listarProdutos(req, res) {
         console.log('Estou no listarProdutos em ProdutoController');
-
+    
         try {
             const { id } = req.params || {};
             if (id) {
                 ProdutoIdSchema.parse(id);
             }
-
-            const query = req.query || {};
-            if (Object.keys(query).length !== 0) {
-                await ProdutoQuerySchema.parseAsync(query);
+    
+            // Garantir que os parâmetros de paginação existam
+            if (!req.query) req.query = {};
+            if (!req.query.page) req.query.page = 1;
+            if (!req.query.limite) req.query.limite = 10;
+            
+            // Validar query params (se existirem outros além da paginação)
+            if (Object.keys(req.query).some(key => !['page', 'limite'].includes(key))) {
+                await ProdutoQuerySchema.parseAsync(req.query);
             }
-
+    
             const data = await this.service.listarProdutos(req);
-
+    
             // Verificar se a lista está vazia
             if (data.docs && data.docs.length === 0) {
                 return CommonResponse.error(
@@ -35,7 +40,7 @@ class ProdutoController {
                     'Nenhum produto encontrado com os critérios informados.'
                 );
             }
-
+    
             return CommonResponse.success(res, data);
         } catch (error) {
             return CommonResponse.error(res, error);
