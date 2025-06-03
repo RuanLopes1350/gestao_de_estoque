@@ -145,12 +145,6 @@ Análise de Mercado:
 
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-Riscos e Mitigações:
-  * AAAA: 
-  * AAAA: 
-  * AAAA: 
-
-
 # Metodologia Adotada no Desenvolvimento
 
 A metodologia de desenvolvimento escolhida foi a Scrum, utilizada para gerenciar o fluxo de trabalho do projeto de software. O objetivo é garantir transparência, melhoria contínua e eficiência no processo de desenvolvimento.
