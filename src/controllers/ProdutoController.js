@@ -128,12 +128,37 @@ class ProdutoController {
 
     async cadastrarProduto(req, res) {
         console.log('Estou no cadastrarProduto em ProdutoController');
-
+    
         try {
             const parsedData = ProdutoSchema.parse(req.body);
             const data = await this.service.cadastrarProduto(parsedData);
             return CommonResponse.created(res, data, HttpStatusCodes.CREATED.code, 'Produto cadastrado com sucesso.');
         } catch (error) {
+            // Handle Zod validation errors
+            if (error.name === 'ZodError') {
+                return CommonResponse.error(
+                    res,
+                    HttpStatusCodes.BAD_REQUEST.code,
+                    'validationError',
+                    'body',
+                    error.errors,
+                    'Dados de produto inválidos. Verifique os campos e tente novamente.'
+                );
+            }
+            
+            // Handle Mongoose validation errors (thrown by the model)
+            if (error.name === 'ValidationError') {
+                return CommonResponse.error(
+                    res,
+                    HttpStatusCodes.BAD_REQUEST.code,
+                    'validationError',
+                    Object.keys(error.errors)[0],
+                    Object.values(error.errors).map(e => e.message),
+                    'Validação de dados falhou. Verifique os campos obrigatórios.'
+                );
+            }
+    
+            // For all other errors, pass them through as is
             return CommonResponse.error(res, error);
         }
     }
