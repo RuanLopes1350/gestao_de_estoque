@@ -37,23 +37,26 @@
 
 || |
 |:---|:---|
-| **NOME** |Dashboard de Métricas |
-| **Lider do Projeto** | Giullia Beatriz Chiarotti |
-| **PRINCIPAL OBJETIVO** | Facilitar a visualização dos Projetos |
-| **BENEFÍCIOS ESPERADOS** | Otimização do Tempo |
+| **NOME** |Gestão de Estoque |
+| **Lider do Projeto** | Ruan Lopes |
+| **PRINCIPAL OBJETIVO** | Um sistema intuitivo que permita o controle de estoque |
+| **BENEFÍCIOS ESPERADOS** | Ter um melhor controle do estoque |
 | **INÍCIO E TÉRMINO PREVISTOS** | 01/10/2024 - 11/03/2025 |
 
 
 # INTRODUÇÃO
 
-Este documento apresenta a especificação do Projeto de Software desenvolvido para facilitar a visualização e o acompanhamento de projetos acadêmicos utilizando um dashboard de métricas do GitLab. O sistema proposto permitirá a análise de dados por meio de gráficos intuitivos, proporcionando aos usuários uma visão clara sobre o progresso das atividades e a participação dos envolvidos para os gestores responsaveis.
-A documentação detalha os requisitos funcionais e não funcionais, os stakeholders, a metodologia adotada, os diagramas de modelagem e demais aspectos técnicos necessários para garantir a viabilidade e a eficácia do projeto. O objetivo principal é otimizar o tempo dos usuários, oferecendo uma interface prática e eficiente para o monitoramento das informações.
-Além disso, este documento busca garantir que todas as informações relevantes para o desenvolvimento e implementação do sistema estejam devidamente organizadas, permitindo uma compreensão clara de cada etapa do projeto e das decisões técnicas adotadas.
+O H&R é um sistema completo para gerenciamento de estoque de peças automotivas, projetado para facilitar o controle, categorização e monitoramento de itens em lojas de autopeças. O sistema oferece uma abordagem estruturada para classificar peças por valor monetário e tipo de veículo, além de integrar-se com sistemas externos de PDV e emissão de notas fiscais.
 
 
 ## PROPÓSITO DESTE DOCUMENTO
 
-Garantir que todas as informações relevantes para a produção do produto final estejam organizadas para assim facilitar o entendimento do que estiver a cargo da produção!
+- Desenvolver um sistema para gerenciamento eficiente de estoque de peças automotivas
+- Implementar categorização automática de peças por valor (A, B, C) e por tipo de veículo
+- Integrar com sistemas de PDV (Ponto de Venda) e notas fiscais
+- Fornecer relatórios de estoque, vendas e necessidade de reposição
+- Automatizar alertas de estoque baixo e sugestões de compra
+
 
 ## CONCEPÇÃO DO SISTEMA
 
