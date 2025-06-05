@@ -10,6 +10,7 @@ import rotasMovimentacoes from './movimentacaoRoutes.js';
 
 
 import dotenv from "dotenv";
+import auth from './authRoutes.js';
 
 // importar as rotas/endpoints
 
@@ -31,6 +32,7 @@ const routes = (app) => {
   });
 
   app.use(express.json(),
+    auth,
     rotasProdutos,
     rotasFornecedores,
     rotasUsuarios,
