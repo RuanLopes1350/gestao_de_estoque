@@ -36,13 +36,17 @@
 
 ## FORNECEDORES
 
-`GET `
+`GET http://localhost:5011/fornecedores` 
 
-`POST `
+`GET http://localhost:5011/fornecedores?nome_fornecedor=`
+
+`GET http://localhost:5011/fornecedores?cnpj=`
+
+`POST http://localhost:5011/fornecedores`
 
 `PATCH `
 
-`DELETE `
+`DELETE http://localhost:5011/fornecedores/:id`
 
 ## MOVIMENTAÇÕES
 
