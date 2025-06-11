@@ -3,7 +3,7 @@ import Fornecedor from "../models/Fornecedor.js";
 import FornecedorFilterBuilder from "./filters/FornecedorFilterBuilder.js";
 import CustomError from "../utils/helpers/CustomError.js";
 import messages from "../utils/helpers/messages.js";
-import Validator from "../utils/Validator.js";
+import mongoose from "mongoose";
 
 class FornecedorRepository {
   constructor({ model = Fornecedor } = {}) {
@@ -19,8 +19,15 @@ class FornecedorRepository {
   async listar(req) {
     const { id } = req.params || null;
     if (id) {
-      Validator.validarMongoID(id);
-      const fornecedor = await this.model.findById(id);
+      if (!mongoose.Types.ObjectId.isValid(id)) {
+        throw new CustomError({
+            statusCode: HttpStatusCodes.BAD_REQUEST.code,
+            errorType: 'validationError',
+            field: 'id',
+            details: [],
+            customMessage: 'ID do fornecedor inválido.'
+        });
+    }      const fornecedor = await this.model.findById(id);
       if (!fornecedor) {
         throw new CustomError({
           statusCode: 404,
@@ -62,8 +69,15 @@ class FornecedorRepository {
 
   // Método para buscar um fornecedor por ID
   async buscarPorId(id) {
-    Validator.validarMongoID(id);
-    const fornecedor = await this.model.findById(id);
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      throw new CustomError({
+          statusCode: HttpStatusCodes.BAD_REQUEST.code,
+          errorType: 'validationError',
+          field: 'id',
+          details: [],
+          customMessage: 'ID do fornecedor inválido.'
+      });
+  }    const fornecedor = await this.model.findById(id);
     if (!fornecedor) {
       throw new CustomError({
         statusCode: 404,
@@ -77,8 +91,15 @@ class FornecedorRepository {
 
   // Método para atualizar um fornecedor existente
   async atualizar(id, dadosAtualizados) {
-    Validator.validarMongoID(id);
-    const fornecedor = await this.model.findByIdAndUpdate(
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      throw new CustomError({
+          statusCode: HttpStatusCodes.BAD_REQUEST.code,
+          errorType: 'validationError',
+          field: 'id',
+          details: [],
+          customMessage: 'ID do fornecedor inválido.'
+      });
+  }    const fornecedor = await this.model.findByIdAndUpdate(
       id,
       dadosAtualizados,
       { new: true }
@@ -97,8 +118,25 @@ class FornecedorRepository {
 
   // Método para deletar um fornecedor
   async deletar(id) {
-    Validator.validarMongoID(id);
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      throw new CustomError({
+          statusCode: HttpStatusCodes.BAD_REQUEST.code,
+          errorType: 'validationError',
+          field: 'id',
+          details: [],
+          customMessage: 'ID do fornecedor inválido.'
+      });
+  }
     const fornecedor = await this.model.findByIdAndDelete(id);
+    if (!fornecedor) {
+      throw new CustomError({
+        statusCode: 400,
+        errorType: 'BadRequest',
+        field: 'ID',
+        details: [],
+        customMessage: messages.error.resourceNotFound('fornecedor não encontrado')
+    });
+    }
     return fornecedor;
   }
 }
