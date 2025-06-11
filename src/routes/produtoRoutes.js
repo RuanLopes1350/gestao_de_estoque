@@ -46,12 +46,6 @@ router
         asyncWrapper(produtoController.deletarProduto.bind(produtoController))
     );
 
-// Middleware para rotas inexistentes
-router.use('/produtos/*', (req, res) => {
-    res.status(404).json({
-        message: "Rota de produto não encontrada",
-        path: req.originalUrl
-    });
-});
+
 
 export default router;

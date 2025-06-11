@@ -1,15 +1,14 @@
 // services/PermissionService.js
 
 import Rota from '../models/Rotas.js';
+import UsuarioRepository from '../repositories/usuarioRepository.js';
+import Usuario from '../models/Usuario.js';
 import { CommonResponse, CustomError, HttpStatusCodes, errorHandler, messages, StatusService, asyncWrapper } from '../utils/helpers/index.js';
 
 class PermissionService {
     constructor() {
         this.repository = new UsuarioRepository();
         this.Usuario = Usuario;
-        this.Grupo = Grupo;
-        this.Rota = Rota;
-        this.messages = messages;        
     }
 
     async hasPermission(userId, rota, dominio, metodo) {

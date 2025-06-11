@@ -3,6 +3,7 @@
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import { CommonResponse, CustomError, HttpStatusCodes, errorHandler, messages, StatusService, asyncWrapper } from '../utils/helpers/index.js';
+import UsuarioRepository from '../repositories/usuarioRepository.js';
 import tokenUtil from '../utils/TokenUtil.js';
 import { v4 as uuid } from 'uuid';
 

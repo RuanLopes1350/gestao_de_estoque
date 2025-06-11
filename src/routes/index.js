@@ -39,13 +39,6 @@ const routes = (app) => {
     rotasMovimentacoes
   );
 
-  app.use('/produtos/*', (req, res) => {
-    res.status(404).json({ 
-      message: "Rota de produto não encontrada",
-      path: req.originalUrl 
-    });
-  });
-
   // Se não é nenhuma rota válida, produz 404
   app.use((req, res) => {
     res.status(404).json({ message: "Rota não encontrada" });

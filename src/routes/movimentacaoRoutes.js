@@ -42,12 +42,6 @@ router
         asyncWrapper(movimentacoesController.deletarMovimentacao.bind(movimentacoesController))
     );
 
-// Middleware para rotas inexistentes
-router.use('/movimentacoes/*', (req, res) => {
-    res.status(404).json({
-        message: "Rota de movimentação não encontrada",
-        path: req.originalUrl
-    });
-});
+
 
 export default router;

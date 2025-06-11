@@ -34,12 +34,4 @@ router
         asyncWrapper(usuarioController.deletarUsuario.bind(usuarioController))
     );
 
-// Middleware para rotas inexistentes
-router.use('/usuarios/*', (req, res) => {
-    res.status(404).json({
-        message: "Rota de usuário não encontrada",
-        path: req.originalUrl
-    });
-});
-
 export default router;
