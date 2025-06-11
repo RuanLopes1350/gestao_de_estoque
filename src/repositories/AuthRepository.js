@@ -5,12 +5,9 @@ import { CustomError, messages } from '../utils/helpers/index.js';
 
 class AuthRepository {
     constructor({
-        rotaModel = RotaModel
+        usuarioModel = UsuarioModel
     } = {}) {
         this.model = usuarioModel;
-        this.grupoModel = grupoModel;
-        this.unidadeModel = unidadeModel;
-        this.rotaModel = rotaModel;
     }
 
     /**
