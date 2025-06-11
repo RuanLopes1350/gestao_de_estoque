@@ -199,17 +199,17 @@ class Validator {
     //     return this._erro;
     // }
 
-    validarMongoID(id) {
-        if (!mongoose.Types.ObjectId.isValid(id)) {
-            throw new CustomError({
-                statusCode: 400,
-                errorType: 'validationError',
-                field: 'id',
-                details: [],
-                customMessage: 'ID do produto inválido'
-            });
-        }
-    }
+    // validarMongoID(id) {
+    //     if (!mongoose.Types.ObjectId.isValid(id)) {
+    //         throw new CustomError({
+    //             statusCode: 400,
+    //             errorType: 'validationError',
+    //             field: 'id',
+    //             details: [],
+    //             customMessage: 'ID do produto inválido'
+    //         });
+    //     }
+    // }
 }
 
 export default Validator;
