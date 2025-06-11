@@ -1,3 +1,4 @@
+import mongoose from "mongoose";
 import FornecedorRepository from "../repositories/fornecedorRepository.js";
 
 class FornecedorService {
@@ -31,6 +32,15 @@ class FornecedorService {
 
   // DELETE /fornecedores/:id
   async deletar(id) {
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+        throw new CustomError({
+            statusCode: HttpStatusCodes.BAD_REQUEST.code,
+            errorType: 'validationError',
+            field: 'id',
+            details: [],
+            customMessage: 'ID do fornecedor inválido.'
+        });
+    }
     const data = await this.repository.deletar(id);
     return data;
   }
