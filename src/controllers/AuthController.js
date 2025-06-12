@@ -171,18 +171,6 @@ class AuthController {
     // Extrai o cabeçalho Authorization
     const token = req.body.access_token || req.headers.authorization?.split(' ')[1];
 
-    // Verifica se o body.access_token está presente
-    if (!token) {
-      console.log('Cabeçalho Authorization ausente.');
-      throw new CustomError({
-        statusCode: HttpStatusCodes.BAD_REQUEST.code,
-        errorType: 'invalidLogout',
-        field: 'Logout',
-        details: [],
-        customMessage: 'Access Token passado no corpo da requição é inválido.'
-      });
-    }
-
     // Verifica se o token está presente e não é uma string inválida
     if (!token || token === 'null' || token === 'undefined') {
       console.log('Token recebido:', token);
