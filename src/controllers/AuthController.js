@@ -4,6 +4,8 @@ import jwt from 'jsonwebtoken';
 import { promisify } from 'util';
 import { CommonResponse, CustomError, HttpStatusCodes, errorHandler, messages, StatusService, asyncWrapper } from '../utils/helpers/index.js';
 import { LoginSchema } from '../utils/validators/schemas/zod/LoginSchema.js';
+import { UsuarioSchema, UsuarioUpdateSchema } from '../utils/validators/schemas/zod/UsuarioSchema.js';
+import { UsuarioIdSchema } from '../utils/validators/schemas/zod/querys/UsuarioQuerySchema.js';
 import { RequestAuthorizationSchema } from '../utils/validators/schemas/zod/querys/RequestAuthorizationSchema.js';
 
 import AuthService from '../services/AuthService.js';
@@ -37,9 +39,88 @@ class AuthController {
     const body = req.body || {};
 
     // Validar apenas o email
-    const validatedBody = UsuarioUpdateSchema.parse(req.body);
-    const data = await this.service.recuperaSenha(validatedBody);
+    const validatedBody = UsuarioUpdateSchema.parse(body);
+    const data = await this.service.recuperaSenha(req, validatedBody);
     return CommonResponse.success(res, data);
+  }
+
+  /**
+      * Atualiza a senha do próprio usuário em dois cenários NÃO autenticados:
+      *
+      * 1) Normal (token único passado na URL como query: `?token=<JWT_PASSWORD_RECOVERY>`) 
+      *    + { senha } no body.
+      *    → Decodifica JWT, extrai usuarioId, salva o hash da nova senha mesmo que usuário esteja inativo.
+      *
+      * 2) Recuperação por código (envia `{ codigo_recupera_senha, senha }` no body).
+      *    → Busca usuário pelo campo `codigo_recupera_senha`, salva hash da nova senha (mesmo se inativo),
+      *      e “zera” o campo `codigo_recupera_senha`.
+      */
+  async atualizarSenhaToken(req, res, next) {
+    console.log('Estou no atualizarSenha em AuthController, enviando req para AuthService');
+
+    const tokenRecuperacao = req.query.token || req.params.token || null; // token de recuperação passado na URL
+    const senha = req.body.senha || null; // nova senha passada no body
+
+    // 1) Verifica se veio o token de recuperação
+    if (!tokenRecuperacao) {
+      throw new CustomError({
+        statusCode: HttpStatusCodes.UNAUTHORIZED.code,
+        errorType: 'unauthorized',
+        field: 'authentication',
+        details: [],
+        customMessage:
+          'Token de recuperação na URL como parâmetro ou query é obrigatório para troca da senha.'
+      });
+    }
+
+    // Validar a senha com o schema
+    const senhaSchema = UsuarioUpdateSchema.parse({ "senha": senha });
+
+    // atualiza a senha 
+    await this.service.atualizarSenhaToken(tokenRecuperacao, senhaSchema);
+
+    return CommonResponse.success(
+      res,
+      null,
+      HttpStatusCodes.OK.code, 'Senha atualizada com sucesso.',
+      { message: 'Senha atualizada com sucesso via token de recuperação.' },
+    );
+  }
+
+
+  async atualizarSenhaCodigo(req, res, next) {
+    console.log('Estou no atualizarSenha em AuthController, enviando req para AuthService');
+
+    const codigo_recupera_senha = req.body.codigo_recupera_senha || null; // código de recuperação passado no body
+    const senha = req.body.senha || null; // nova senha passada no body
+
+    console.log('codigo_recupera_senha:', codigo_recupera_senha);
+    console.log('senha:', senha);
+
+    // 1) Verifica se veio o código de recuperação
+    if (!codigo_recupera_senha) {
+      throw new CustomError({
+        statusCode: HttpStatusCodes.UNAUTHORIZED.code,
+        errorType: 'unauthorized',
+        field: 'authentication',
+        details: [],
+        customMessage:
+          'Código de recuperação no body é obrigatório para troca da senha.'
+      });
+    }
+
+    // Validar a senha com o schema
+    const senhaSchema = UsuarioUpdateSchema.parse({ senha });
+
+    // atualiza a senha 
+    await this.service.atualizarSenhaCodigo(codigo_recupera_senha, senhaSchema);
+
+    return CommonResponse.success(
+      res,
+      null,
+      HttpStatusCodes.OK.code, 'Senha atualizada com sucesso.',
+      { message: 'Senha atualizada com sucesso via código de recuperação.' },
+    );
   }
 
   /**
@@ -73,7 +154,8 @@ class AuthController {
     }
 
     // Verifica e decodifica o token
-    const decoded = await promisify(jwt.verify)(token, process.env.JWT_SECRET);
+    const decoded = await promisify(jwt.verify)(token, process.env.JWT_SECRET_REFRESH_TOKEN);
+
 
     // encaminha o token para o serviço
     const data = await this.service.refresh(decoded.id, token);
@@ -113,8 +195,8 @@ class AuthController {
       });
     }
 
-    // Verifica e decodifica o token
-    const decoded = await promisify(jwt.verify)(token, process.env.JWT_SECRET);
+    // Verifica e decodifica o access token
+    const decoded = await promisify(jwt.verify)(token, process.env.JWT_SECRET_ACCESS_TOKEN);
 
     // Verifica se o token decodificado contém o ID do usuário
     if (!decoded || !decoded.id) {
@@ -146,7 +228,7 @@ class AuthController {
 
     // 2. Decodifica e verifica o JWT
     const decoded = /** @type {{ id: string, exp?: number, iat?: number, nbf?: number, client_id?: string, aud?: string }} */ (
-      await promisify(jwt.verify)(validatedBody.accesstoken, process.env.JWT_SECRET)
+      await promisify(jwt.verify)(validatedBody.accesstoken, process.env.JWT_SECRET_ACCESS_TOKEN)
     );
 
     // 3. Valida ID de usuário
