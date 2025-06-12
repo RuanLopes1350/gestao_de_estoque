@@ -9,15 +9,13 @@ import TokenUtil from '../utils/TokenUtil.js';
 import AuthHelper from '../utils/AuthHelper.js';
 import fetch from 'node-fetch'
 
-import UsuarioRepository from '../repositories/UsuarioRepository.js';
-import AuthRepository from '../repositories/AuthRepository.js';
+import UsuarioRepository from '../repositories/usuarioRepository.js';
 
 class AuthService {
-    constructor({ tokenUtil: injectedTokenUtil, usuarioRepository, authRepository } = {}) {
+    constructor({ tokenUtil: injectedTokenUtil, usuarioRepository } = {}) {
         // Se nada for injetado, usa a instância importada
         this.TokenUtil = injectedTokenUtil || tokenUtil;
         this.usuarioRepository = usuarioRepository || new UsuarioRepository();
-        this.repository = authRepository || new AuthRepository();
     }
 
     async carregatokens(id, token) {
@@ -26,12 +24,12 @@ class AuthService {
     }
 
     async revoke(id) {
-        const data = await this.repository.removeToken(id);
+        const data = await this.usuarioRepository.removeToken(id);
         return { data };
     }
 
     async logout(id, token) {
-        const data = await this.repository.removeToken(id);
+        const data = await this.usuarioRepository.removeToken(id);
         return { data };
     }
 

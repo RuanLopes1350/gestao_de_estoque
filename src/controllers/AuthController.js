@@ -198,6 +198,9 @@ class AuthController {
       });
     }
 
+    // Valida o ID do usuário
+    UsuarioIdSchema.parse(decoded.id);
+
     // Encaminha o token para o serviço de logout
     const data = await this.service.logout(decoded.id, token);
 
