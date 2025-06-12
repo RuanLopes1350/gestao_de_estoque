@@ -1,14 +1,14 @@
-import express from "express";
+import express from 'express';
 import AuthController from '../controllers/AuthController.js';
-import UsuarioController from '../controllers/UsuarioController.js';
-import AuthMiddleware from "../middlewares/AuthMiddleware.js";
-import authPermission from '../middlewares/AuthPermission.js';
+// import UsuarioController from '../controllers/UsuarioController.js';
+// import AuthMiddleware from '../middlewares/AuthMiddleware.js';
+// import authPermission from '../middlewares/AuthPermission.js';
 import { asyncWrapper } from '../utils/helpers/index.js';
 
 const router = express.Router();
 
 const authController = new AuthController();
-const usuarioController = new UsuarioController();
+const usuarioController = new usuarioController();
 
 router
   .post("/login", asyncWrapper(authController.login.bind(authController)))

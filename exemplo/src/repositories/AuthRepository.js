@@ -17,6 +17,10 @@
 //         this.unidadeModel = unidadeModel;
 //         this.rotaModel = rotaModel;
 //     }
+
+    
+
+    
 // }
 
 // export default AuthRepository;

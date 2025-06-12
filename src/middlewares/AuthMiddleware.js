@@ -1,4 +1,3 @@
-// src/middlewares/AuthMiddleware.js
 import jwt from 'jsonwebtoken';
 import { promisify } from 'util';
 import AuthenticationError from '../utils/errors/AuthenticationError.js';

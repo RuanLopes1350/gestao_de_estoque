@@ -1,5 +1,3 @@
-// middlewares/AuthPermission.js
-
 import jwt from 'jsonwebtoken';
 import PermissionService from '../services/PermissionService.js';
 import Rota from '../models/Rotas.js';
