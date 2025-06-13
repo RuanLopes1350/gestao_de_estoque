@@ -68,20 +68,8 @@ class UsuarioRepository {
         return await this.model.findById(id, projection);
     }
 
-    async buscarUsuarioPorMatricula(matricula) {
-        console.log('Estou no buscarUsuarioPorMatricula em UsuarioRepository');
-
-        const usuario = await this.model.findOne({ matricula: matricula });
-        if (!usuario) {
-            throw new CustomError({
-                statusCode: 404,
-                errorType: 'resourceNotFound',
-                field: 'Usuario',
-                details: [],
-                customMessage: 'Usuário não encontrado com a matrícula informada'
-            });
-        }
-        return usuario;
+    async buscarPorMatricula(matricula) {
+        return await this.model.findOne({ matricula });
     }
 
     async cadastrarUsuario(dadosUsuario) {

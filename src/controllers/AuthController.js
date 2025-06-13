@@ -14,17 +14,17 @@ class AuthController {
 
     async login(req, res) {
         try {
-            const { email, senha } = req.body;
+            const { matricula, senha } = req.body;
 
-            if (!email || !senha) {
+            if (!matricula || !senha) {
                 throw new CustomError({
                     statusCode: 400,
                     errorType: 'validationError',
-                    customMessage: 'Email e senha são obrigatórios'
+                    customMessage: 'Matrícula e senha são obrigatórios'
                 });
             }
 
-            const result = await this.authService.autenticar(email, senha);
+            const result = await this.authService.autenticar(matricula, senha);
             return res.status(200).json(result);
         } catch (error) {
             if (error instanceof CustomError) {
@@ -44,7 +44,7 @@ class AuthController {
     async logout(req, res) {
         try {
             const { id } = req.body;
-            
+
             if (!id) {
                 throw new CustomError({
                     statusCode: 400,
@@ -73,7 +73,7 @@ class AuthController {
     async refresh(req, res) {
         try {
             const { refreshToken } = req.body;
-            
+
             if (!refreshToken) {
                 throw new CustomError({
                     statusCode: 400,
@@ -102,7 +102,7 @@ class AuthController {
     async pass(req, res) {
         try {
             const token = req.headers.authorization?.split(' ')[1];
-            
+
             if (!token) {
                 throw new CustomError({
                     statusCode: 401,
@@ -130,19 +130,19 @@ class AuthController {
 
     async recuperaSenha(req, res) {
         try {
-            const { email } = req.body;
-            
-            if (!email) {
+            const { matricula } = req.body;
+
+            if (!matricula) {
                 throw new CustomError({
                     statusCode: 400,
                     errorType: 'validationError',
-                    customMessage: 'Email é obrigatório'
+                    customMessage: 'Matrícula é obrigatória'
                 });
             }
 
-            await this.authService.enviarEmailRecuperacao(email);
-            return res.status(200).json({ 
-                message: 'Email de recuperação enviado com sucesso' 
+            await this.authService.enviarEmailRecuperacao(matricula);
+            return res.status(200).json({
+                message: 'Email de recuperação enviado com sucesso'
             });
         } catch (error) {
             if (error instanceof CustomError) {
@@ -162,7 +162,7 @@ class AuthController {
     async atualizarSenhaToken(req, res) {
         try {
             const { token, novaSenha } = req.body;
-            
+
             if (!token || !novaSenha) {
                 throw new CustomError({
                     statusCode: 400,
@@ -190,17 +190,17 @@ class AuthController {
 
     async atualizarSenhaCodigo(req, res) {
         try {
-            const { email, codigo, novaSenha } = req.body;
-            
-            if (!email || !codigo || !novaSenha) {
+            const { matricula, codigo, novaSenha } = req.body;
+
+            if (!matricula || !codigo || !novaSenha) {
                 throw new CustomError({
                     statusCode: 400,
                     errorType: 'validationError',
-                    customMessage: 'Email, código e nova senha são obrigatórios'
+                    customMessage: 'Matrícula, código e nova senha são obrigatórios'
                 });
             }
 
-            await this.authService.atualizarSenhaComCodigo(email, codigo, novaSenha);
+            await this.authService.atualizarSenhaComCodigo(matricula, codigo, novaSenha);
             return res.status(200).json({ message: 'Senha atualizada com sucesso' });
         } catch (error) {
             if (error instanceof CustomError) {
@@ -220,7 +220,7 @@ class AuthController {
     async revoke(req, res) {
         try {
             const { id } = req.body;
-            
+
             if (!id) {
                 throw new CustomError({
                     statusCode: 400,
