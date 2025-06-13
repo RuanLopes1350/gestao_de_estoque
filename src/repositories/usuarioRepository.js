@@ -10,12 +10,12 @@ class UsuarioRepository {
     async listarUsuarios(req) {
         console.log('Estou no listarUsuarios em UsuarioRepository');
         console.log('Query recebida:', req.query);
-    
+
         const id = req.params ? req.params.id : null;
-    
+
         if (id) {
             const data = await this.model.findById(id);
-    
+
             if (!data) {
                 throw new CustomError({
                     statusCode: 404,
@@ -25,47 +25,52 @@ class UsuarioRepository {
                     customMessage: messages.error.resourceNotFound('Usuario')
                 });
             }
-    
+
             return data;
         }
-    
+
         // Para busca por filtros
         // Mapeia o nome da query para nome_usuario no banco
         const { nome_usuario, matricula, senha, cargo, data_cadastro, data_ultima_atualizacao, page = 1 } = req.query || {};
         const limite = Math.min(parseInt(req.query?.limite, 10) || 10, 100);
-    
+
         const filtros = {};
-    
+
         if (nome_usuario) {
             filtros.nome_usuario = { $regex: nome_usuario, $options: 'i' };
             console.log(`Aplicando filtro por nome: "${nome_usuario}"`);
         }
-    
+
         if (matricula) {
             filtros.matricula = { $regex: matricula, $options: 'i' };
             console.log(`Aplicando filtro por matricula: "${matricula}"`);
         }
-    
+
         if (cargo) {
             filtros.cargo = { $regex: cargo, $options: 'i' };
             console.log(`Aplicando filtro por cargo: "${cargo}"`);
         }
-    
+
         const options = {
             page: parseInt(page, 10),
             limit: parseInt(limite, 10),
             sort: { nome_usuario: 1 },
         };
-    
+
         console.log('Filtros aplicados:', filtros);
         const resultado = await this.model.paginate(filtros, options);
         console.log(`Encontrados ${resultado.docs?.length || 0} usuários`);
         return resultado;
     }
 
+    async buscarPorId(id, includeTokens = false) {
+        const projection = includeTokens ? {} : { accesstoken: 0, refreshtoken: 0 };
+        return await this.model.findById(id, projection);
+    }
+
     async buscarUsuarioPorMatricula(matricula) {
         console.log('Estou no buscarUsuarioPorMatricula em UsuarioRepository');
-        
+
         const usuario = await this.model.findOne({ matricula: matricula });
         if (!usuario) {
             throw new CustomError({
@@ -81,7 +86,7 @@ class UsuarioRepository {
 
     async cadastrarUsuario(dadosUsuario) {
         console.log('Estou no cadastrarUsuario em UsuarioRepository');
-        
+
         // Verificar se já existe um usuário com a mesma matrícula
         if (dadosUsuario.matricula) {
             const usuarioExistente = await this.model.findOne({ matricula: dadosUsuario.matricula });
@@ -154,7 +159,7 @@ class UsuarioRepository {
 
     async deletarUsuario(matricula) {
         console.log('Estou no deletarUsuario em UsuarioRepository');
-        
+
         if (!mongoose.Types.ObjectId.isValid(matricula)) {
             throw new CustomError({
                 statusCode: 400,
@@ -164,7 +169,7 @@ class UsuarioRepository {
                 customMessage: 'Matricula do usuário inválido'
             });
         }
-        
+
         const usuario = await this.model.findByIdAndDelete(matricula);
         if (!usuario) {
             throw new CustomError({
@@ -182,44 +187,52 @@ class UsuarioRepository {
      * Armazenar accesstoken e refreshtoken no banco de dados
      */
     async armazenarTokens(id, accesstoken, refreshtoken) {
-        const documento = await this.model.findById(id);
-        if (!documento) {
-            throw new CustomError({
-                statusCode: 404,
-                errorType: 'resourceNotFound',
-                field: 'Usuário',
-                details: [],
-                customMessage: messages.error.resourceNotFound('Usuário')
-            });
-        }
-        documento.accesstoken = accesstoken;
-        documento.refreshtoken = refreshtoken;
-        const data = await documento.save();
-        return data;
+        return await this.model.findByIdAndUpdate(
+            id,
+            { accesstoken, refreshtoken },
+            { new: true }
+        );
     }
 
     /**
      * Atualizar usuário removendo accesstoken e refreshtoken
      */
     async removeToken(id) {
-        // Criar objeto com os campos a serem atualizados
-        const parsedData = {
-            accesstoken: null,
-            refreshtoken: null
-        };
-        const usuario = await this.model.findByIdAndUpdate(id, parsedData, { new: true }).exec();
+        return await this.model.findByIdAndUpdate(
+            id,
+            { accesstoken: null, refreshtoken: null },
+            { new: true }
+        );
+    }
 
-        // Validar se o usuário atualizado foi retornado
-        if (!usuario) {
-            throw new CustomError({
-                statusCode: 404,
-                errorType: 'resourceNotFound',
-                field: 'Usuário',
-                details: [],
-                customMessage: messages.error.resourceNotFound('Usuário')
-            });
-        }
-        return usuario;
+    async atualizarTokenRecuperacao(id, token, codigo) {
+        return await this.model.findByIdAndUpdate(
+            id,
+            {
+                token_recuperacao: token,
+                codigo_recuperacao: codigo,
+                token_recuperacao_expira: Date.now() + 3600000 // 1 hora
+            },
+            { new: true }
+        );
+    }
+
+    async atualizarSenha(id, senha) {
+        return await this.model.findByIdAndUpdate(
+            id,
+            {
+                senha,
+                token_recuperacao: null,
+                codigo_recuperacao: null,
+                token_recuperacao_expira: null
+            },
+            { new: true }
+        );
+    }
+
+    async criarUsuario(dadosUsuario) {
+        const novoUsuario = new this.model(dadosUsuario);
+        return await novoUsuario.save();
     }
 }
 

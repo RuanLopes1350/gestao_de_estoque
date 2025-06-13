@@ -1,30 +1,41 @@
 import mongoose from 'mongoose';
-import mongoosePaginate from 'mongoose-paginate-v2';
+import bcrypt from 'bcryptjs';
 
-export class Usuario {
-    constructor() {
-        const usuarioSchema = mongoose.Schema (
-            {
-                nome_usuario: {type: String, index: true, required: true},
-                matricula: {type: String, index: true, required: true, unique: true},
-                senha: {type: String, required: true, select: false},
-                email: {type: String, required: true, unique: true},
-                cargo: {type: String, required: true},
-                status: {type: Boolean, default: true},
-                accessToken: {type: String, default: null},
-                refreshToken: {type: String, default: null},
-                data_cadastro: {type: Date, default: Date.now},
-                data_atualizacao: {type: Date, default: Date.now},
-                data_ultimo_login: {type: Date, default: null},
-            },
-            {
-                versionKey: false,
-                timestamps: {createdAt: 'data_cadastro', updatedAt: 'data_atualizacao'},
-            }
-        )
-        usuarioSchema.plugin(mongoosePaginate);
-        this.model = mongoose.model('usuarios', usuarioSchema);
+const usuarioSchema = new mongoose.Schema({
+    nome: { type: String, required: true },
+    email: { type: String, required: true, unique: true, lowercase: true, trim: true },
+    senha: { type: String, required: true },
+    perfil: { type: String, enum: ['admin', 'gerente', 'vendedor', 'estoquista'], default: 'estoquista' },
+    ativo: { type: Boolean, default: true },
+    accesstoken: String,
+    refreshtoken: String,
+    token_recuperacao: String,
+    codigo_recuperacao: String,
+    token_recuperacao_expira: Date,
+    created_at: { type: Date, default: Date.now },
+    updated_at: { type: Date, default: Date.now }
+});
+
+// Middleware para hash de senha antes de salvar
+usuarioSchema.pre('save', async function (next) {
+    // Só faz hash da senha se ela foi modificada
+    if (!this.isModified('senha')) return next();
+
+    try {
+        const salt = await bcrypt.genSalt(10);
+        this.senha = await bcrypt.hash(this.senha, salt);
+        next();
+    } catch (error) {
+        next(error);
     }
-}
+});
 
-export default new Usuario().model;
+// Método para atualização da data de atualização
+usuarioSchema.pre('findOneAndUpdate', function (next) {
+    this.set({ updated_at: Date.now() });
+    next();
+});
+
+const Usuario = mongoose.model('Usuario', usuarioSchema);
+
+export default Usuario;

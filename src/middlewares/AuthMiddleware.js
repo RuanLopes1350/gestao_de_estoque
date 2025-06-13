@@ -1,71 +1,58 @@
 import jwt from 'jsonwebtoken';
-import { promisify } from 'util';
-import AuthenticationError from '../utils/errors/AuthenticationError.js';
-import TokenExpiredError from '../utils/errors/TokenExpiredError.js';
-import { CustomError } from '../utils/helpers/index.js';
-import AuthService from '../services/AuthService.js';
+import dotenv from 'dotenv';
+import UsuarioRepository from '../repositories/usuarioRepository.js';
 
-class AuthMiddleware {
-  constructor() {
-    this.service = new AuthService();
+dotenv.config();
 
-    /**
-     * Vinculação para grantir ao método handle o contexto 'this' correto
-     * Ao usar bind(this) no método handle garantimos independentemente de como ou onde o método é chamado, 
-     * this sempre se referirá à instância atual de AuthMiddleware.
-     */
-    this.handle = this.handle.bind(this);
-  }
-
-  async handle(req, res, next) {
-    try {
-      const authHeader = req.headers.authorization;
-
-      if (!authHeader) {
-        throw new AuthenticationError("O token de autenticação não existe!");
-      }
-
-      const [scheme, token] = authHeader.split(' ');
-
-      if (scheme !== 'Bearer' || !token) {
-        throw new AuthenticationError("Formato do token de autenticação inválido!");
-      }
-
-      // Verifica e decodifica o token
-      const decoded = await promisify(jwt.verify)(token, process.env.JWT_SECRET);
-
-      if (!decoded) { // Se não ocorrer a decodificação do token
-        throw new TokenExpiredError("Teste novamente, o token JWT está expirado! ");
-      }
-
-      // Verifica se o refreshtoken está presente no banco de dados e se é válido
-      const tokenData = await this.service.carregatokens(decoded.id);
-
-      if (!tokenData?.data?.refreshtoken) {
-        throw new CustomError({
-          statusCode: 401,
-          errorType: 'unauthorized',
-          field: 'Token',
-          details: [],
-          customMessage: 'Refresh token inválido, autentique novamente!'
-        });
-      }
-
-      // Se o token for válido, anexa o user_id à requisição
-      req.user_id = decoded.id;
-      next();
-
-    } catch (err) {
-      if (err.name === 'JsonWebTokenError') {
-        next(new AuthenticationError("Token JWT inválido!"));
-      } else if (err.name === 'TokenExpiredError') {
-        next(new TokenExpiredError("Teste novamente, o token JWT está expirado! "));
-      } else {
-        next(err); // Passa outros erros para o errorHandler
-      }
+const authMiddleware = async (req, res, next) => {
+    // Rotas públicas que não precisam de autenticação
+    const publicRoutes = ['/login', '/recuperar-senha', '/docs', '/cadastro'];
+    
+    // Verifica se a rota atual está na lista de rotas públicas
+    if (publicRoutes.includes(req.path)) {
+        return next();
     }
-  }
-}
 
-// Instanciar e exportar apenas o método 'handle' como função de middleware
-export default new AuthMiddleware().handle;
+    // Verificar se o token está presente no header
+    const authHeader = req.headers.authorization;
+    if (!authHeader) {
+        return res.status(401).json({ message: 'Token não fornecido' });
+    }
+
+    // Extrair o token do header (formato: "Bearer <token>")
+    const token = authHeader.split(' ')[1];
+    if (!token) {
+        return res.status(401).json({ message: 'Token não fornecido' });
+    }
+
+    try {
+        // Verificar o token
+        const decoded = jwt.verify(token, process.env.JWT_SECRET || 'secret_token');
+        
+        // Buscar usuário no banco de dados
+        const usuarioRepository = new UsuarioRepository();
+        const usuario = await usuarioRepository.buscarPorId(decoded.id);
+        
+        if (!usuario) {
+            return res.status(401).json({ message: 'Usuário não encontrado' });
+        }
+        
+        // Verificar se o token no banco corresponde ao token fornecido
+        if (usuario.accesstoken !== token) {
+            return res.status(401).json({ message: 'Token inválido' });
+        }
+        
+        // Adicionar o usuário ao objeto da requisição
+        req.user = {
+            id: usuario._id,
+            email: usuario.email,
+            perfil: usuario.perfil
+        };
+        
+        next();
+    } catch (error) {
+        return res.status(401).json({ message: 'Token inválido ou expirado' });
+    }
+};
+
+export default authMiddleware;

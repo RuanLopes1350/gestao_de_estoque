@@ -1,173 +1,250 @@
 import jwt from 'jsonwebtoken';
-import { promisify } from 'util';
-import { CommonResponse, CustomError, HttpStatusCodes, errorHandler, messages, StatusService, asyncWrapper } from '../utils/helpers/index.js';
+import bcrypt from 'bcryptjs';
+import { v4 as uuidv4 } from 'uuid';
+import dotenv from 'dotenv';
 import AuthService from '../services/AuthService.js';
-import { LoginSchema, UsuarioUpdateSchema } from '../utils/validators/schemas/zod/UsuarioSchema.js';
+import CustomError from '../utils/helpers/CustomError.js';
+
+dotenv.config();
 
 class AuthController {
-  constructor() {
-    this.service = new AuthService();
-  }
-
-  login = async (req, res) => {
-    console.log("Estou no login em AuthController")
-
-    // 1º validação estrutural - validar os campos passados no body
-    const body = req.body || {};
-    const validatedBody = LoginSchema.parse(body);
-    // se os dados validados, inicia processo de login
-    const data = await this.service.login(validatedBody)
-    return CommonResponse.success(res, data);
-  }
-
-  logout = async (req, res) => {
-    console.log("Estou no logout em AuthController");
-
-    // Extrai o cabeçalho Authorization
-    const token = req.body.access_token || req.headers.authorization?.split(' ')[1];
-
-    // Verifica se o token está presente e não é uma string inválida
-    if (!token || token == 'null' || token === 'undefined') {
-      throw new CustomError({
-        statusCode: HttpStatusCodes.BAD_REQUEST.code,
-        errorType: 'invalidLogout',
-        field: 'Logout',
-        details: [],
-        customMessage: 'Token de acesso é obrigatório para realizar logout'
-      });
+    constructor() {
+        this.authService = new AuthService();
     }
 
-    // Verifica e decodifica o access token
-    const decoded = await promisify(jwt.verify)(token, process.env.JWT_SECRET_ACCESS_TOKEN);
+    async login(req, res) {
+        try {
+            const { email, senha } = req.body;
 
-    // Verifica se o token decodificado contém o ID do usuário
-    if (!decoded || decoded.id) {
-      throw new CustomError({
-        statusCode: HttpStatusCodes.INVALID_TOKEN.code,
-        errorType: 'notAuthorized',
-        field: 'NotAuthorized',
-        details: [],
-        customMessage: 'Token inválido ou malformado'
-      });
+            if (!email || !senha) {
+                throw new CustomError({
+                    statusCode: 400,
+                    errorType: 'validationError',
+                    customMessage: 'Email e senha são obrigatórios'
+                });
+            }
+
+            const result = await this.authService.autenticar(email, senha);
+            return res.status(200).json(result);
+        } catch (error) {
+            if (error instanceof CustomError) {
+                return res.status(error.statusCode).json({
+                    message: error.customMessage || 'Erro de autenticação',
+                    type: error.errorType
+                });
+            }
+
+            return res.status(500).json({
+                message: 'Erro interno ao fazer login',
+                error: error.message
+            });
+        }
     }
 
-    // Encaminha o token para o serviço de logout
-    const data = await this.service.logout(decoded.id, token);
-    // Retorna uma resposta de sucesso
-    return CommonResponse.success(res, null, messages.success.logout);
-  }
+    async logout(req, res) {
+        try {
+            const { id } = req.body;
+            
+            if (!id) {
+                throw new CustomError({
+                    statusCode: 400,
+                    errorType: 'validationError',
+                    customMessage: 'ID do usuário é obrigatório'
+                });
+            }
 
-  revoke = async (req, res) => {
-    console.log("Estou no revoke em AuthController");
+            await this.authService.logout(id);
+            return res.status(200).json({ message: 'Logout realizado com sucesso' });
+        } catch (error) {
+            if (error instanceof CustomError) {
+                return res.status(error.statusCode).json({
+                    message: error.customMessage || 'Erro ao fazer logout',
+                    type: error.errorType
+                });
+            }
 
-    const { id } = req.body;
-
-    if (!id) {
-      throw new CustomError({
-        statusCode: HttpStatusCodes.BAD_REQUEST.code,
-        errorType: 'validationError',
-        field: 'id',
-        details: [],
-        customMessage: 'ID do usuário é obrigatório'
-      })
+            return res.status(500).json({
+                message: 'Erro interno ao fazer logout',
+                error: error.message
+            });
+        }
     }
 
-    const data = await this.service.revoke(id);
-    return CommonResponse.success(res, data);
-  }
+    async refresh(req, res) {
+        try {
+            const { refreshToken } = req.body;
+            
+            if (!refreshToken) {
+                throw new CustomError({
+                    statusCode: 400,
+                    errorType: 'validationError',
+                    customMessage: 'Refresh token é obrigatório'
+                });
+            }
 
-  recuperarSenha = async (req, res) => {
-    console.log("Estou no recuperarSenha em AuthController");
+            const result = await this.authService.refreshToken(refreshToken);
+            return res.status(200).json(result);
+        } catch (error) {
+            if (error instanceof CustomError) {
+                return res.status(error.statusCode).json({
+                    message: error.customMessage || 'Erro ao renovar token',
+                    type: error.errorType
+                });
+            }
 
-    const body = req.body || {};
-
-    const validatedBody = UsuarioUpdateSchema.parse(body);
-    const data = await this.service.recuperaSenha(req, validatedBody);
-    return CommonResponse.success(res, data);
-  }
-
-  atualizarSenhaToken = async (req, res, next) => {
-    console.log('Estou no atualizarSenhaToken em AuthController');
-
-    const tokenRecuperacao = req.query.token || req.params.token || null; //token de recuperação passado na URL
-    const senha = req.body.senha || null; //nova senha passada no body
-
-    //verificar se veio token de recuperação
-    if (!tokenRecuperacao) {
-      throw new CustomError({
-        statusCode: HttpStatusCodes.UNAUTHORIZED.code,
-        errorType: 'unauthorized',
-        field: 'authentication',
-        details: [],
-        customMessage: 'Token de recuperação na URL como parâmetro ou query é obrigatório para troca da senha.'
-      });
+            return res.status(500).json({
+                message: 'Erro interno ao renovar token',
+                error: error.message
+            });
+        }
     }
 
-    //validar a senha com o schema
-    const senhaSchema = UsuarioUpdateSchema.parse({ "senha": senha })
+    async pass(req, res) {
+        try {
+            const token = req.headers.authorization?.split(' ')[1];
+            
+            if (!token) {
+                throw new CustomError({
+                    statusCode: 401,
+                    errorType: 'authError',
+                    customMessage: 'Token não fornecido'
+                });
+            }
 
-    // atualiza a senha
-    await this.service.atualizarSenhaToken(tokenRecuperacao, senhaSchema);
+            const result = await this.authService.verificarToken(token);
+            return res.status(200).json(result);
+        } catch (error) {
+            if (error instanceof CustomError) {
+                return res.status(error.statusCode).json({
+                    message: error.customMessage || 'Token inválido',
+                    type: error.errorType
+                });
+            }
 
-    return CommonResponse.success(res, null, HttpStatusCodes.OK.code, 'Senha atualizada com sucesso.', { message: 'Senha atualizada com sucesso via token de recuperação.' });
-  }
-
-  atualizarSenhaCodigo = async (req, res, next) => {
-    console.log("Estou no atualizarSenhaCodigo em AuthController");
-
-    const codigo_recupera_senha = req.body.codigo_recupera_senha || null; //codigo de recuperaçao passado no body
-    const senha = req.body.senha || null; //nova senha passada no body
-
-    console.log('codigo_recupera_senha:', codigo_recupera_senha);
-    console.log('senha:', senha);
-
-    //verifica se veio código de recuperação
-    if (!codigo_recupera_senha) {
-      throw new CustomError({
-        statusCode: HttpStatusCodes.UNAUTHORIZED.code,
-        errorType: 'unauthorized',
-        field: 'authentication',
-        details: [],
-        customMessage: 'Código de recuperação no body é obrigatório para troca da senha'
-      });
+            return res.status(500).json({
+                message: 'Erro interno ao verificar token',
+                error: error.message
+            });
+        }
     }
 
-    //validar a senha com o schema
-    const senhaSchema = UsuarioUpdateSchema.parse({ senha });
+    async recuperaSenha(req, res) {
+        try {
+            const { email } = req.body;
+            
+            if (!email) {
+                throw new CustomError({
+                    statusCode: 400,
+                    errorType: 'validationError',
+                    customMessage: 'Email é obrigatório'
+                });
+            }
 
-    //atualiza a senha
-    await this.service.atualizarSenhaCodigo(codigo_recupera_senha, senhaSchema);
+            await this.authService.enviarEmailRecuperacao(email);
+            return res.status(200).json({ 
+                message: 'Email de recuperação enviado com sucesso' 
+            });
+        } catch (error) {
+            if (error instanceof CustomError) {
+                return res.status(error.statusCode).json({
+                    message: error.customMessage || 'Erro ao solicitar recuperação de senha',
+                    type: error.errorType
+                });
+            }
 
-    return CommonResponse.success(res, null, HttpStatusCodes.OK.code, 'Senha atualizada com sucesso.', { message: 'Senha atualizada com sucesso via código de recuperação.' });
-  }
-
-  revoke = async (req, body) => {
-    //Extrai o ID do usuario a ter o token revogado do body
-    const id = req.body.id;
-    //remove o token do banco de dados e retorna uma resposta de sucesso
-    const data = await this.service.revoke(id);
-    return CommonResponse.success(res);
-  }
-
-  refresh = async (req, res) => {
-    //Extrai do body o token
-    const token = req.body.refresh_token;
-
-    //Verifica se o cabeçalho Authorization está presente
-    if(!token || token === 'null' || token === 'undefined') {
-      console.log('Cabeçalho Authorization ausente');
-      throw new CustomError({
-        statusCode: HttpStatusCodes.BAD_GATEWAY.code,
-        errorType: 'invalidRefresh',
-        field: 'Refresh',
-        details: [],
-        customMessage: 'Refresh token is missing.'
-      });
+            return res.status(500).json({
+                message: 'Erro interno ao solicitar recuperação de senha',
+                error: error.message
+            });
+        }
     }
 
-    const decoded = await promisify(jwt.verify)(token, process.env.JWT_SECRET_REFRESH_TOKEN);
+    async atualizarSenhaToken(req, res) {
+        try {
+            const { token, novaSenha } = req.body;
+            
+            if (!token || !novaSenha) {
+                throw new CustomError({
+                    statusCode: 400,
+                    errorType: 'validationError',
+                    customMessage: 'Token e nova senha são obrigatórios'
+                });
+            }
 
-    const data = await this.service.refresh(decoded.id, token);
-    return CommonResponse.success(res, data);
-  }
+            await this.authService.atualizarSenhaComToken(token, novaSenha);
+            return res.status(200).json({ message: 'Senha atualizada com sucesso' });
+        } catch (error) {
+            if (error instanceof CustomError) {
+                return res.status(error.statusCode).json({
+                    message: error.customMessage || 'Erro ao atualizar senha',
+                    type: error.errorType
+                });
+            }
+
+            return res.status(500).json({
+                message: 'Erro interno ao atualizar senha',
+                error: error.message
+            });
+        }
+    }
+
+    async atualizarSenhaCodigo(req, res) {
+        try {
+            const { email, codigo, novaSenha } = req.body;
+            
+            if (!email || !codigo || !novaSenha) {
+                throw new CustomError({
+                    statusCode: 400,
+                    errorType: 'validationError',
+                    customMessage: 'Email, código e nova senha são obrigatórios'
+                });
+            }
+
+            await this.authService.atualizarSenhaComCodigo(email, codigo, novaSenha);
+            return res.status(200).json({ message: 'Senha atualizada com sucesso' });
+        } catch (error) {
+            if (error instanceof CustomError) {
+                return res.status(error.statusCode).json({
+                    message: error.customMessage || 'Erro ao atualizar senha',
+                    type: error.errorType
+                });
+            }
+
+            return res.status(500).json({
+                message: 'Erro interno ao atualizar senha',
+                error: error.message
+            });
+        }
+    }
+
+    async revoke(req, res) {
+        try {
+            const { id } = req.body;
+            
+            if (!id) {
+                throw new CustomError({
+                    statusCode: 400,
+                    errorType: 'validationError',
+                    customMessage: 'ID do usuário é obrigatório'
+                });
+            }
+
+            await this.authService.revogarTokens(id);
+            return res.status(200).json({ message: 'Tokens revogados com sucesso' });
+        } catch (error) {
+            if (error instanceof CustomError) {
+                return res.status(error.statusCode).json({
+                    message: error.customMessage || 'Erro ao revogar tokens',
+                    type: error.errorType
+                });
+            }
+
+            return res.status(500).json({
+                message: 'Erro interno ao revogar tokens',
+                error: error.message
+            });
+        }
+    }
 }
+
+export default AuthController;
