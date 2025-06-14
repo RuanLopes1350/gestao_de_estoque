@@ -2,10 +2,11 @@ import mongoose from 'mongoose';
 import bcrypt from 'bcryptjs';
 
 const usuarioSchema = new mongoose.Schema({
-    nome: { type: String, required: true },
+    nome_usuario: { type: String, required: true },
     email: { type: String, required: true, unique: true, lowercase: true, trim: true },
+    matricula: { type: String, required: true, unique: true },
     senha: { type: String, required: true },
-    perfil: { type: String, enum: ['admin', 'gerente', 'vendedor', 'estoquista'], default: 'estoquista' },
+    perfil: { type: String, enum: ['administrador', 'gerente', 'vendedor', 'estoquista'], default: 'estoquista' },
     ativo: { type: Boolean, default: true },
     accesstoken: String,
     refreshtoken: String,
