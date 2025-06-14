@@ -12,33 +12,33 @@ const movimentacoesController = new MovimentacoesController();
 router
     // Rotas sem parâmetros de rota primeiro
     .get(
-        '/movimentacoes',
+        '/',
         asyncWrapper(movimentacoesController.listarMovimentacoes.bind(movimentacoesController))
     )
     .post(
-        '/movimentacoes',
+        '/',
         asyncWrapper(movimentacoesController.cadastrarMovimentacao.bind(movimentacoesController))
     )
     // Rotas com query strings (busca e filtro)
     .get(
-        '/movimentacoes/busca',
+        '/busca',
         asyncWrapper(movimentacoesController.buscarMovimentacoes.bind(movimentacoesController))
     )
     .get(
-        '/movimentacoes/filtro',
+        '/filtro',
         asyncWrapper(movimentacoesController.filtrarMovimentacoesAvancado.bind(movimentacoesController))
     )
     // Rotas com parâmetros de rota por último
     .get(
-        '/movimentacoes/:id',
+        '/:id',
         asyncWrapper(movimentacoesController.buscarMovimentacaoPorID.bind(movimentacoesController))
     )
     .patch(
-        '/movimentacoes/:id',
+        '/:id',
         asyncWrapper(movimentacoesController.atualizarMovimentacao.bind(movimentacoesController))
     )
     .delete(
-        '/movimentacoes/:id',
+        '/:id',
         asyncWrapper(movimentacoesController.deletarMovimentacao.bind(movimentacoesController))
     );
 

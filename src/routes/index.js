@@ -1,44 +1,29 @@
 import express from "express";
-import swaggerJsDoc from "swagger-jsdoc";
-import swaggerUI from "swagger-ui-express";
-import getSwaggerOptions from "../docs/config/head.js";
-import authMiddleware from "../middlewares/AuthMiddleware.js";
+import authMiddleware from "../middlewares/authMiddleware.js";
 import rotasProdutos from "./produtoRoutes.js";
 import rotasFornecedores from "./fornecedorRoutes.js";
 import rotasUsuarios from "./usuarioRoutes.js";
 import rotasMovimentacoes from './movimentacaoRoutes.js';
-import rotasAuth from './authRoutes.js'; // Importando as rotas de autenticação
-
+import rotasAuth from './authRoutes.js';
 import dotenv from "dotenv";
 
 dotenv.config();
 
 const routes = (app) => {
   
-  // Rota para encaminhar da raiz para /docs
+  // Rota para encaminhar da raiz para /login
   app.get("/", (req, res) => {
-    res.redirect("/docs");
+    res.redirect("/login");
   });
 
-  // Configuração do Swagger
-  const swaggerDocs = swaggerJsDoc(getSwaggerOptions());
-  app.use(swaggerUI.serve);
-  app.get("/docs", (req, res, next) => {
-    swaggerUI.setup(swaggerDocs)(req, res, next);
-  });
-
-  // Rotas de autenticação (não precisam de autenticação)
-  app.use(express.json(), rotasAuth);
+  // Rotas públicas (não necessitam de autenticação)
+  app.use("/auth", express.json(), rotasAuth);
   
   // Rotas protegidas (precisam de autenticação)
-  app.use(
-    express.json(),
-    authMiddleware, // Aplicando o middleware de autenticação
-    rotasProdutos,
-    rotasFornecedores,
-    rotasUsuarios,
-    rotasMovimentacoes
-  );
+  app.use("/api/produtos", express.json(), authMiddleware, rotasProdutos);
+  app.use("/api/fornecedores", express.json(), authMiddleware, rotasFornecedores);
+  app.use("/api/usuarios", express.json(), authMiddleware, rotasUsuarios);
+  app.use("/api/movimentacoes", express.json(), authMiddleware, rotasMovimentacoes);
 
   // Se não é nenhuma rota válida, produz 404
   app.use((req, res) => {

@@ -1,51 +1,46 @@
 import jwt from 'jsonwebtoken';
-import bcrypt from 'bcryptjs';
-import { v4 as uuidv4 } from 'uuid';
+import bcrypt from 'bcrypt';
 import dotenv from 'dotenv';
 import UsuarioRepository from '../repositories/usuarioRepository.js';
 import CustomError from '../utils/helpers/CustomError.js';
-// import EmailService from './EmailService.js'; // Descomente se tiver um serviço de email
 
 dotenv.config();
 
-class AuthService {
+export class AuthService {
     constructor() {
         this.usuarioRepository = new UsuarioRepository();
-        // this.emailService = new EmailService(); // Descomente se tiver um serviço de email
-        this.accessTokenSecret = process.env.JWT_SECRET || 'secret_token';
-        this.refreshTokenSecret = process.env.REFRESH_SECRET || 'secret_refresh';
-        this.accessTokenExpiry = process.env.JWT_EXPIRATION || '1h';
-        this.refreshTokenExpiry = process.env.REFRESH_EXPIRATION || '7d';
+        this.ACCESS_TOKEN_SECRET = process.env.JWT_SECRET || "your_jwt_secret";
+        this.REFRESH_TOKEN_SECRET = process.env.JWT_REFRESH_SECRET || "your_jwt_refresh_secret";
+        this.ACCESS_TOKEN_EXPIRY = '1h';
+        this.REFRESH_TOKEN_EXPIRY = '7d';
     }
 
     async autenticar(matricula, senha) {
-        // Buscar usuário pela matrícula
-        const usuario = await this.usuarioRepository.buscarPorMatricula(matricula);
+        const usuario = await this.usuarioRepository.buscarPorMatricula(matricula, '+senha');
 
         if (!usuario) {
             throw new CustomError({
                 statusCode: 401,
                 errorType: 'authError',
-                customMessage: 'Matrícula ou senha inválidos'
+                customMessage: 'Matrícula ou senha incorretos'
             });
         }
 
-        // Verificar se o usuário está ativo
-        if (usuario.ativo === false) {
+        if (!usuario.ativo) {
             throw new CustomError({
                 statusCode: 401,
                 errorType: 'authError',
-                customMessage: 'Usuário inativo. Entre em contato com o administrador.'
+                customMessage: 'Usuário inativo'
             });
         }
 
         // Verificar senha
-        const senhaValida = await bcrypt.compare(senha, usuario.senha);
-        if (!senhaValida) {
+        const senhaCorreta = await bcrypt.compare(senha, usuario.senha);
+        if (!senhaCorreta) {
             throw new CustomError({
                 statusCode: 401,
                 errorType: 'authError',
-                customMessage: 'Matrícula ou senha inválidos'
+                customMessage: 'Matrícula ou senha incorretos'
             });
         }
 
@@ -53,15 +48,16 @@ class AuthService {
         const accessToken = this._gerarAccessToken(usuario);
         const refreshToken = this._gerarRefreshToken(usuario);
 
-        // Salvar tokens no banco de dados
+        // Armazenar tokens no usuário
         await this.usuarioRepository.armazenarTokens(usuario._id, accessToken, refreshToken);
 
-        // Remover campos sensíveis
+        // Retornar dados sem a senha
         const usuarioSemSenha = {
             id: usuario._id,
-            nome: usuario.nome,
+            nome_usuario: usuario.nome_usuario,
+            email: usuario.email,
             matricula: usuario.matricula,
-            perfil: usuario.perfil,
+            perfil: usuario.perfil
         };
 
         return {
@@ -72,191 +68,62 @@ class AuthService {
     }
 
     async logout(userId) {
-        // Remover tokens do usuário no banco de dados
-        await this.usuarioRepository.removeToken(userId);
-        return true;
+        return await this.usuarioRepository.removeToken(userId);
     }
 
     async refreshToken(refreshToken) {
         try {
             // Verificar se o token é válido
-            const payload = jwt.verify(refreshToken, this.refreshTokenSecret);
-
+            const decoded = jwt.verify(refreshToken, this.REFRESH_TOKEN_SECRET);
+            
             // Buscar usuário pelo ID
-            const usuario = await this.usuarioRepository.buscarPorId(payload.id);
-
-            if (!usuario) {
+            const usuario = await this.usuarioRepository.buscarPorId(decoded.id);
+            
+            if (!usuario || usuario.refreshtoken !== refreshToken) {
                 throw new CustomError({
                     statusCode: 401,
                     errorType: 'authError',
-                    customMessage: 'Usuário não encontrado'
+                    customMessage: 'Token de atualização inválido'
                 });
             }
-
-            // Verificar se o refresh token está armazenado no banco
-            if (usuario.refreshtoken !== refreshToken) {
-                throw new CustomError({
-                    statusCode: 401,
-                    errorType: 'authError',
-                    customMessage: 'Refresh token inválido'
-                });
-            }
-
+            
             // Gerar novos tokens
-            const newAccessToken = this._gerarAccessToken(usuario);
+            const accessToken = this._gerarAccessToken(usuario);
             const newRefreshToken = this._gerarRefreshToken(usuario);
-
-            // Atualizar tokens no banco de dados
-            await this.usuarioRepository.armazenarTokens(usuario._id, newAccessToken, newRefreshToken);
-
+            
+            // Armazenar novos tokens
+            await this.usuarioRepository.armazenarTokens(usuario._id, accessToken, newRefreshToken);
+            
             return {
-                accessToken: newAccessToken,
+                accessToken,
                 refreshToken: newRefreshToken
             };
         } catch (error) {
             throw new CustomError({
                 statusCode: 401,
                 errorType: 'authError',
-                customMessage: 'Token inválido ou expirado'
+                customMessage: 'Token de atualização inválido ou expirado'
             });
         }
-    }
-
-    async verificarToken(token) {
-        try {
-            const payload = jwt.verify(token, this.accessTokenSecret);
-
-            // Buscar usuário pelo ID
-            const usuario = await this.usuarioRepository.buscarPorId(payload.id);
-
-            if (!usuario) {
-                throw new CustomError({
-                    statusCode: 401,
-                    errorType: 'authError',
-                    customMessage: 'Usuário não encontrado'
-                });
-            }
-
-            // Verificar se o token está armazenado no banco
-            if (usuario.accesstoken !== token) {
-                throw new CustomError({
-                    statusCode: 401,
-                    errorType: 'authError',
-                    customMessage: 'Token inválido'
-                });
-            }
-
-            return {
-                valid: true,
-                usuario: {
-                    id: usuario._id,
-                    nome: usuario.nome,
-                    email: usuario.email,
-                    perfil: usuario.perfil
-                }
-            };
-        } catch (error) {
-            throw new CustomError({
-                statusCode: 401,
-                errorType: 'authError',
-                customMessage: 'Token inválido ou expirado'
-            });
-        }
-    }
-
-    async atualizarSenhaComToken(token, novaSenha) {
-        try {
-            // Verificar se o token é válido
-            const payload = jwt.verify(token, this.accessTokenSecret);
-
-            // Buscar usuário pelo ID
-            const usuario = await this.usuarioRepository.buscarPorId(payload.id);
-
-            if (!usuario || usuario.token_recuperacao !== token) {
-                throw new CustomError({
-                    statusCode: 401,
-                    errorType: 'authError',
-                    customMessage: 'Token inválido ou expirado'
-                });
-            }
-
-            // Hash da nova senha
-            const senhaHash = await bcrypt.hash(novaSenha, 10);
-
-            // Atualizar senha e limpar token de recuperação
-            await this.usuarioRepository.atualizarSenha(usuario._id, senhaHash);
-
-            return true;
-        } catch (error) {
-            throw new CustomError({
-                statusCode: 401,
-                errorType: 'authError',
-                customMessage: 'Token inválido ou expirado'
-            });
-        }
-    }
-
-    async atualizarSenhaComCodigo(matricula, codigo, novaSenha) {
-        // Buscar usuário pela matrícula
-        const usuario = await this.usuarioRepository.buscarPorMatricula(matricula);
-
-        if (!usuario || usuario.codigo_recuperacao !== codigo) {
-            throw new CustomError({
-                statusCode: 401,
-                errorType: 'authError',
-                customMessage: 'Matrícula ou código inválido'
-            });
-        }
-
-        // Hash da nova senha
-        const senhaHash = await bcrypt.hash(novaSenha, 10);
-
-        // Atualizar senha e limpar código de recuperação
-        await this.usuarioRepository.atualizarSenha(usuario._id, senhaHash);
-
-        return true;
-    }
-
-    async revogarTokens(userId) {
-        // Remover tokens do usuário no banco de dados
-        await this.usuarioRepository.removeToken(userId);
-        return true;
     }
 
     _gerarAccessToken(usuario) {
-        const payload = {
-            id: usuario._id,
-            email: usuario.email,
-            perfil: usuario.perfil,
-            // Adicione outros campos conforme necessário
-        };
-
-        return jwt.sign(payload, this.accessTokenSecret, {
-            expiresIn: this.accessTokenExpiry
-        });
+        return jwt.sign(
+            { 
+                id: usuario._id, 
+                matricula: usuario.matricula,
+                perfil: usuario.perfil 
+            },
+            this.ACCESS_TOKEN_SECRET,
+            { expiresIn: this.ACCESS_TOKEN_EXPIRY }
+        );
     }
 
     _gerarRefreshToken(usuario) {
-        const payload = {
-            id: usuario._id,
-            tokenId: uuidv4()
-        };
-
-        return jwt.sign(payload, this.refreshTokenSecret, {
-            expiresIn: this.refreshTokenExpiry
-        });
-    }
-
-    _gerarRecuperacaoToken(usuario) {
-        const payload = {
-            id: usuario._id,
-            tokenId: uuidv4()
-        };
-
-        return jwt.sign(payload, this.accessTokenSecret, {
-            expiresIn: '1h' // Token de recuperação expira em 1 hora
-        });
+        return jwt.sign(
+            { id: usuario._id },
+            this.REFRESH_TOKEN_SECRET,
+            { expiresIn: this.REFRESH_TOKEN_EXPIRY }
+        );
     }
 }
-
-export default AuthService;
