@@ -1,48 +1,63 @@
+## LOGIN
+
+`POST http://localhost:5011/auth/login`
+
+`POST http://localhost:5011/auth/refresh`
+
+`POST http://localhost:5011//auth/logout`
+
 ## PRODUTOS
 
 `POST localhost:5011/produtos`
 
-`GET localhost:5011/produtos/`
+`GET localhost:5011/api/produtos/`
 
-`GET localhost:5011/produtos/:id`
+`GET localhost:5011/api/produtos/:id`
 
-`GET localhost:5011/produtos/estoque-baixo`
+`GET localhost:5011/api/produtos/estoque-baixo`
 
-`GET localhost:5011/produtos/busca?nome=freio`
+`GET localhost:5011/api/produtos/busca?nome=freio`
 
-`GET localhost:5011/produtos/busca?categoria=`
+`GET localhost:5011/api/produtos/busca?categoria=`
 
-`GET localhost:5011/produtos/busca?codigo=`
+`GET localhost:5011/api/produtos/busca?codigo=`
 
-`GET localhost:5011/produtos/busca?fornecedor=`
+`GET localhost:5011/api/produtos/busca?fornecedor=`
 
-`PATCH localhost:5011/produtos/:id`
+`PATCH localhost:5011/api/produtos/:id`
 
-`PATCH localhost:5011/produtos/desativar/`
+`PATCH localhost:5011/api/produtos/desativar/`
 
-`PATCH localhost:5011/produtos/reativar/`
+`PATCH localhost:5011/api/produtos/reativar/`
 
-`DEL localhost:5011/produtos/:id`
+`DELETE localhost:5011/api/produtos/:id`
 
 ## USUARIOS
+`POST http://localhost:5011/api/usuarios`
 
-`GET `
+`GET http://localhost:5011/api/usuarios`
 
-`POST `
+`GET http://localhost:5011/api/usuarios/busca`
 
-`PATCH `
+`GET http://localhost:5011/api/usuarios/:matricula`
 
-`DELETE `
+`PATCH http://localhost:5011/api/usuarios/:matricula`
+
+`DELETE http://localhost:5011/api/usuarios/:matricula`
 
 ## FORNECEDORES
 
-`GET `
+`GET http://localhost:5011/api/fornecedores` 
 
-`POST `
+`GET http://localhost:5011/api/fornecedores?nome_fornecedor=`
+
+`GET http://localhost:5011/api/fornecedores?cnpj=`
+
+`POST http://localhost:5011/api/fornecedores`
 
 `PATCH `
 
-`DELETE `
+`DELETE http://localhost:5011/fornecedores/:id`
 
 ## MOVIMENTAÇÕES
 

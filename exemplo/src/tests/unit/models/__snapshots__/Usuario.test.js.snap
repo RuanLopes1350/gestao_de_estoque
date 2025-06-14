@@ -1,0 +1,3 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Modelo de Usuário não deve criar um usuário com email duplicado 1`] = `"E11000 duplicate key error collection: test.usuarios index: email_1 dup key: { email: "duplicate@example.com" }"`;

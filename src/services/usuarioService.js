@@ -20,7 +20,7 @@ class UsuarioService {
         if (!dadosUsuario.data_cadastro) {
             dadosUsuario.data_cadastro = new Date();
         }
-        
+
         dadosUsuario.data_ultima_atualizacao = new Date();
 
         const data = await this.repository.cadastrarUsuario(dadosUsuario);
@@ -59,7 +59,7 @@ class UsuarioService {
         }
 
         const data = await this.repository.buscarUsuarioPorID(id);
-        
+
         if (!data) {
             throw new CustomError({
                 statusCode: HttpStatusCodes.NOT_FOUND.code,
@@ -69,7 +69,7 @@ class UsuarioService {
                 customMessage: 'Usuário não encontrado.'
             });
         }
-        
+
         return data;
     }
 
@@ -87,7 +87,7 @@ class UsuarioService {
         }
 
         const usuario = await this.repository.buscarUsuarioPorMatricula(matricula);
-        
+
         if (!usuario) {
             throw new CustomError({
                 statusCode: HttpStatusCodes.NOT_FOUND.code,
@@ -97,7 +97,7 @@ class UsuarioService {
                 customMessage: 'Usuário não encontrado com a matrícula informada.'
             });
         }
-        
+
         return usuario;
     }
 
@@ -116,13 +116,27 @@ class UsuarioService {
 
         // Verificar se o usuário existe antes de tentar deletar
         await this.buscarUsuarioPorID(id);
-        
+
         try {
             const data = await this.repository.deletarUsuario(id);
             return data;
         } catch (error) {
             throw error;
         }
+    }
+
+    async verificarEmailExistente(email) {
+        const usuario = await this.repository.buscarPorEmail(email);
+        return usuario !== null;
+    }
+
+    async criarUsuario(dadosUsuario) {
+        // Se a senha não estiver hash, faça o hash
+        if (dadosUsuario.senha && !dadosUsuario.senha.startsWith('$2')) {
+            dadosUsuario.senha = await bcrypt.hash(dadosUsuario.senha, 10);
+        }
+
+        return await this.repository.criarUsuario(dadosUsuario);
     }
 }
 

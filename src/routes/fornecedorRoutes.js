@@ -8,23 +8,23 @@ const fornecedorController = new FornecedorController();
 
 router
   .get(
-    "/fornecedores",
+    "/",
     asyncWrapper(fornecedorController.listar.bind(fornecedorController))
   )
   .get(
-    "/fornecedores/:id",
+    "/:id",
     asyncWrapper(fornecedorController.buscarPorId.bind(fornecedorController))
   )
   .post(
-    "/fornecedores",
+    "/",
     asyncWrapper(fornecedorController.criar.bind(fornecedorController))
   )
   .put(
-    "/fornecedores/:id",
+    "/:id",
     asyncWrapper(fornecedorController.atualizar.bind(fornecedorController))
   )
   .delete(
-    "/fornecedores/:id",
+    "/:id",
     asyncWrapper(fornecedorController.deletar.bind(fornecedorController))
   );
 

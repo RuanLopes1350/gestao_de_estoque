@@ -23,7 +23,7 @@ class UsuarioController {
             }
 
             const data = await this.service.listarUsuarios(req);
-            
+
             // Verificar se a lista está vazia
             if (data.docs && data.docs.length === 0) {
                 return CommonResponse.error(
@@ -35,7 +35,7 @@ class UsuarioController {
                     'Nenhum usuário encontrado com os critérios informados.'
                 );
             }
-            
+
             return CommonResponse.success(res, data);
         } catch (error) {
             return CommonResponse.error(res, error);
@@ -47,7 +47,7 @@ class UsuarioController {
 
         try {
             const { id } = req.params || {};
-            
+
             UsuarioIdSchema.parse(id);
             const data = await this.service.buscarUsuarioPorID(id);
             return CommonResponse.success(res, data, 200, 'Usuário encontrado com sucesso.');
@@ -95,9 +95,9 @@ class UsuarioController {
             const parsedData = UsuarioSchema.parse(req.body);
             const data = await this.service.cadastrarUsuario(parsedData);
             return CommonResponse.created(
-                res, 
-                data, 
-                HttpStatusCodes.CREATED.code, 
+                res,
+                data,
+                HttpStatusCodes.CREATED.code,
                 'Usuário cadastrado com sucesso.'
             );
         } catch (error) {
@@ -140,7 +140,7 @@ class UsuarioController {
             return CommonResponse.error(res, error);
         }
     }
-    
+
     async deletarUsuario(req, res) {
         console.log('Estou no deletarUsuario em UsuarioController');
 
@@ -175,7 +175,7 @@ class UsuarioController {
         }
     }
 
-    async desativarUsuario(req,res) {
+    async desativarUsuario(req, res) {
         console.log('Estou no desativarUsuario em UsuarioController');
 
         try {
@@ -260,6 +260,58 @@ class UsuarioController {
                 );
             }
             return CommonResponse.error(res, error);
+        }
+    }
+
+    async criarComSenha(req, res) {
+        try {
+            const { nome, email, senha, perfil } = req.body;
+
+            // Validar dados
+            if (!nome || !email || !senha) {
+                return res.status(400).json({
+                    message: 'Nome, email e senha são obrigatórios',
+                    type: 'validationError'
+                });
+            }
+
+            // Verificar se o email já existe
+            const emailExiste = await this.service.verificarEmailExistente(email);
+            if (emailExiste) {
+                return res.status(400).json({
+                    message: 'Este email já está em uso',
+                    type: 'validationError'
+                });
+            }
+
+            // Criar usuário
+            const usuario = await this.service.criarUsuario({
+                nome,
+                email,
+                senha,
+                perfil: perfil || 'estoquista', // Perfil padrão se não for especificado
+                ativo: true
+            });
+
+            // Remover a senha do objeto de resposta
+            const usuarioSemSenha = {
+                id: usuario._id,
+                nome: usuario.nome,
+                email: usuario.email,
+                perfil: usuario.perfil,
+                ativo: usuario.ativo
+            };
+
+            return res.status(201).json({
+                message: 'Usuário criado com sucesso',
+                usuario: usuarioSemSenha
+            });
+        } catch (error) {
+            console.error('Erro ao criar usuário:', error);
+            return res.status(500).json({
+                message: 'Erro interno ao criar usuário',
+                error: error.message
+            });
         }
     }
 }

@@ -357,7 +357,7 @@ class MovimentacaoService {
                     // Atualizar estoque
                     await this.produtoService.atualizarProduto(produto._id, {
                         quantidade_estoque: produto.quantidade_estoque + produtoMov.quantidade_produtos,
-                        data_ultima_entrada: new Date()
+                        data_ultima_entradaup: new Date()
                     });
                 } catch (error) {
                     if (error.statusCode !== HttpStatusCodes.BAD_REQUEST.code) {

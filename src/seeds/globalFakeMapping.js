@@ -65,19 +65,27 @@ function getGlobalFakeMapping() {
     const fakeMapping = {
         usuario: {
             nome_usuario: () => fakerPT_BR.person.fullName(),
+            email: () => fakerPT_BR.internet.email(),
             matricula: () => fakerPT_BR.string.alphanumeric(6).toUpperCase(),
             senha: () => fakerPT_BR.internet.password(15),
-            cargo: () => fakerPT_BR.helpers.arrayElement(['Gerente', 'Assistente', 'Operador', 'Analista', 'Supervisor']),
+            perfil: () => fakerPT_BR.helpers.arrayElement(['administrador', 'gerente', 'vendedor', 'estoquista']),
             data_cadastro: () => fakerPT_BR.date.past(),
             data_ultima_atualizacao: () => fakerPT_BR.date.recent(),
         },
         fornecedor: {
             nome_fornecedor: () => fakerPT_BR.company.name(),
             cnpj: () => fakerPT_BR.string.numeric(14),
-            endereco: () => [{ 
-                telefone: fakerPT_BR.phone.number(),
-                email: fakerPT_BR.internet.email()
-            }]
+            telefone: () => fakerPT_BR.phone.number('##-####-####'),
+            email: () => fakerPT_BR.internet.email(),
+            endereco: [
+                {
+                    logradouro: () => fakerPT_BR.location.street(),
+                    bairro: () => fakerPT_BR.location.streetName(),
+                    cidade: () => fakerPT_BR.location.city(),
+                    estado: () => fakerPT_BR.location.state(),
+                    cep: () => fakerPT_BR.location.zipCode(),
+                },
+            ],
         },
         produto: {
             nome_produto: () => fakerPT_BR.commerce.productName(),
