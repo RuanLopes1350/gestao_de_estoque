@@ -15,7 +15,7 @@ class UsuarioService {
     }
 
     async cadastrarUsuario(dadosUsuario) {
-        console.log('Estou no cadastrarUsuario em UsuarioService');
+        console.log('Estou no cadastrarUsuario em UsuarioService'); // mexendo aqui
 
         if (!dadosUsuario.data_cadastro) {
             dadosUsuario.data_cadastro = new Date();
