@@ -126,4 +126,32 @@ export class AuthService {
             { expiresIn: this.REFRESH_TOKEN_EXPIRY }
         );
     }
+
+    async revoke(matricula) {
+    // Verificar se a matrícula foi fornecida
+    if (!matricula) {
+        throw new CustomError({
+            statusCode: 400,
+            errorType: 'validationError',
+            customMessage: 'Matrícula não fornecida'
+        });
+    }
+    
+    // Buscar usuário pela matrícula
+    const usuario = await this.usuarioRepository.buscarPorMatricula(matricula);
+    
+    if (!usuario) {
+        throw new CustomError({
+            statusCode: 404,
+            errorType: 'notFoundError',
+            customMessage: 'Usuário não encontrado com esta matrícula'
+        });
+    }
+    
+    // Remove tokens do usuário
+    const data = await this.usuarioRepository.removeToken(usuario._id);
+    return { data };
+}
+
+    
 }

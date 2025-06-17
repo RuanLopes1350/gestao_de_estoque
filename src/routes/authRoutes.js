@@ -10,5 +10,6 @@ router.post('/refresh', (req, res) => AuthController.refresh(req, res));
 
 // Rotas protegidas
 router.post('/logout', authMiddleware, (req, res) => AuthController.logout(req, res));
+router.post('/revoke', authMiddleware, (req, res) => AuthController.revoke(req, res));
 
 export default router;
