@@ -1,6 +1,7 @@
 import mongoose from 'mongoose';
 import Usuario from '../models/Usuario.js';
 import { CustomError, messages } from '../utils/helpers/index.js';
+import { CssFunction } from '@faker-js/faker';
 
 class UsuarioRepository {
     constructor({ model = Usuario } = {}) {
@@ -69,17 +70,17 @@ class UsuarioRepository {
     }
 
     async buscarPorMatricula(matricula, incluirSenha = false) {
-    try {
-        const query = { matricula };
-        if (incluirSenha) {
-            return await this.model.findOne(query).select('+senha');
+        try {
+            const query = { matricula };
+            if (incluirSenha) {
+                return await this.model.findOne(query).select('+senha');
+            }
+            return await this.model.findOne(query);
+        } catch (error) {
+            console.error('Erro ao buscar usuário por matrícula:', error);
+            throw error;
         }
-        return await this.model.findOne(query);
-    } catch (error) {
-        console.error('Erro ao buscar usuário por matrícula:', error);
-        throw error;
     }
-}
 
     async cadastrarUsuario(dadosUsuario) {
         console.log('Estou no cadastrarUsuario em UsuarioRepository');
@@ -210,7 +211,7 @@ class UsuarioRepository {
             {
                 token_recuperacao: token,
                 codigo_recuperacao: codigo,
-                token_recuperacao_expira: Date.now() + 3600000 // 1 hora
+                token_recuperacao_expira: Date.now() + 3600000
             },
             { new: true }
         );
@@ -232,6 +233,51 @@ class UsuarioRepository {
     async criarUsuario(dadosUsuario) {
         const novoUsuario = new this.model(dadosUsuario);
         return await novoUsuario.save();
+    }
+
+    async removeToken(id) {
+        //criar objeto com os campos a serem atualizados
+        const parsedData = {
+            accesstoken: null,
+            refreshtoken: null
+        };
+
+        const usuario = await this.model.findByIdAndUpdate(id, parsedData, { new: true }).exec();
+
+        //validar se o usuário atualizado foi retornado
+        if (!usuario) {
+            throw new CustomError({
+                statusCode: 404,
+                errorType: 'resourceNotFound',
+                field: 'Usuário',
+                details: [],
+                customMessage: messages.error.resourceNotFound('Usuário')
+            })
+        }
+        return usuario;
+    }
+
+    async buscarPorEmail(email, incluirSenha = false) {
+        const select = incluirSenha ? '+senha' : '';
+        return await this.model.findOne({ email }).select(select);
+    }
+
+    async buscarPorCodigoRecuperacao(codigo) {
+        return await this.model.findOne({
+            codigo_recuperacao: codigo
+        }).select('+senha +token_recuperacao +codigo_recuperacao +token_recuperacao_expira');
+    }
+
+    async atualizarTokenRecuperacao(id, token, codigo) {
+        return await this.model.findByIdAndUpdate(
+            id,
+            {
+                token_recuperacao: token,
+                codigo_recuperacao: codigo,
+                token_recuperacao_expira: new Date(Date.now() + 3600000) // 1 hora
+            },
+            { new: true }
+        );
     }
 }
 

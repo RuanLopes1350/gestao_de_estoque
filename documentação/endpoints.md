@@ -6,6 +6,8 @@
 
 `POST http://localhost:5011//auth/logout`
 
+`POST http://localhost:5011/auth/revoke/?id=`
+
 ## PRODUTOS
 
 `POST localhost:5011/produtos`

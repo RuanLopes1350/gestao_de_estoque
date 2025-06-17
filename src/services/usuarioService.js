@@ -1,6 +1,7 @@
 import UsuarioRepository from '../repositories/usuarioRepository.js';
 import mongoose from 'mongoose';
 import { CustomError, HttpStatusCodes } from '../utils/helpers/index.js';
+import bcrypt from 'bcrypt';
 
 class UsuarioService {
     constructor() {
@@ -15,15 +16,14 @@ class UsuarioService {
     }
 
     async cadastrarUsuario(dadosUsuario) {
-        console.log('Estou no cadastrarUsuario em UsuarioService'); // mexendo aqui
-
+        console.log('Estou no cadastrarUsuario em UsuarioService');
         if (!dadosUsuario.data_cadastro) {
             dadosUsuario.data_cadastro = new Date();
         }
 
         dadosUsuario.data_ultima_atualizacao = new Date();
 
-        const data = await this.repository.cadastrarUsuario(dadosUsuario);
+        const data = await this.criarUsuario(dadosUsuario);
         return data;
     }
 
@@ -137,6 +137,19 @@ class UsuarioService {
         }
 
         return await this.repository.criarUsuario(dadosUsuario);
+    }
+
+    async revoke(token) {
+        if (!token) {
+            throw new CustomError({
+                statusCode: 400,
+                customMessage: 'Token não fornecido',
+                errorType: 'validationError'
+            });
+        }
+        await this.repository.adicionarTokenRevogado(token);
+
+        return true;
     }
 }
 

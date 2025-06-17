@@ -10,14 +10,16 @@ class Usuario {
         email: { type: String, required: true, unique: true },
         matricula: { type: String, required: true, unique: true },
         senha: { type: String, required: true, select: false },
-        perfil: { 
-          type: String, 
-          enum: ["administrador", "gerente", "estoquista"], 
-          default: "estoquista" 
+        perfil: {
+          type: String,
+          enum: ["administrador", "gerente", "estoquista"],
+          default: "estoquista"
         },
         ativo: { type: Boolean, default: true },
         accesstoken: { type: String, select: false },
         refreshtoken: { type: String, select: false },
+        token_recuperacao: { type: String, select: false },
+        token_recuperacao_expira: { type: String, select: false },
         codigo_recuperacao: { type: String, select: false },
         data_expiracao_codigo: { type: Date, select: false }
       },
@@ -31,7 +33,7 @@ class Usuario {
     );
 
     // Método para comparar senha
-    schema.methods.verificarSenha = async function(senha) {
+    schema.methods.verificarSenha = async function (senha) {
       return await bcrypt.compare(senha, this.senha);
     };
 
