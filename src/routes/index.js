@@ -1,5 +1,5 @@
 import express from "express";
-import authMiddleware from "../middlewares/authMiddleware.js";
+import authMiddleware from "../middlewares/AuthMiddleware.js";
 import rotasProdutos from "./produtoRoutes.js";
 import rotasFornecedores from "./fornecedorRoutes.js";
 import rotasUsuarios from "./usuarioRoutes.js";
