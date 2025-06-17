@@ -37,7 +37,7 @@
 
 `GET http://localhost:5011/api/usuarios`
 
-`GET http://localhost:5011/api/usuarios/busca`
+`GET http://localhost:5011/api/usuarios/:parametro`
 
 `GET http://localhost:5011/api/usuarios/:matricula`
 
