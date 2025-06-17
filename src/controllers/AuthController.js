@@ -1,6 +1,7 @@
 import { AuthService } from "../services/AuthService.js";
 import CommonResponse from "../utils/helpers/CommonResponse.js";
-import messages from "../utils/helpers/messages.js";
+import HttpStatusCodes from "../utils/helpers/HttpStatusCodes.js";
+import { UsuarioUpdateSchema } from '../utils/validators/schemas/zod/UsuarioSchema.js'
 
 class AuthController {
     constructor() {
@@ -131,6 +132,76 @@ class AuthController {
             message: 'Erro ao processar a revogação do token',
             type: 'serverError'
         });
+    }
+
+    async solicitarRecuperacaoSenha(req, res) {
+        try {
+            const { email } = req.body;
+
+            if (!email) {
+                return res.status(400).json({
+                    message: 'Email é obrigatório',
+                    type: 'validationError'
+                });
+            }
+
+            const resultado = await this.service.recuperarSenha(email);
+
+            return res.status(200).json(resultado);
+        } catch (error) {
+            console.error('Erro ao solicitar recuperação de senha:', error);
+            return res.status(error.statusCode || 500).json({
+                message: error.customMessage || 'Erro ao processar solicitação',
+                type: error.errorType || 'serverError'
+            });
+        }
+    }
+
+    async redefinirSenhaComToken(req, res) {
+        try {
+            const { token } = req.query;
+            const { senha } = req.body;
+
+            if (!token || !senha) {
+                return res.status(400).json({
+                    message: 'Token e senha são obrigatórios',
+                    type: 'validationError'
+                });
+            }
+
+            const resultado = await this.service.redefinirSenhaComToken(token, senha);
+
+            return res.status(200).json(resultado);
+        } catch (error) {
+            console.error('Erro ao redefinir senha:', error);
+            return res.status(error.statusCode || 500).json({
+                message: error.customMessage || 'Erro ao processar solicitação',
+                type: error.errorType || 'serverError'
+            });
+        }
+    }
+
+    async redefinirSenhaComCodigo(req, res) {
+        try {
+            const { codigo, senha } = req.body;
+
+            if (!codigo || !senha) {
+                return res.status(400).json({
+                    message: 'Código e senha são obrigatórios',
+                    type: 'validationError'
+                });
+            }
+
+            const resultado = await this.service.redefinirSenhaComCodigo(codigo, senha);
+
+            return res.status(200).json(resultado);
+        } catch (error) {
+            console.error('Erro ao redefinir senha:', error);
+            return res.status(error.statusCode || 500).json({
+                message: error.customMessage || 'Erro ao processar solicitação',
+                type: error.errorType || 'serverError'
+            });
+        }
     }
 }
 

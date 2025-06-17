@@ -70,17 +70,17 @@ class UsuarioRepository {
     }
 
     async buscarPorMatricula(matricula, incluirSenha = false) {
-    try {
-        const query = { matricula };
-        if (incluirSenha) {
-            return await this.model.findOne(query).select('+senha');
+        try {
+            const query = { matricula };
+            if (incluirSenha) {
+                return await this.model.findOne(query).select('+senha');
+            }
+            return await this.model.findOne(query);
+        } catch (error) {
+            console.error('Erro ao buscar usuário por matrícula:', error);
+            throw error;
         }
-        return await this.model.findOne(query);
-    } catch (error) {
-        console.error('Erro ao buscar usuário por matrícula:', error);
-        throw error;
     }
-}
 
     async cadastrarUsuario(dadosUsuario) {
         console.log('Estou no cadastrarUsuario em UsuarioRepository');
@@ -211,7 +211,7 @@ class UsuarioRepository {
             {
                 token_recuperacao: token,
                 codigo_recuperacao: codigo,
-                token_recuperacao_expira: Date.now() + 3600000 
+                token_recuperacao_expira: Date.now() + 3600000
             },
             { new: true }
         );
@@ -242,7 +242,7 @@ class UsuarioRepository {
             refreshtoken: null
         };
 
-        const usuario = await this.model.findByIdAndUpdate(id, parsedData, {new: true}).exec();
+        const usuario = await this.model.findByIdAndUpdate(id, parsedData, { new: true }).exec();
 
         //validar se o usuário atualizado foi retornado
         if (!usuario) {
@@ -255,6 +255,29 @@ class UsuarioRepository {
             })
         }
         return usuario;
+    }
+
+    async buscarPorEmail(email, incluirSenha = false) {
+        const select = incluirSenha ? '+senha' : '';
+        return await this.model.findOne({ email }).select(select);
+    }
+
+    async buscarPorCodigoRecuperacao(codigo) {
+        return await this.model.findOne({
+            codigo_recuperacao: codigo
+        }).select('+senha +token_recuperacao +codigo_recuperacao +token_recuperacao_expira');
+    }
+
+    async atualizarTokenRecuperacao(id, token, codigo) {
+        return await this.model.findByIdAndUpdate(
+            id,
+            {
+                token_recuperacao: token,
+                codigo_recuperacao: codigo,
+                token_recuperacao_expira: new Date(Date.now() + 3600000) // 1 hora
+            },
+            { new: true }
+        );
     }
 }
 

@@ -3,12 +3,14 @@ import bcrypt from 'bcrypt';
 import dotenv from 'dotenv';
 import UsuarioRepository from '../repositories/usuarioRepository.js';
 import CustomError from '../utils/helpers/CustomError.js';
+import TokenUtil from '../utils/TokenUtil.js';
 
 dotenv.config();
 
 export class AuthService {
     constructor() {
         this.usuarioRepository = new UsuarioRepository();
+        this.tokenUtil = TokenUtil;
         this.ACCESS_TOKEN_SECRET = process.env.JWT_SECRET || "your_jwt_secret";
         this.REFRESH_TOKEN_SECRET = process.env.JWT_REFRESH_SECRET || "your_jwt_refresh_secret";
         this.ACCESS_TOKEN_EXPIRY = '1h';
@@ -75,10 +77,10 @@ export class AuthService {
         try {
             // Verificar se o token é válido
             const decoded = jwt.verify(refreshToken, this.REFRESH_TOKEN_SECRET);
-            
+
             // Buscar usuário pelo ID
             const usuario = await this.usuarioRepository.buscarPorId(decoded.id);
-            
+
             if (!usuario || usuario.refreshtoken !== refreshToken) {
                 throw new CustomError({
                     statusCode: 401,
@@ -86,14 +88,14 @@ export class AuthService {
                     customMessage: 'Token de atualização inválido'
                 });
             }
-            
+
             // Gerar novos tokens
             const accessToken = this._gerarAccessToken(usuario);
             const newRefreshToken = this._gerarRefreshToken(usuario);
-            
+
             // Armazenar novos tokens
             await this.usuarioRepository.armazenarTokens(usuario._id, accessToken, newRefreshToken);
-            
+
             return {
                 accessToken,
                 refreshToken: newRefreshToken
@@ -109,10 +111,10 @@ export class AuthService {
 
     _gerarAccessToken(usuario) {
         return jwt.sign(
-            { 
-                id: usuario._id, 
+            {
+                id: usuario._id,
                 matricula: usuario.matricula,
-                perfil: usuario.perfil 
+                perfil: usuario.perfil
             },
             this.ACCESS_TOKEN_SECRET,
             { expiresIn: this.ACCESS_TOKEN_EXPIRY }
@@ -128,30 +130,124 @@ export class AuthService {
     }
 
     async revoke(matricula) {
-    // Verificar se a matrícula foi fornecida
-    if (!matricula) {
-        throw new CustomError({
-            statusCode: 400,
-            errorType: 'validationError',
-            customMessage: 'Matrícula não fornecida'
-        });
-    }
-    
-    // Buscar usuário pela matrícula
-    const usuario = await this.usuarioRepository.buscarPorMatricula(matricula);
-    
-    if (!usuario) {
-        throw new CustomError({
-            statusCode: 404,
-            errorType: 'notFoundError',
-            customMessage: 'Usuário não encontrado com esta matrícula'
-        });
-    }
-    
-    // Remove tokens do usuário
-    const data = await this.usuarioRepository.removeToken(usuario._id);
-    return { data };
-}
+        // Verificar se a matrícula foi fornecida
+        if (!matricula) {
+            throw new CustomError({
+                statusCode: 400,
+                errorType: 'validationError',
+                customMessage: 'Matrícula não fornecida'
+            });
+        }
 
-    
+        // Buscar usuário pela matrícula
+        const usuario = await this.usuarioRepository.buscarPorMatricula(matricula);
+
+        if (!usuario) {
+            throw new CustomError({
+                statusCode: 404,
+                errorType: 'notFoundError',
+                customMessage: 'Usuário não encontrado com esta matrícula'
+            });
+        }
+
+        // Remove tokens do usuário
+        const data = await this.usuarioRepository.removeToken(usuario._id);
+        return { data };
+    }
+
+    async recuperarSenha(email) {
+        // Buscar o usuário pelo email
+        const usuario = await this.usuarioRepository.buscarPorEmail(email);
+
+        // Mesmo que não encontre o usuário, não revelamos isso por segurança
+        if (!usuario) {
+            return {
+                message: 'Solicitação de recuperação de senha recebida, um email será enviado com as instruções para recuperação de senha'
+            };
+        }
+
+        // Gerar token de recuperação (JWT)
+        const token = await this.tokenUtil.generatePasswordRecoveryToken(usuario._id);
+
+        // Gerar código de recuperação (4 dígitos)
+        const codigo = Math.random().toString(36).replace(/[^a-z0-9]/gi, '').slice(0, 4).toUpperCase();
+
+        // Salvar token e código no usuário
+        await this.usuarioRepository.atualizarTokenRecuperacao(usuario._id, token, codigo);
+
+        // No ambiente real, aqui enviaríamos um email com o link para reset
+        // Simular o envio de email (em produção, implemente o envio real)
+        console.log(`Link de recuperação: https://seusite.com/reset-password?token=${token}`);
+        console.log(`Código de recuperação: ${codigo}`);
+
+        return {
+            message: 'Solicitação de recuperação de senha recebida, um email será enviado com as instruções para recuperação de senha'
+        };
+    }
+
+    async redefinirSenhaComToken(token, novaSenha) {
+        try {
+            // Decodificar o token para obter o ID do usuário
+            const usuarioId = await this.tokenUtil.decodePasswordRecoveryToken(token);
+
+            // Verificar se o usuário existe
+            const usuario = await this.usuarioRepository.buscarPorId(usuarioId);
+            if (!usuario) {
+                throw new CustomError({
+                    statusCode: 404,
+                    errorType: 'notFound',
+                    customMessage: 'Usuário não encontrado'
+                });
+            }
+
+            // Hash da nova senha
+            const senhaCriptografada = await bcrypt.hash(novaSenha, 10);
+
+            // Atualizar senha e remover tokens de recuperação
+            await this.usuarioRepository.atualizarSenha(usuarioId, senhaCriptografada);
+
+            return {
+                message: 'Senha atualizada com sucesso'
+            };
+        } catch (error) {
+            throw new CustomError({
+                statusCode: 401,
+                errorType: 'authError',
+                customMessage: 'Token inválido ou expirado'
+            });
+        }
+    }
+
+    async redefinirSenhaComCodigo(codigo, novaSenha) {
+        // Buscar usuário pelo código de recuperação
+        const usuario = await this.usuarioRepository.buscarPorCodigoRecuperacao(codigo);
+
+        if (!usuario) {
+            throw new CustomError({
+                statusCode: 404,
+                errorType: 'notFound',
+                customMessage: 'Código de recuperação inválido'
+            });
+        }
+
+        // Verificar se o código não expirou
+        const agora = new Date();
+        if (usuario.token_recuperacao_expira && usuario.token_recuperacao_expira < agora) {
+            throw new CustomError({
+                statusCode: 401,
+                errorType: 'authError',
+                customMessage: 'Código de recuperação expirado'
+            });
+        }
+
+        // Hash da nova senha
+        const senhaCriptografada = await bcrypt.hash(novaSenha, 10);
+
+        // Atualizar senha e remover informações de recuperação
+        await this.usuarioRepository.atualizarSenha(usuario._id, senhaCriptografada);
+
+        return {
+            message: 'Senha atualizada com sucesso'
+        };
+    }
 }
