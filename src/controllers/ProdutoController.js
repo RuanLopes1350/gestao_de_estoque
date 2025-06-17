@@ -5,7 +5,7 @@ import { CommonResponse, CustomError, HttpStatusCodes } from '../utils/helpers/i
 
 class ProdutoController {
     constructor() {
-        this.service = new ProdutoService();
+        this.service = new ProdutoService(); 
     }
 
     async listarProdutos(req, res) {

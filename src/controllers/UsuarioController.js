@@ -88,8 +88,9 @@ class UsuarioController {
         }
     }
 
-    async cadastrarUsuario(req, res) {
-        console.log('Estou no cadastrarUsuario em UsuarioController');
+    // reformulando o cadastrar usuario
+    /*async cadastrarUsuario(req, res) {
+        console.log('Estou no cadastrarUsuario em UsuarioController'); // mexendo aqui
 
         try {
             const parsedData = UsuarioSchema.parse(req.body);
@@ -103,7 +104,49 @@ class UsuarioController {
         } catch (error) {
             return CommonResponse.error(res, error);
         }
+    }*/
+    async cadastrarUsuario(req, res) {
+    console.log('Estou no cadastrarUsuario em UsuarioController');
+
+    try {
+        const parsedData = UsuarioSchema.parse(req.body);
+        const data = await this.service.cadastrarUsuario(parsedData);
+
+        return CommonResponse.created(
+            res,
+            data,
+            HttpStatusCodes.CREATED.code,
+            'Usuário cadastrado com sucesso.'
+        );
+    } catch (error) {
+        // Tratando erro Zod
+        if (error.name === 'ZodError') {
+            return CommonResponse.error(
+                res,
+                HttpStatusCodes.BAD_REQUEST.code,
+                'validationError',
+                'body',
+                error.errors,
+                'Dados de usuário inválidos. Verifique os campos e tente novamente.'
+            );
+        }
+
+        // Tratando erro no Mongoose
+        if (error.name === 'ValidationError') {
+            return CommonResponse.error(
+                res,
+                HttpStatusCodes.BAD_REQUEST.code,
+                'validationError',
+                Object.keys(error.errors)[0],
+                Object.values(error.errors).map(e => e.message),
+                'Validação de dados falhou. Verifique os campos obrigatórios.'
+            );
+        }
+
+        return CommonResponse.error(res, error);
     }
+}
+
 
     async atualizarUsuario(req, res) {
         console.log('Estou no atualizarUsuario em UsuarioController');

@@ -13,7 +13,7 @@ router
     )
     .post(
         "/", 
-        asyncWrapper(usuarioController.cadastrarUsuario.bind(usuarioController))
+        asyncWrapper(usuarioController.cadastrarUsuario.bind(usuarioController)) // mexendo aqui
     )
     // Rotas específicas antes das rotas com parâmetros
     .get(

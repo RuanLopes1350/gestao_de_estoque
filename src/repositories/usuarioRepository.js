@@ -86,7 +86,7 @@ class UsuarioRepository {
 
         // Verificar se já existe um usuário com a mesma matrícula
         if (dadosUsuario.matricula) {
-            const usuarioExistente = await this.model.findOne({ matricula: dadosUsuario.matricula });
+            const usuarioExistente = await this.model.findOne({ matricula: dadosUsuario.matricula }); //mexendo aqui
             if (usuarioExistente) {
                 throw new CustomError({
                     statusCode: 400,
@@ -97,6 +97,8 @@ class UsuarioRepository {
                 });
             }
         }
+        const novoUsuario = await this.model.create(dadosUsuario);
+        return novoUsuario
     }
 
     async atualizarUsuario(matricula, dadosAtualizacao) {
