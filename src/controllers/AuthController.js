@@ -1,7 +1,8 @@
 import { AuthService } from "../services/AuthService.js";
 import CommonResponse from "../utils/helpers/CommonResponse.js";
 import HttpStatusCodes from "../utils/helpers/HttpStatusCodes.js";
-import { UsuarioUpdateSchema } from '../utils/validators/schemas/zod/UsuarioSchema.js'
+import { UsuarioUpdateSchema } from '../utils/validators/schemas/zod/UsuarioSchema.js';
+import LogMiddleware from '../middlewares/LogMiddleware.js';
 
 class AuthController {
     constructor() {
@@ -10,18 +11,6 @@ class AuthController {
 
     async login(req, res) {
         try {
-            const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
-            const userAgent = req.headers['user-agent'];
-            let SO = 'Desconhecido';
-            if(userAgent) {
-                if(userAgent.includes('Windows')) SO = 'Windows';
-                else if(userAgent.includes('Macintosh')) SO = 'MacOS';
-                else if(userAgent.includes('Linux')) SO = 'Linux';
-                else if(userAgent.includes('Android')) SO = 'Android';
-                else if (userAgent.includes('iPhone') || userAgent.includes('iPad')) SO = 'iOS';
-            }
-            console.log(ip, userAgent, SO);
-            
             const { matricula, senha } = req.body;
 
             if (!matricula || !senha) {
@@ -33,12 +22,28 @@ class AuthController {
 
             const authData = await this.service.autenticar(matricula, senha);
 
+            // Inicia sessão de log para o usuário
+            LogMiddleware.startSession(authData.usuario.id, {
+                matricula: authData.usuario.matricula,
+                nome: authData.usuario.nome_usuario,
+                perfil: authData.usuario.perfil
+            }, req);
+
             return res.status(200).json({
                 message: 'Login realizado com sucesso',
                 ...authData
             });
         } catch (error) {
             console.error('Erro ao realizar login:', error);
+
+            // Registra tentativa de login falhada
+            if (req.body.matricula) {
+                LogMiddleware.logFailedLogin(
+                    req.body.matricula, 
+                    error.customMessage || 'Erro de autenticação',
+                    req
+                );
+            }
 
             if (error.statusCode) {
                 return res.status(error.statusCode).json({
@@ -59,6 +64,9 @@ class AuthController {
             const userId = req.userId; // Disponibilizado pelo middleware de autenticação
 
             await this.service.logout(userId);
+
+            // Finaliza sessão de log
+            LogMiddleware.endSession(userId, 'manual');
 
             return res.status(200).json({
                 message: 'Logout realizado com sucesso'
@@ -126,6 +134,12 @@ class AuthController {
             }
 
             await this.service.revoke(matricula);
+
+            // Registra evento crítico de revogação
+            LogMiddleware.logCriticalEvent(req.userId, 'TOKEN_REVOKE', {
+                matricula_revogada: matricula,
+                revogado_por: req.userMatricula
+            }, req);
 
             return res.status(200).json({
                 message: 'Token revogado com sucesso'

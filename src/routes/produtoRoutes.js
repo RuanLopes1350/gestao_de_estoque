@@ -1,6 +1,7 @@
 import express from 'express';
 import ProdutoController from '../controllers/ProdutoController.js';
 import asyncWrapper from '../middlewares/asyncWrapper.js';
+import LogMiddleware from '../middlewares/LogMiddleware.js';
 
 const router = express.Router();
 const produtoController = new ProdutoController();
@@ -9,10 +10,12 @@ router
     // Rotas gerais primeiro
     .get(
         "/",
+        LogMiddleware.log('CONSULTA_PRODUTOS'),
         asyncWrapper(produtoController.listarProdutos.bind(produtoController))
     )
     .post(
         "/",
+        LogMiddleware.log('CADASTRO_PRODUTO'),
         asyncWrapper(produtoController.cadastrarProduto.bind(produtoController))
     )
     // Rotas específicas antes das rotas com parâmetros
