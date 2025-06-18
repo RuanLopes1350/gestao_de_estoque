@@ -50,8 +50,9 @@ export class AuthService {
         const accessToken = this._gerarAccessToken(usuario);
         const refreshToken = this._gerarRefreshToken(usuario);
 
-        // Armazenar tokens no usuário
+        // Armazenar tokens no usuário e marcar como online
         await this.usuarioRepository.armazenarTokens(usuario._id, accessToken, refreshToken);
+        await this.usuarioRepository.setUserOnlineStatus(usuario._id, true);
 
         // Retornar dados sem a senha
         const usuarioSemSenha = {
@@ -70,6 +71,8 @@ export class AuthService {
     }
 
     async logout(userId) {
+        // Marcar usuário como offline
+        await this.usuarioRepository.setUserOnlineStatus(userId, false);
         return await this.usuarioRepository.removeToken(userId);
     }
 
@@ -150,7 +153,8 @@ export class AuthService {
             });
         }
 
-        // Remove tokens do usuário
+        // Remove tokens do usuário e marca como offline
+        await this.usuarioRepository.setUserOnlineStatus(usuario._id, false);
         const data = await this.usuarioRepository.removeToken(usuario._id);
         return { data };
     }

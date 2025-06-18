@@ -10,6 +10,11 @@ const logController = new LogController();
 router.use(authMiddleware);
 
 router
+    // Usuários online (apenas administradores)
+    .get(
+        "/online-users",
+        asyncWrapper(logController.getOnlineUsers.bind(logController))
+    )
     // Obter logs de um usuário específico
     .get(
         "/usuario/:userId",

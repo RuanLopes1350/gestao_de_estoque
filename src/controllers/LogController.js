@@ -1,8 +1,10 @@
 import LogMiddleware from '../middlewares/LogMiddleware.js';
+import UsuarioRepository from '../repositories/usuarioRepository.js';
 
 class LogController {
     constructor() {
         this.logMiddleware = LogMiddleware;
+        this.usuarioRepository = new UsuarioRepository();
     }
 
     /**
@@ -159,6 +161,36 @@ class LogController {
             console.error('Erro ao buscar eventos críticos:', error);
             return res.status(500).json({
                 message: 'Erro interno ao buscar eventos críticos',
+                type: 'serverError'
+            });
+        }
+    }
+
+    /**
+     * Lista usuários atualmente online
+     */
+    async getOnlineUsers(req, res) {
+        try {
+            // Apenas administradores podem ver usuários online
+            if (req.userPerfil !== 'administrador') {
+                return res.status(403).json({
+                    message: 'Acesso negado. Apenas administradores podem ver usuários online',
+                    type: 'permissionError'
+                });
+            }
+
+            const onlineUsers = await this.usuarioRepository.getOnlineUsers();
+
+            return res.status(200).json({
+                message: 'Usuários online recuperados com sucesso',
+                data: onlineUsers,
+                total: onlineUsers.length,
+                timestamp: new Date().toISOString()
+            });
+        } catch (error) {
+            console.error('Erro ao buscar usuários online:', error);
+            return res.status(500).json({
+                message: 'Erro interno ao buscar usuários online',
                 type: 'serverError'
             });
         }
