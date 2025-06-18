@@ -21,7 +21,8 @@ class Usuario {
         token_recuperacao: { type: String, select: false },
         token_recuperacao_expira: { type: String, select: false },
         codigo_recuperacao: { type: String, select: false },
-        data_expiracao_codigo: { type: Date, select: false }
+        data_expiracao_codigo: { type: Date, select: false },
+        online: { type: Boolean, default: false }
       },
       {
         timestamps: {
