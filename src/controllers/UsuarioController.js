@@ -2,6 +2,7 @@ import UsuarioService from "../services/usuarioService.js";
 import { CommonResponse, CustomError, HttpStatusCodes } from "../utils/helpers/index.js";
 import { UsuarioSchema, UsuarioUpdateSchema } from "../utils/validators/schemas/zod/UsuarioSchema.js";
 import { UsuarioQuerySchema, UsuarioIdSchema } from "../utils/validators/schemas/zod/querys/UsuarioQuerySchema.js";
+import LogMiddleware from '../middlewares/LogMiddleware.js';
 
 class UsuarioController {
     constructor() {
@@ -111,6 +112,14 @@ class UsuarioController {
     try {
         const parsedData = UsuarioSchema.parse(req.body);
         const data = await this.service.cadastrarUsuario(parsedData);
+
+        // Registra evento crítico de criação de usuário
+        LogMiddleware.logCriticalEvent(req.userId, 'USUARIO_CRIADO', {
+            usuario_criado: data._id,
+            matricula: data.matricula,
+            perfil: data.perfil,
+            criado_por: req.userMatricula
+        }, req);
 
         return CommonResponse.created(
             res,
