@@ -41,7 +41,7 @@
 | **Lider do Projeto** | Ruan Lopes |
 | **PRINCIPAL OBJETIVO** | Um sistema intuitivo que permita o controle de estoque |
 | **BENEFÍCIOS ESPERADOS** | Ter um melhor controle do estoque |
-| **INÍCIO E TÉRMINO PREVISTOS** | 01/10/2024 - 11/03/2025 |
+| **INÍCIO E TÉRMINO PREVISTOS** | 24/03/2025 - 21/07/2025 |
 
 
 # INTRODUÇÃO
@@ -65,7 +65,14 @@ Métodos utilizados para a obtenção dos requisitos do sistema:
 
 
 # DESCRIÇÃO GERAL
-O H&R é um sistema completo para gerenciamento de estoque de peças automotivas, projetado para facilitar o controle, categorização e monitoramento de itens em lojas de autopeças. O sistema oferece uma abordagem estruturada para classificar peças por valor monetário e tipo de veículo, além de integrar-se com sistemas externos de PDV e emissão de notas fiscais.
+O sistema de Gestão de Estoque foi desenvolvido atendendo às necessidades específicas de uma auto peças que realiza a venda de peças automotivas. O objetivo principal é proporcionar um controle mais eficiente do estoque, por meio do registro detalhado de entradas e saídas de produtos.
+Uma das funcionalidades centrais do sistema é a classificação automática dos produtos em três categorias distintas, definidas conforme o valor de cada item:
+
+Categoria A: Produtos de alto valor;
+Categoria B: Produtos de valor intermediário;
+Categoria C: Produtos de baixo valor.
+
+Essa categorização visa facilitar a organização, monitoramento e priorização dos itens no estoque, permitindo à oficina tomar decisões mais assertivas em relação à reposição e movimentação de produtos.
 
 ## Usuários do sistema
 |USUÁRIO|DESCRIÇÃO|
@@ -77,12 +84,10 @@ O H&R é um sistema completo para gerenciamento de estoque de peças automotivas
 
 
 
-### Sistemas similares:
-O dashboard vai ser baseado nos projetos desenvolvidos no GitLab, exibindo gráficos intuitivos para os usuários. Alguns exemplos similares ao dashboard de métricas são: 
-•	Microsoft Power BI;
-•	QilkView;
-•	Google Data Studio;
-•	O próprio dashboard fornecido pelo GitHub.
+### Sistemas similares: 
+•	NetSuite ERP;
+•	Zoho Inventory;
+•	SAP Business One;
 
 
 ## Suposições e dependências
