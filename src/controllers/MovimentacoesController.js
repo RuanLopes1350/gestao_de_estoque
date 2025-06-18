@@ -2,6 +2,7 @@ import MovimentacaoService from '../services/movimentacaoService.js';
 import { MovimentacaoSchema, MovimentacaoUpdateSchema } from '../utils/validators/schemas/zod/MovimentacaoSchema.js';
 import { MovimentacaoQuerySchema, MovimentacaoIdSchema } from '../utils/validators/schemas/zod/querys/MovimentacaoQuerySchema.js';
 import { CommonResponse, CustomError, HttpStatusCodes } from '../utils/helpers/index.js';
+import LogMiddleware from '../middlewares/LogMiddleware.js';
 
 class MovimentacoesController {
     constructor() {
@@ -126,6 +127,15 @@ class MovimentacoesController {
         try {
             const parsedData = await MovimentacaoSchema.parseAsync(req.body);
             const data = await this.service.cadastrarMovimentacao(parsedData);
+
+            // Registra evento crítico de movimentação de estoque
+            LogMiddleware.logCriticalEvent(req.userId, 'ESTOQUE_MOVIMENTO', {
+                produto: parsedData.produto,
+                quantidade: parsedData.quantidade,
+                tipo_movimentacao: parsedData.tipo_movimentacao,
+                movimentacao_id: data._id
+            }, req);
+
             return CommonResponse.created(
                 res,
                 data,

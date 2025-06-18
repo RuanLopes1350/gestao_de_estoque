@@ -21,31 +21,38 @@ router
     // Rotas específicas antes das rotas com parâmetros
     .get(
         "/estoque-baixo",
+        LogMiddleware.log('CONSULTA_ESTOQUE_BAIXO'),
         asyncWrapper(produtoController.listarEstoqueBaixo.bind(produtoController))
     )
     .get(
         "/busca",
+        LogMiddleware.log('BUSCA_PRODUTOS'),
         asyncWrapper(produtoController.buscarProdutos.bind(produtoController))
     )
     .patch(
         "/desativar/:id",
+        LogMiddleware.log('DESATIVACAO_PRODUTO'),
         asyncWrapper(produtoController.desativarProduto.bind(produtoController))
     )
     .patch(
         "/reativar/:id",
+        LogMiddleware.log('REATIVACAO_PRODUTO'),
         asyncWrapper(produtoController.reativarProduto.bind(produtoController))
     )
     // Rotas com parâmetros por último
     .get(
         "/:id",
+        LogMiddleware.log('CONSULTA_PRODUTO'),
         asyncWrapper(produtoController.buscarProdutoPorID.bind(produtoController))
     )
     .patch(
         "/:id",
+        LogMiddleware.log('ATUALIZACAO_PRODUTO'),
         asyncWrapper(produtoController.atualizarProduto.bind(produtoController))
     )
     .delete(
         "/:id",
+        LogMiddleware.log('EXCLUSAO_PRODUTO'),
         asyncWrapper(produtoController.deletarProduto.bind(produtoController))
     );
 
