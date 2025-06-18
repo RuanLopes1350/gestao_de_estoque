@@ -10,6 +10,18 @@ class AuthController {
 
     async login(req, res) {
         try {
+            const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
+            const userAgent = req.headers['user-agent'];
+            let SO = 'Desconhecido';
+            if(userAgent) {
+                if(userAgent.includes('Windows')) SO = 'Windows';
+                else if(userAgent.includes('Macintosh')) SO = 'MacOS';
+                else if(userAgent.includes('Linux')) SO = 'Linux';
+                else if(userAgent.includes('Android')) SO = 'Android';
+                else if (userAgent.includes('iPhone') || userAgent.includes('iPad')) SO = 'iOS';
+            }
+            console.log(ip, userAgent, SO);
+            
             const { matricula, senha } = req.body;
 
             if (!matricula || !senha) {
