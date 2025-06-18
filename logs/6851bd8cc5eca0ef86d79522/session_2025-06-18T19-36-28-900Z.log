@@ -1,0 +1,31 @@
+{
+  "inicioSessao": "2025-06-18T19:36:28.900Z",
+  "usuario": {
+    "id": "6851bd8cc5eca0ef86d79522",
+    "matricula": "ADM1350",
+    "nome": "Ruan Lopes",
+    "perfil": "administrador"
+  },
+  "informacaoSistema": {
+    "ip": "::ffff:127.0.0.1",
+    "sistemaOperacional": "Desconhecido",
+    "navegador": "Desconhecido",
+    "userAgent": "Thunder Client (https://www.thunderclient.com)"
+  },
+  "eventos": [
+    {
+      "timestamp": "2025-06-18T19:36:28.901Z",
+      "tipo": "LOGIN",
+      "ip": "::ffff:127.0.0.1",
+      "userAgent": "Thunder Client (https://www.thunderclient.com)",
+      "sistemaOperacional": "Desconhecido",
+      "navegador": "Desconhecido",
+      "metodo": "POST",
+      "rota": "/auth/login",
+      "dados": {
+        "tipo": "login_sucesso",
+        "matricula": "ADM1350"
+      }
+    }
+  ]
+}
