@@ -57,9 +57,10 @@ class MovimentacoesController {
 
     try {
       const { id } = req.params || {};
-
-      MovimentacaoIdSchema.parse(id);
-      const data = await this.service.buscarMovimentacaoPorID(id);
+      console.log(id);
+      const movId = MovimentacaoIdSchema.parse(id);
+      console.log(movId);
+      const data = await this.service.buscarMovimentacaoPorID(movId);
       return CommonResponse.success(
         res,
         data,
