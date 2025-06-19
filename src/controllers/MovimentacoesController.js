@@ -12,6 +12,21 @@ import {
   CustomError,
   HttpStatusCodes,
 } from "../utils/helpers/index.js";
+import LogMiddleware from "../middlewares/LogMiddleware.js";
+import MovimentacaoService from "../services/movimentacaoService.js";
+import {
+  MovimentacaoSchema,
+  MovimentacaoUpdateSchema,
+} from "../utils/validators/schemas/zod/MovimentacaoSchema.js";
+import {
+  MovimentacaoQuerySchema,
+  MovimentacaoIdSchema,
+} from "../utils/validators/schemas/zod/querys/MovimentacaoQuerySchema.js";
+import {
+  CommonResponse,
+  CustomError,
+  HttpStatusCodes,
+} from "../utils/helpers/index.js";
 
 class MovimentacoesController {
   constructor() {
@@ -187,49 +202,29 @@ class MovimentacoesController {
     console.log("ID da movimentação:", req.params.id);
 
     try {
-      const { id } = req.params;
-      if (!id) {
-        throw new CustomError({
-          statusCode: HttpStatusCodes.BAD_REQUEST.code,
-          errorType: "validationError",
-          field: "id",
-          details: [],
-          customMessage: "ID da movimentação é obrigatório.",
-        });
-      }
+      const parsedData = await MovimentacaoSchema.parseAsync(req.body);
+      const data = await this.service.cadastrarMovimentacao(parsedData);
 
-      MovimentacaoIdSchema.parse(id);
-
-      const dadosAtualizacao = req.body;
-
-      // Verifica se há dados para atualizar
-      if (Object.keys(dadosAtualizacao).length === 0) {
-        throw new CustomError({
-          statusCode: HttpStatusCodes.BAD_REQUEST.code,
-          errorType: "validationError",
-          field: "body",
-          details: [],
-          customMessage: "Nenhum dado fornecido para atualização.",
-        });
-      }
-
-      await MovimentacaoUpdateSchema.parseAsync(dadosAtualizacao);
-
-      const movimentacaoAtualizada = await this.service.atualizarMovimentacao(
-        id,
-        dadosAtualizacao
+      // Registra evento crítico de movimentação de estoque
+      LogMiddleware.logCriticalEvent(
+        req.userId,
+        "ESTOQUE_MOVIMENTO",
+        {
+          produto: parsedData.produto,
+          quantidade: parsedData.quantidade,
+          tipo_movimentacao: parsedData.tipo_movimentacao,
+          movimentacao_id: data._id,
+        },
+        req
       );
 
-      console.log("Movimentação atualizada:", movimentacaoAtualizada);
-
-      return CommonResponse.success(
+      return CommonResponse.created(
         res,
-        movimentacaoAtualizada,
-        200,
-        "Movimentação atualizada com sucesso."
+        data,
+        HttpStatusCodes.CREATED.code,
+        "Movimentação registrada com sucesso."
       );
     } catch (error) {
-      console.error("Erro ao atualizar movimentação:", error);
       return CommonResponse.error(res, error);
     }
   }

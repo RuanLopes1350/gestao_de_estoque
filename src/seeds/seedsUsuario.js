@@ -23,6 +23,7 @@ async function seedUsuario() {
             senha: senhaHash,
             perfil: 'administrador',
             ativo: true,
+            online: false,
             data_cadastro: new Date(),
             data_ultima_atualizacao: new Date()
         });
@@ -37,6 +38,7 @@ async function seedUsuario() {
                 senha: senhaFake,
                 perfil: i < 2 ? 'gerente' : 'estoquista', // 2 gerentes, o resto estoquistas
                 ativo: true,
+                online: false,
                 data_cadastro: new Date(),
                 data_ultima_atualizacao: new Date()
             });

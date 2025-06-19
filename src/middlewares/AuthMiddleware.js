@@ -3,7 +3,7 @@ import dotenv from 'dotenv';
 
 dotenv.config();
 
-const authMiddleware = (req, res, next) => {
+const authMiddleware = async (req, res, next) => {
     try {
         // Obter o token do cabeçalho
         const authHeader = req.headers.authorization;
@@ -19,6 +19,26 @@ const authMiddleware = (req, res, next) => {
         
         // Verificar o token
         const decoded = jwt.verify(token, process.env.JWT_SECRET || "your_jwt_secret");
+        const Usuario = (await import('../models/Usuario.js')).default;
+        // Usar select para incluir o campo accesstoken que normalmente está oculto
+        const usuario = await Usuario.findById(decoded.id).select('+accesstoken');
+
+        // Verificar se o usuário existe e tem um token válido no banco
+        if(!usuario) {
+            return res.status(401).json ({
+                message: 'Usuário não encontrado',
+                type: 'authError'
+            });
+        }
+
+        // Verificar se o token usado na requisição é o mesmo que está armazenado no banco
+        // Isso garante que tokens revogados não funcionem mesmo que ainda sejam válidos em termos de JWT
+        if (token !== usuario.accesstoken) {
+            return res.status(401).json({
+                message: 'Token foi revogado ou é inválido',
+                type: 'authError'
+            });
+        }
         
         // Adicionar dados do usuário à requisição
         req.userId = decoded.id;

@@ -279,6 +279,19 @@ class UsuarioRepository {
             { new: true }
         );
     }
+
+    async setUserOnlineStatus(id, isOnline) {
+        return await this.model.findByIdAndUpdate(
+            id,
+            { online: isOnline },
+            { new: true }
+        );
+    }
+
+    async getOnlineUsers() {
+        return await this.model.find({ online: true, ativo: true })
+            .select('nome_usuario email matricula perfil data_cadastro');
+    }
 }
 
-export default UsuarioRepository; 
+export default UsuarioRepository;
