@@ -267,7 +267,16 @@ class UsuarioController {
                     'Usuario não encontrado. Verifique se a matricula está correta'
                 );
             }
-            return CommonResponse.error(res, error);
+            // return CommonResponse.error(res, error);  trocando esse commonResponse pelo que está abaixo
+            return CommonResponse.error(
+                res,
+                error.statusCode || 500,
+                error.errorType || 'internalError',
+                error.field || '',
+                error.details || [],
+                error.customMessage || 'Erro inesperado ao processar a solicitação.'
+);
+
         }
     }
 

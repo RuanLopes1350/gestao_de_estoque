@@ -125,6 +125,22 @@ class UsuarioService {
         }
     }
 
+    async desativarUsuario(matricula) {
+        console.log('Estou no desativarUsuario em UsuarioService');
+        const data = await this .repository.desativarUsuario(matricula);
+        if (!data) {
+            throw new CustomError({
+                statusCode: HttpStatusCodes.BAD_REQUEST.code,
+                errorType: 'validationError',
+                field: 'matricula',
+                details: [],
+                customMessage: 'Matricula do ususario inválida'
+            });
+        }
+
+        return data;
+    }
+
     async verificarEmailExistente(email) {
         const usuario = await this.repository.buscarPorEmail(email);
         return usuario !== null;
