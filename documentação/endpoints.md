@@ -112,7 +112,7 @@ Authorization: Bearer your_jwt_token
 `GET http://localhost:5011/api/produtos/busca?fornecedor=Auto Peças Sul`
 
 ### Atualizar Produto
-`PATCH http://localhost:5011/api/produtos/:id`
+`PATCH http://localhost:5011/api/produtos/:matricula`
 
 ### Desativar Produto
 `PATCH http://localhost:5011/api/produtos/desativar/:id`
