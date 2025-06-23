@@ -19,7 +19,22 @@ export const UsuarioIdSchema = z.string().refine(id => {
 }, {
     message: 'ID do usuário inválido'
 });
+export const UsuarioMatriculaSchema = z
+  .string()
+  .trim()
+  .regex(/^[A-Z]{4}[0-9]{3}$/, {
+    message: 'Matrícula deve seguir o padrão TEST001'
+  });
 
+/* //trocado pela cosntante acima
+export const UsuarioMatriculaSchema = z.string().refine(matricula => {
+    return mongoose.Types.ObjectId.isValid(matricula);
+}, {
+    message: 'Matricula do ususairo inválida'   
+});
+*/
+/*
 export const UsuarioMatriculaSchema = z.string().min(1, {
     message: 'A matrícula deve conter pelo menos 1 caractere'
 });
+*/

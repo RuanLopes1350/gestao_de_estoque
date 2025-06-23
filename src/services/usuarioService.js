@@ -124,20 +124,40 @@ class UsuarioService {
             throw error;
         }
     }
-
+    /*
     async desativarUsuario(matricula) {
-        console.log('Estou no desativarUsuario em UsuarioService');
-        const data = await this .repository.desativarUsuario(matricula);
-        if (!data) {
-            throw new CustomError({
-                statusCode: HttpStatusCodes.BAD_REQUEST.code,
-                errorType: 'validationError',
-                field: 'matricula',
-                details: [],
-                customMessage: 'Matricula do ususario inválida'
-            });
-        }
+            console.log('Estou no desativarUsuario em UsuarioService');
+    
+            if (!mongoose.Types.ObjectId.isValid(matricula)) {
+                throw new CustomError({
+                    statusCode: HttpStatusCodes.BAD_REQUEST.code,
+                    errorType: 'validationError',
+                    field: 'matricula',
+                    details: [],
+                    customMessage: 'Matricula do usuario inválida.'
+                });
+            }
+    
+            const data = await this.repository.desativarUsuario(matricula);
+            return data;
+    }
+    */
+    async desativarUsuario(matricula) {
+    console.log('Estou no desativarUsuario em UsuarioService');
 
+    try {
+        UsuarioMatriculaSchema.parse(matricula);
+    } catch (error) {
+        throw new CustomError({
+            statusCode: HttpStatusCodes.BAD_REQUEST.code,
+            errorType: 'validationError',
+            field: 'matricula',
+            details: [],
+            customMessage: 'Matrícula do usuário inválida.'
+        });
+    }
+
+        const data = await this.repository.desativarUsuario(matricula);
         return data;
     }
 

@@ -4,7 +4,7 @@ import asyncWrapper from '../middlewares/asyncWrapper.js';
 import LogMiddleware from '../middlewares/LogMiddleware.js';
 
 const router = express.Router();
-const usuarioController = new UsuarioController();
+const usuarioController = new UsuarioController(); 
 
 router
     // Rotas gerais primeiro
@@ -31,9 +31,15 @@ router
         asyncWrapper(usuarioController.buscarUsuarioPorID.bind(usuarioController))
     )
     //Rota para desativar usuario
-    .patch(
+    /*.patch(
         "/:matricula/desativar",
         usuarioController.desativarUsuario.bind(usuarioController)
+    )
+        */
+    .patch(
+        "/desativar/:matricula",
+        LogMiddleware.log('DESATIVACAO_USUARIO'),
+        asyncWrapper(usuarioController.desativarUsuario.bind(usuarioController))
     )
     .patch(
         "/:matricula",

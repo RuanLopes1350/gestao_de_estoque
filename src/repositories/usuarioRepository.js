@@ -182,8 +182,8 @@ class UsuarioRepository {
         }
         return usuario;
     }
-
-    async desativarUsuario(matricula) {
+    /*
+    async desativarUsuario(matricula) { 
         const usuario = await this.model.findOneAndUpdate (
             { matricula },
             { ativo: false },
@@ -191,7 +191,15 @@ class UsuarioRepository {
         );
         return usuario;
     }
-
+    */
+    async desativarUsuario(matricula) { 
+        const usuario = await this.model.findByIdAndUpdate (
+            matricula,
+            { ativo: false },
+            { new: true }
+        );
+        return usuario;
+    }
     /**
      * Armazenar accesstoken e refreshtoken no banco de dados
      */

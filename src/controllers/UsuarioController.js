@@ -1,7 +1,7 @@
 import UsuarioService from "../services/usuarioService.js";
 import { CommonResponse, CustomError, HttpStatusCodes } from "../utils/helpers/index.js";
 import { UsuarioSchema, UsuarioUpdateSchema } from "../utils/validators/schemas/zod/UsuarioSchema.js";
-import { UsuarioQuerySchema, UsuarioIdSchema } from "../utils/validators/schemas/zod/querys/UsuarioQuerySchema.js";
+import { UsuarioQuerySchema, UsuarioIdSchema, UsuarioMatriculaSchema } from "../utils/validators/schemas/zod/querys/UsuarioQuerySchema.js";
 import LogMiddleware from '../middlewares/LogMiddleware.js';
 
 class UsuarioController {
@@ -43,7 +43,7 @@ class UsuarioController {
         }
     }
 
-    async buscarUsuarioPorID(req, res) {
+    async buscarUsuarioPorID(req, res) { 
         console.log('Estou no buscarUsuarioPorID em UsuarioController');
 
         try {
@@ -89,23 +89,6 @@ class UsuarioController {
         }
     }
 
-    // reformulando o cadastrar usuario
-    /*async cadastrarUsuario(req, res) {
-        console.log('Estou no cadastrarUsuario em UsuarioController'); // mexendo aqui
-
-        try {
-            const parsedData = UsuarioSchema.parse(req.body);
-            const data = await this.service.cadastrarUsuario(parsedData);
-            return CommonResponse.created(
-                res,
-                data,
-                HttpStatusCodes.CREATED.code,
-                'Usuário cadastrado com sucesso.'
-            );
-        } catch (error) {
-            return CommonResponse.error(res, error);
-        }
-    }*/
     async cadastrarUsuario(req, res) {
     console.log('Estou no cadastrarUsuario em UsuarioController');
 
@@ -227,6 +210,7 @@ class UsuarioController {
         }
     }
 
+    /*
     async desativarUsuario(req, res) {
         console.log('Estou no desativarUsuario em UsuarioController');
 
@@ -278,8 +262,59 @@ class UsuarioController {
 );
 
         }
+    }*/
+   //----------------------------------------------------------------------------------------
+   async desativarUsuario(req, res) {
+           console.log('Estou no desativarUsusario em UsuarioController');
+   
+           try {
+               const { matricula } = req.params || {};
+               if (!matricula) {
+                   throw new CustomError({
+                       statusCode: HttpStatusCodes.BAD_REQUEST.code,
+                       errorType: 'validationError',
+                       field: 'matricula',
+                       details: [],
+                       customMessage: 'Matricula do usuario é obrigatório para desativar.'
+                   });
+               }
+   
+               try {
+                   UsuarioMatriculaSchema.parse(matricula);
+               } catch (error) {
+                   throw new CustomError({
+                       statusCode: HttpStatusCodes.BAD_REQUEST.code,
+                       errorType: 'validationError',
+                       field: 'matricula',
+                       details: [],
+                       customMessage: 'Matricula do usuario inválida.'
+                   });
+               }
+   
+               const data = await this.service.desativarUsuario(matricula);
+               return CommonResponse.success(res, data, 200, 'Usuario desativado com sucesso.');
+           } catch (error) {
+               if (error.statusCode === 404) {
+                   return CommonResponse.error(
+                       res,
+                       error.statusCode,
+                       error.errorType,
+                       error.field,
+                       error.details,
+                       'Usuario não encontrado. Verifique se a matricula está correta.'
+                   );
+               }
+               //return CommonResponse.error(res, error);
+               return CommonResponse.error(
+                res,
+                error.statusCode || 500,
+                error.errorType || 'serverError',
+                error.field || null,
+                error.details || [],
+                error.customMessage || error.message || 'Erro interno no servidor.');
+           }
     }
-
+// -------------------------------------------------------------------------------------------------
     async reativarUsuario(req, res) {
         console.log('Estou no reativarUsuario em UsuarioController');
 
