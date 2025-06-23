@@ -93,9 +93,8 @@ Essa categorização visa facilitar a organização, monitoramento e priorizaç�
 ## Suposições e dependências
 
 Não será necessário que os usuários tenham um computador muito potente para conseguir acessar o dashboard;
-•	Por padrão o computador deve ter uma memória RAM de 4GB;
+•	Por padrão o computador deve ter no mínimo uma memória RAM de 4GB;
 •	Um processador comum como um Intel Core I3 de 3° Geração ou mais;
-•	Um navegador instalado podendo ser o Google Chrome, Microsoft Edge, etc...;
 •	Conexão com a internet, preferencialmente com uma velocidade superior ou igual a 5 MB.
 
 # ESTUDO DE VIABILIDADE
@@ -144,8 +143,8 @@ Viabilidade Legal
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 Análise de Mercado:
-  * Público-Alvo: 
-  * Necessidade: 
+  * Público-Alvo: Empresa no ramo de auto peças.
+  * Necessidade: Controlar o estoque de forma pratica e segura.
   * Concorrência: 
 
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -220,26 +219,15 @@ RNF-009 |O sistema deve realizar backup automático diário dos dados|##########
 
 |UC-01 - Realizar Login|           
 |:---|
-|**Descrição/Objetivo:** Permitir que os usuários do sistema (alunos e professores) acessem o dashboard de métricas do GitLab por meio de autenticação|
-|**Atores: Professor**|
-|**Pré-condições:** O usuário deve estar cadastrado no sistema e o usuário deve possuir um navegador compatível e conexão com a internet.|
-|**Pós-condições:** O usuário terá acesso ao dashboard e às funcionalidades conforme seu nível de permissão.|
+|**Descrição/Objetivo:** Permitir que os usuários do sistema realizem o o login informando a matricula e senha|
+|**Atores: Funcionarios que tem acesso ao estoque**|
+|**Pré-condições:** O usuário deve estar cadastrado no sistema.|
+|**Pós-condições:** O usuário terá acesso ao sistema conforme seu nível de permissão.|
 |**FLUXO PRINCIPAL / BÁSICO:**|
 |1. O usuário acessa a página de login do sistema. |
 |2. O sistema exibe os campos para inserção de credenciais (matricula e senha).|
 |3. O usuário insere suas credenciais e confirma o login.|
 |4. O sistema valida as credenciais e autentica o usuário.|
-|5. O usuário é redirecionado para o dashboard correspondente ao seu perfil (aluno ou professor).|
-|**FLUXOS ALTERNATIVOS / EXCESSÕES:** |
-|**A1: Usuário insere credenciais inválidas** |
-|1. O sistema informa que o matricula ou senha estão incorretos
-|2. O usuário pode tentar novamente ou utilizar a opção de recuperação de senha.|
-|**A2:  Usuário esqueceu a senha** |
-|1. O usuário seleciona a opção "Esqueci minha senha".|
-|2. O sistema solicita o matricula cadastrado.|
-|3. O usuário insere o matricula e confirma.|
-|4. O sistema envia um link de recuperação de senha para o e-mail informado.|
-|5. O usuário redefine a senha e tenta realizar login novamente.|
 
 ### UC-02 - Visualizar Elementos do Sistema
 
