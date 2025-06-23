@@ -133,21 +133,8 @@ class MovimentacaoRepository {
 
   async buscarMovimentacaoPorID(id) {
     console.log("Estou no buscarMovimentacaoPorID em MovimentacaoRepository");
-
-    if (!mongoose.Types.ObjectId.isValid(id)) {
-      throw new CustomError({
-        statusCode: 400,
-        errorType: "validationError",
-        field: "id",
-        details: [],
-        customMessage: "ID da movimentação inválido",
-      });
-    }
-
-    const movimentacao = await this.model
-      .findById(id)
-      .populate("id_usuario")
-      .populate("produtos.produto_ref");
+    console.log("ID DA MOVIMENTAÇÃO", id);
+    const movimentacao = await this.model.findById(id);
 
     if (!movimentacao) {
       throw new CustomError({

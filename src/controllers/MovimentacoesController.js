@@ -1,9 +1,5 @@
 import MovimentacaoService from "../services/movimentacaoService.js";
 import {
-  MovimentacaoSchema,
-  MovimentacaoUpdateSchema,
-} from "../utils/validators/schemas/zod/MovimentacaoSchema.js";
-import {
   MovimentacaoQuerySchema,
   MovimentacaoIdSchema,
 } from "../utils/validators/schemas/zod/querys/MovimentacaoQuerySchema.js";
@@ -13,20 +9,10 @@ import {
   HttpStatusCodes,
 } from "../utils/helpers/index.js";
 import LogMiddleware from "../middlewares/LogMiddleware.js";
-import MovimentacaoService from "../services/movimentacaoService.js";
 import {
   MovimentacaoSchema,
   MovimentacaoUpdateSchema,
 } from "../utils/validators/schemas/zod/MovimentacaoSchema.js";
-import {
-  MovimentacaoQuerySchema,
-  MovimentacaoIdSchema,
-} from "../utils/validators/schemas/zod/querys/MovimentacaoQuerySchema.js";
-import {
-  CommonResponse,
-  CustomError,
-  HttpStatusCodes,
-} from "../utils/helpers/index.js";
 
 class MovimentacoesController {
   constructor() {
@@ -72,9 +58,7 @@ class MovimentacoesController {
 
     try {
       const { id } = req.params || {};
-      console.log(id);
       const movId = MovimentacaoIdSchema.parse(id);
-      console.log(movId);
       const data = await this.service.buscarMovimentacaoPorID(movId);
       return CommonResponse.success(
         res,

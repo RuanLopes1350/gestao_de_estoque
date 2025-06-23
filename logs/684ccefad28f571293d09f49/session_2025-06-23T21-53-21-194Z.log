@@ -1,5 +1,5 @@
 {
-  "inicioSessao": "2025-06-18T20:36:54.615Z",
+  "inicioSessao": "2025-06-23T21:53:21.195Z",
   "usuario": {
     "id": "684ccefad28f571293d09f49",
     "matricula": "ADM0001",
@@ -14,7 +14,7 @@
   },
   "eventos": [
     {
-      "timestamp": "2025-06-18T20:36:54.616Z",
+      "timestamp": "2025-06-23T21:53:21.195Z",
       "tipo": "LOGIN",
       "ip": "::1",
       "userAgent": "PostmanRuntime/7.44.0",
@@ -25,6 +25,24 @@
       "dados": {
         "tipo": "login_sucesso",
         "matricula": "ADM0001"
+      }
+    },
+    {
+      "timestamp": "2025-06-23T21:53:34.851Z",
+      "tipo": "EXCLUSAO_MOVIMENTACAO",
+      "ip": "::1",
+      "userAgent": "PostmanRuntime/7.44.0",
+      "sistemaOperacional": "Desconhecido",
+      "navegador": "Desconhecido",
+      "metodo": "DELETE",
+      "rota": "/api/movimentacoes/68521e69a614fd0c4a743dd4",
+      "dados": {
+        "metodo": "DELETE",
+        "rota": "/api/movimentacoes/68521e69a614fd0c4a743dd4",
+        "params": {
+          "id": "68521e69a614fd0c4a743dd4"
+        },
+        "query": {}
       }
     }
   ]
