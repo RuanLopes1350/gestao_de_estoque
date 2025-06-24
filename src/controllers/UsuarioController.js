@@ -268,8 +268,8 @@ class UsuarioController {
            console.log('Estou no desativarUsusario em UsuarioController');
    
            try {
-               const { matricula } = req.params || {};
-               if (!matricula) {
+               const { id } = req.params || {};
+               if (!id) {
                    throw new CustomError({
                        statusCode: HttpStatusCodes.BAD_REQUEST.code,
                        errorType: 'validationError',
@@ -280,18 +280,18 @@ class UsuarioController {
                }
    
                try {
-                   UsuarioMatriculaSchema.parse(matricula);
+                   UsuarioIdSchema.parse(id);
                } catch (error) {
                    throw new CustomError({
                        statusCode: HttpStatusCodes.BAD_REQUEST.code,
                        errorType: 'validationError',
                        field: 'matricula',
                        details: [],
-                       customMessage: 'Matricula do usuario inválida.'
+                       customMessage: 'Matricula do usuario inválido.'
                    });
                }
    
-               const data = await this.service.desativarUsuario(matricula);
+               const data = await this.service.desativarUsuario(id);
                return CommonResponse.success(res, data, 200, 'Usuario desativado com sucesso.');
            } catch (error) {
                if (error.statusCode === 404) {

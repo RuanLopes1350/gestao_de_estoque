@@ -192,9 +192,9 @@ class UsuarioRepository {
         return usuario;
     }
     */
-    async desativarUsuario(matricula) { 
-        const usuario = await this.model.findByIdAndUpdate (
-            matricula,
+    async desativarUsuario(id) { 
+        const usuario = await this.model.findByIdAndUpdate ( // trocar findByIdAndUpdate por findOneAndUpdate
+            id,
             { ativo: false },
             { new: true }
         );

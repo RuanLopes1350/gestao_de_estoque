@@ -165,6 +165,9 @@ Authorization: Bearer your_jwt_token
 ### Buscar por Matrícula
 `GET http://localhost:5011/api/usuarios/matricula/:matricula`
 
+### Desativar Usuário
+`PATCH http://localhost:5011/api/usuarios/desativar/:id`
+
 ### Atualizar Usuário
 `PATCH http://localhost:5011/api/usuarios/:matricula`
 

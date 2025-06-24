@@ -30,14 +30,9 @@ router
         LogMiddleware.log('CONSULTA_USUARIO'),
         asyncWrapper(usuarioController.buscarUsuarioPorID.bind(usuarioController))
     )
-    //Rota para desativar usuario
-    /*.patch(
-        "/:matricula/desativar",
-        usuarioController.desativarUsuario.bind(usuarioController)
-    )
-        */
+    //Rota para desativar usuario por id
     .patch(
-        "/desativar/:matricula",
+        "/desativar/:id",
         LogMiddleware.log('DESATIVACAO_USUARIO'),
         asyncWrapper(usuarioController.desativarUsuario.bind(usuarioController))
     )

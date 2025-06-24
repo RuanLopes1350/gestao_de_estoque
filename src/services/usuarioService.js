@@ -2,6 +2,7 @@ import UsuarioRepository from '../repositories/usuarioRepository.js';
 import mongoose from 'mongoose';
 import { CustomError, HttpStatusCodes } from '../utils/helpers/index.js';
 import bcrypt from 'bcrypt';
+import { UsuarioIdSchema } from '../utils/validators/schemas/zod/querys/UsuarioQuerySchema.js';
 
 class UsuarioService {
     constructor() {
@@ -142,11 +143,11 @@ class UsuarioService {
             return data;
     }
     */
-    async desativarUsuario(matricula) {
+    async desativarUsuario(id) {
     console.log('Estou no desativarUsuario em UsuarioService');
 
     try {
-        UsuarioMatriculaSchema.parse(matricula);
+        UsuarioIdSchema.parse(id);
     } catch (error) {
         throw new CustomError({
             statusCode: HttpStatusCodes.BAD_REQUEST.code,
@@ -157,7 +158,7 @@ class UsuarioService {
         });
     }
 
-        const data = await this.repository.desativarUsuario(matricula);
+        const data = await this.repository.desativarUsuario(id);
         return data;
     }
 
