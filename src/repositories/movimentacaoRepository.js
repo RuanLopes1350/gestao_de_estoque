@@ -133,7 +133,6 @@ class MovimentacaoRepository {
 
   async buscarMovimentacaoPorID(id) {
     console.log("Estou no buscarMovimentacaoPorID em MovimentacaoRepository");
-    console.log("ID DA MOVIMENTAÇÃO", id);
     const movimentacao = await this.model.findById(id);
 
     if (!movimentacao) {
@@ -142,7 +141,7 @@ class MovimentacaoRepository {
         errorType: "resourceNotFound",
         field: "Movimentacao",
         details: [],
-        customMessage: "Movimentação não encontrada",
+        customMessage: messages.error.resourceNotFound('Movimentacao')
       });
     }
 

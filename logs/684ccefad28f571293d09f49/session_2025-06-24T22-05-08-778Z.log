@@ -1,0 +1,117 @@
+{
+  "inicioSessao": "2025-06-24T22:05:08.778Z",
+  "usuario": {
+    "id": "684ccefad28f571293d09f49",
+    "matricula": "ADM0001",
+    "nome": "Administrador",
+    "perfil": "administrador"
+  },
+  "informacaoSistema": {
+    "ip": "::1",
+    "sistemaOperacional": "Desconhecido",
+    "navegador": "Desconhecido",
+    "userAgent": "PostmanRuntime/7.44.0"
+  },
+  "eventos": [
+    {
+      "timestamp": "2025-06-24T22:05:08.779Z",
+      "tipo": "LOGIN",
+      "ip": "::1",
+      "userAgent": "PostmanRuntime/7.44.0",
+      "sistemaOperacional": "Desconhecido",
+      "navegador": "Desconhecido",
+      "metodo": "POST",
+      "rota": "/auth/login",
+      "dados": {
+        "tipo": "login_sucesso",
+        "matricula": "ADM0001"
+      }
+    },
+    {
+      "timestamp": "2025-06-24T22:05:27.332Z",
+      "tipo": "CONSULTA_MOVIMENTACOES",
+      "ip": "::1",
+      "userAgent": "PostmanRuntime/7.44.0",
+      "sistemaOperacional": "Desconhecido",
+      "navegador": "Desconhecido",
+      "metodo": "GET",
+      "rota": "/api/movimentacoes/",
+      "dados": {
+        "metodo": "GET",
+        "rota": "/api/movimentacoes/",
+        "params": {},
+        "query": {}
+      }
+    },
+    {
+      "timestamp": "2025-06-24T22:06:27.927Z",
+      "tipo": "EXCLUSAO_MOVIMENTACAO",
+      "ip": "::1",
+      "userAgent": "PostmanRuntime/7.44.0",
+      "sistemaOperacional": "Desconhecido",
+      "navegador": "Desconhecido",
+      "metodo": "DELETE",
+      "rota": "/api/movimentacoes/68521e69a614fd0c4a743dd4",
+      "dados": {
+        "metodo": "DELETE",
+        "rota": "/api/movimentacoes/68521e69a614fd0c4a743dd4",
+        "params": {
+          "id": "68521e69a614fd0c4a743dd4"
+        },
+        "query": {}
+      }
+    },
+    {
+      "timestamp": "2025-06-24T22:07:23.365Z",
+      "tipo": "CADASTRO_MOVIMENTACAO",
+      "ip": "::1",
+      "userAgent": "PostmanRuntime/7.44.0",
+      "sistemaOperacional": "Desconhecido",
+      "navegador": "Desconhecido",
+      "metodo": "POST",
+      "rota": "/api/movimentacoes/",
+      "dados": {
+        "metodo": "POST",
+        "rota": "/api/movimentacoes/",
+        "params": {},
+        "query": {}
+      }
+    },
+    {
+      "timestamp": "2025-06-24T22:14:54.869Z",
+      "tipo": "EXCLUSAO_MOVIMENTACAO",
+      "ip": "::1",
+      "userAgent": "PostmanRuntime/7.44.0",
+      "sistemaOperacional": "Desconhecido",
+      "navegador": "Desconhecido",
+      "metodo": "DELETE",
+      "rota": "/api/movimentacoes/685b219ba962fb815774cf28",
+      "dados": {
+        "metodo": "DELETE",
+        "rota": "/api/movimentacoes/685b219ba962fb815774cf28",
+        "params": {
+          "id": "685b219ba962fb815774cf28"
+        },
+        "query": {}
+      }
+    },
+    {
+      "timestamp": "2025-06-24T22:16:19.276Z",
+      "tipo": "EXCLUSAO_MOVIMENTACAO",
+      "ip": "::1",
+      "userAgent": "PostmanRuntime/7.44.0",
+      "sistemaOperacional": "Desconhecido",
+      "navegador": "Desconhecido",
+      "metodo": "DELETE",
+      "rota": "/api/movimentacoes/685b219ba962fb815774cf28",
+      "dados": {
+        "metodo": "DELETE",
+        "rota": "/api/movimentacoes/685b219ba962fb815774cf28",
+        "params": {
+          "id": "685b219ba962fb815774cf28"
+        },
+        "query": {}
+      }
+    }
+  ]
+}
