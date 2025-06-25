@@ -253,6 +253,17 @@ class MovimentacaoFilterBuilder {
         return texto.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, '\\$&');
     }
 
+    comStatus(status) {
+        if (status !== undefined) {
+            // Converter string 'true' ou 'false' para booleano
+            if (typeof status === 'string') {
+                status = status.toLowerCase() === 'true';
+            }
+            this.filters.status = status;
+        }
+        return this;
+    }
+
     /**
      * Constrói e retorna o objeto de filtros
      * @returns {Object} - Filtros para consulta MongoDB

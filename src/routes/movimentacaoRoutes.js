@@ -44,6 +44,16 @@ router
         '/:id',
         LogMiddleware.log('EXCLUSAO_MOVIMENTACAO'),
         asyncWrapper(movimentacoesController.deletarMovimentacao.bind(movimentacoesController))
+    )
+    .patch(
+        '/desativar/:id',
+        LogMiddleware.log('DESATIVACAO_MOVIMENTACAO'),
+        asyncWrapper(movimentacoesController.desativarMovimentacao.bind(movimentacoesController))
+    )
+    .patch(
+        '/reativar/:id',
+        LogMiddleware.log('REATIVACAO_MOVIMENTACAO'),
+        asyncWrapper(movimentacoesController.reativarMovimentacao.bind(movimentacoesController))
     );
 
 
