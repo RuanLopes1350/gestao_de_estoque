@@ -23,6 +23,7 @@ class Movimentacao {
                 data_movimentacao: { type: Date, default: Date.now },
                 id_usuario: { type: mongoose.Schema.Types.ObjectId, ref: 'usuario' },
                 nome_usuario: { type: String, required: true },
+                status: {type: Boolean, default: true},
                 produtos: [produtoMovimentacaoSchema]
             },
             {

@@ -359,6 +359,24 @@ class MovimentacaoRepository {
       throw error;
     }
   }
+
+  async desativarMovimentacao(id){
+    const movimentacao = await this.model.findByIdAndUpdate (
+      id,
+      { status: false },
+      { new: true }
+  );
+  return movimentacao;
+  }
+
+  async reativarMovimentacao(id){
+    const movimentacao = await this.model.findByIdAndUpdate (
+      id,
+      { status: true },
+      { new: true }
+  );
+  return movimentacao;
+  }
 }
 
 export default MovimentacaoRepository;

@@ -341,6 +341,92 @@ class MovimentacoesController {
       return CommonResponse.error(res, error);
     }
   }
+
+  async desativarMovimentacao(req, res) {
+      console.log('Estou no desativarMovimentacao em MovimentacoesController');
+      try {
+        const { id } = req.params || {};
+        if (!id) {
+            throw new CustomError({
+                statusCode: HttpStatusCodes.BAD_REQUEST.code,
+                errorType: 'validationError',
+                field: 'id',
+                details: [],
+                customMessage: 'ID da movimentação é obrigatório para desativar.'
+            });
+        }
+
+        try {
+          MovimentacaoIdSchema.parse(id);
+        } catch (error) {
+            throw new CustomError({
+                statusCode: HttpStatusCodes.BAD_REQUEST.code,
+                errorType: 'validationError',
+                field: 'id',
+                details: [],
+                customMessage: 'ID da movimentação inválido.'
+            });
+        }
+
+        const data = await this.service.desativarMovimentacao(id);
+        return CommonResponse.success(res, data, 200, 'movimentação desativada com sucesso.');
+    } catch (error) {
+        if (error.statusCode === 404) {
+            return CommonResponse.error(
+                res,
+                error.statusCode,
+                error.errorType,
+                error.field,
+                error.details,
+                'movimentação não encontrada. Verifique se o ID está correto.'
+            );
+        }
+        return CommonResponse.error(res, error);
+    }
+  }
+
+  async reativarMovimentacao(req, res) {
+    console.log('Estou no reativarMovimentacao em MovimentacoesController');
+    try {
+      const { id } = req.params || {};
+      if (!id) {
+          throw new CustomError({
+              statusCode: HttpStatusCodes.BAD_REQUEST.code,
+              errorType: 'validationError',
+              field: 'id',
+              details: [],
+              customMessage: 'ID da movimentação é obrigatório para desativar.'
+          });
+      }
+
+      try {
+        MovimentacaoIdSchema.parse(id);
+      } catch (error) {
+          throw new CustomError({
+              statusCode: HttpStatusCodes.BAD_REQUEST.code,
+              errorType: 'validationError',
+              field: 'id',
+              details: [],
+              customMessage: 'ID da movimentação inválido.'
+          });
+      }
+
+      const data = await this.service.reativarMovimentacao(id);
+      return CommonResponse.success(res, data, 200, 'movimentação reativada com sucesso.');
+  } catch (error) {
+      if (error.statusCode === 404) {
+          return CommonResponse.error(
+              res,
+              error.statusCode,
+              error.errorType,
+              error.field,
+              error.details,
+              'movimentação não encontrada. Verifique se o ID está correto.'
+          );
+      }
+      return CommonResponse.error(res, error);
+  }
+}
 }
 
 export default MovimentacoesController;
