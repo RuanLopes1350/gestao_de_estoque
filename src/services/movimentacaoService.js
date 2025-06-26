@@ -489,6 +489,40 @@ class MovimentacaoService {
         // Chamada ao repository com filtro avançado
         return this.repository.filtrarMovimentacoesAvancado(filtros, opcoesPaginacao);
     }
+
+    async desativarMovimentacao(id) {
+        console.log('Estou no desativarMovimentacao em movimentacaoService');
+
+        if (!mongoose.Types.ObjectId.isValid(id)) {
+            throw new CustomError({
+                statusCode: HttpStatusCodes.BAD_REQUEST.code,
+                errorType: 'validationError',
+                field: 'id',
+                details: [],
+                customMessage: 'ID da movimentacao inválido.'
+            });
+        }
+
+        const data = await this.repository.desativarMovimentacao(id);
+        return data;
+    }
+
+    async reativarMovimentacao(id) {
+        console.log('Estou no reativarMovimentacao em movimentacaoService');
+
+        if (!mongoose.Types.ObjectId.isValid(id)) {
+            throw new CustomError({
+                statusCode: HttpStatusCodes.BAD_REQUEST.code,
+                errorType: 'validationError',
+                field: 'id',
+                details: [],
+                customMessage: 'ID da movimentacao inválido.'
+            });
+        }
+
+        const data = await this.repository.reativarMovimentacao(id);
+        return data;
+    }
 }
 
 export default MovimentacaoService;
