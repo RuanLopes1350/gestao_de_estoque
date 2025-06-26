@@ -1,0 +1,58 @@
+{
+  "inicioSessao": "2025-06-26T00:36:17.173Z",
+  "usuario": {
+    "id": "684ccefad28f571293d09f49",
+    "matricula": "ADM0001",
+    "nome": "Administrador",
+    "perfil": "administrador"
+  },
+  "informacaoSistema": {
+    "ip": "::1",
+    "sistemaOperacional": "Desconhecido",
+    "navegador": "Desconhecido",
+    "userAgent": "PostmanRuntime/7.44.0"
+  },
+  "eventos": [
+    {
+      "timestamp": "2025-06-26T00:36:17.174Z",
+      "tipo": "LOGIN",
+      "ip": "::1",
+      "userAgent": "PostmanRuntime/7.44.0",
+      "sistemaOperacional": "Desconhecido",
+      "navegador": "Desconhecido",
+      "metodo": "POST",
+      "rota": "/auth/login",
+      "dados": {
+        "tipo": "login_sucesso",
+        "matricula": "ADM0001"
+      }
+    },
+    {
+      "timestamp": "2025-06-26T00:36:20.848Z",
+      "tipo": "REATIVACAO_FORNECEDOR",
+      "ip": "::1",
+      "userAgent": "PostmanRuntime/7.44.0",
+      "sistemaOperacional": "Desconhecido",
+      "navegador": "Desconhecido",
+      "metodo": "PATCH",
+      "rota": "/api/fornecedores/reativar/684f848f6c304228a0779a9c",
+      "dados": {
+        "metodo": "PATCH",
+        "rota": "/api/fornecedores/reativar/684f848f6c304228a0779a9c",
+        "params": {
+          "id": "684f848f6c304228a0779a9c"
+        },
+        "query": {}
+      }
+    },
+    {
+      "timestamp": "2025-06-26T00:36:35.747Z",
+      "tipo": "LOGOUT",
+      "dados": {
+        "tipo": "manual"
+      }
+    }
+  ],
+  "fimSessao": "2025-06-26T00:36:35.747Z",
+  "duracaoSessao": 19
+}

@@ -1,4 +1,6 @@
 import express from "express";
+import swaggerJsDoc from "swagger-jsdoc";
+import swaggerUI from "swagger-ui-express";
 import authMiddleware from "../middlewares/AuthMiddleware.js";
 import rotasProdutos from "./produtoRoutes.js";
 import rotasFornecedores from "./fornecedorRoutes.js";
@@ -13,9 +15,44 @@ dotenv.config();
 
 const routes = (app) => {
   
-  // Rota para encaminhar da raiz para /login
+  // Configuração do Swagger
+  const swaggerOptions = {
+    definition: {
+      openapi: '3.0.0',
+      info: {
+        title: 'Sistema de Gestão de Estoque API',
+        version: '1.0.0',
+        description: 'API para gerenciamento de estoque, produtos, fornecedores e usuários'
+      },
+      servers: [
+        {
+          url: process.env.API_URL || 'http://localhost:3000',
+          description: 'Servidor da API'
+        }
+      ],
+      components: {
+        securitySchemes: {
+          bearerAuth: {
+            type: 'http',
+            scheme: 'bearer',
+            bearerFormat: 'JWT'
+          }
+        }
+      }
+    },
+    apis: [
+      './src/routes/*.js',
+      './src/docs/**/*.js'
+    ]
+  };
+  
+  const swaggerDocs = swaggerJsDoc(swaggerOptions);
+  app.use('/api-docs', swaggerUI.serve);
+  app.get('/api-docs', swaggerUI.setup(swaggerDocs));
+  
+  // Rota para encaminhar da raiz para a documentação
   app.get("/", (req, res) => {
-    res.redirect("/login");
+    res.redirect("/api-docs");
   });
 
   // Rotas públicas (não necessitam de autenticação)

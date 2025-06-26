@@ -1,59 +1,111 @@
-import { deepCopy, generateExample } from '../utils/schemaGenerate.js';
+import commonResponses from "./swaggerCommonResponses.js";
 
-// Definição original do authSchemas
 const authSchemas = {
-  RespostaRecuperaSenha: {
-    type: "object",
-    properties: {
-      message: {
-        type: "string",
-        description: "Mensagem indicando o status da recuperação de senha",
-        example: "Email enviado com sucesso para recuperação de senha"
-      }
+    // Schema para requisição de login
+    LoginRequest: {
+        type: "object",
+        properties: {
+            matricula: {
+                type: "string",
+                description: "Matrícula do usuário",
+                example: "ADM001"
+            },
+            senha: {
+                type: "string",
+                description: "Senha do usuário",
+                example: "123456"
+            }
+        },
+        required: ["matricula", "senha"]
     },
-  },
-  RequisicaoRecuperaSenha: {
-    type: "object",
-    properties: {
-      email: {
-        type: "string",
-        format: "email",
-        description: "Endereço de email do usuário para recuperação de senha",
-      }
-    },
-    required: ["email"]
-  },
-  loginPost: {
-    type: "object",
-    properties: {
-      email: { type: "string", description: "Email do usuário" },
-      senha: { type: "string", description: "Senha do usuário" }
-    },
-    required: ["email", "senha"]
-  },
-  RespostaPass: {
-    type: "object",
-    properties: {
-      accesstoken: { type: "string", description: "Token de acesso do usuário" },
-      domain: { type: "string", description: "Domínio do usuário" },
-      path: { type: "string", description: "Caminho do recurso" },
-      metodo: { type: "string", description: "Método HTTP utilizado" }
-    },
-  },
-};
 
-const addExamples = async () => {
-  for (const key of Object.keys(authSchemas)) {
-    const schema = authSchemas[key];
-    if (schema.properties) {
-      for (const [propKey, propertySchema] of Object.entries(schema.properties)) {
-        propertySchema.example = await generateExample(propertySchema, propKey);
-      }
+    // Schema para resposta de login
+    LoginResponse: {
+        type: "object",
+        properties: {
+            message: {
+                type: "string",
+                example: "Login realizado com sucesso"
+            },
+            token: {
+                type: "string",
+                description: "Token JWT de acesso",
+                example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+            },
+            refreshToken: {
+                type: "string",
+                description: "Token para renovação",
+                example: "refresh_token_here..."
+            },
+            usuario: {
+                "$ref": "#/components/schemas/UsuarioBasico"
+            }
+        }
+    },
+
+    // Schema para requisição de refresh token
+    RefreshTokenRequest: {
+        type: "object",
+        properties: {
+            refreshToken: {
+                type: "string",
+                description: "Token de refresh válido",
+                example: "refresh_token_here..."
+            }
+        },
+        required: ["refreshToken"]
+    },
+
+    // Schema para solicitação de recuperação de senha
+    RecuperacaoSenhaRequest: {
+        type: "object",
+        properties: {
+            matricula: {
+                type: "string",
+                description: "Matrícula do usuário",
+                example: "USR001"
+            }
+        },
+        required: ["matricula"]
+    },
+
+    // Schema básico do usuário para respostas de auth
+    UsuarioBasico: {
+        type: "object",
+        properties: {
+            id: {
+                type: "string",
+                description: "ID único do usuário",
+                example: "60d5ecb74f8e4b2b3c8d6e7f"
+            },
+            nome_usuario: {
+                type: "string",
+                description: "Nome do usuário",
+                example: "João Silva"
+            },
+            matricula: {
+                type: "string",
+                description: "Matrícula do usuário",
+                example: "USR001"
+            },
+            perfil: {
+                type: "string",
+                enum: ["administrador", "funcionario"],
+                description: "Perfil do usuário",
+                example: "funcionario"
+            },
+            ativo: {
+                type: "boolean",
+                description: "Status do usuário",
+                example: true
+            },
+            online: {
+                type: "boolean",
+                description: "Status de conexão",
+                example: true
+            }
+        }
     }
-    schema.example = await generateExample(schema);
-  }
 };
-
-await addExamples();
 
 export default authSchemas;
