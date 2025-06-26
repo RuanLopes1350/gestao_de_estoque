@@ -42,6 +42,22 @@
         "params": {},
         "query": {}
       }
+    },
+    {
+      "timestamp": "2025-06-26T20:00:27.629Z",
+      "tipo": "CONSULTA_GRUPOS",
+      "ip": "::1",
+      "userAgent": "PostmanRuntime/7.44.0",
+      "sistemaOperacional": "Desconhecido",
+      "navegador": "Desconhecido",
+      "metodo": "GET",
+      "rota": "/api/grupos",
+      "dados": {
+        "metodo": "GET",
+        "rota": "/api/grupos",
+        "params": {},
+        "query": {}
+      }
     }
   ]
 }

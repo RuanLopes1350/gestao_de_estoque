@@ -18,11 +18,22 @@ class UsuarioService {
 
     async cadastrarUsuario(dadosUsuario) {
         console.log('Estou no cadastrarUsuario em UsuarioService');
+        
         if (!dadosUsuario.data_cadastro) {
             dadosUsuario.data_cadastro = new Date();
         }
 
         dadosUsuario.data_ultima_atualizacao = new Date();
+
+        // Validar grupos se fornecidos
+        if (dadosUsuario.grupos && dadosUsuario.grupos.length > 0) {
+            await this.validarGrupos(dadosUsuario.grupos);
+        }
+
+        // Validar permissões individuais se fornecidas
+        if (dadosUsuario.permissoes && dadosUsuario.permissoes.length > 0) {
+            await this.validarPermissoes(dadosUsuario.permissoes);
+        }
 
         const data = await this.criarUsuario(dadosUsuario);
         return data;
@@ -398,6 +409,107 @@ class UsuarioService {
             return await permissionService.getUserPermissions(usuarioId);
         } catch (error) {
             console.error('Erro ao obter permissões do usuário:', error);
+            throw error;
+        }
+    }
+
+    /**
+     * Valida se os grupos fornecidos existem e estão ativos
+     * @param {Array} gruposIds - Array de IDs dos grupos
+     */
+    async validarGrupos(gruposIds) {
+        try {
+            const Grupo = mongoose.model('grupos');
+            
+            for (const grupoId of gruposIds) {
+                if (!mongoose.Types.ObjectId.isValid(grupoId)) {
+                    throw new CustomError({
+                        statusCode: HttpStatusCodes.BAD_REQUEST.code,
+                        errorType: 'validationError',
+                        field: 'grupos',
+                        details: [],
+                        customMessage: `ID do grupo inválido: ${grupoId}`
+                    });
+                }
+
+                const grupo = await Grupo.findById(grupoId);
+                if (!grupo) {
+                    throw new CustomError({
+                        statusCode: HttpStatusCodes.NOT_FOUND.code,
+                        errorType: 'resourceNotFound',
+                        field: 'grupo',
+                        details: [],
+                        customMessage: `Grupo não encontrado: ${grupoId}`
+                    });
+                }
+
+                if (!grupo.ativo) {
+                    throw new CustomError({
+                        statusCode: HttpStatusCodes.BAD_REQUEST.code,
+                        errorType: 'validationError',
+                        field: 'grupos',
+                        details: [],
+                        customMessage: `Grupo está inativo: ${grupo.nome}`
+                    });
+                }
+            }
+        } catch (error) {
+            console.error('Erro ao validar grupos:', error);
+            throw error;
+        }
+    }
+
+    /**
+     * Valida se as permissões individuais são válidas
+     * @param {Array} permissoes - Array de permissões
+     */
+    async validarPermissoes(permissoes) {
+        try {
+            const Rota = mongoose.model('rotas');
+            
+            for (const permissao of permissoes) {
+                // Verificar se a rota existe no sistema
+                const rota = await Rota.findOne({ 
+                    rota: permissao.rota.toLowerCase(),
+                    dominio: permissao.dominio || 'localhost'
+                });
+
+                if (!rota) {
+                    throw new CustomError({
+                        statusCode: HttpStatusCodes.NOT_FOUND.code,
+                        errorType: 'resourceNotFound',
+                        field: 'permissao.rota',
+                        details: [],
+                        customMessage: `Rota não encontrada no sistema: ${permissao.rota}`
+                    });
+                }
+
+                if (!rota.ativo) {
+                    throw new CustomError({
+                        statusCode: HttpStatusCodes.BAD_REQUEST.code,
+                        errorType: 'validationError',
+                        field: 'permissao.rota',
+                        details: [],
+                        customMessage: `Rota está inativa: ${permissao.rota}`
+                    });
+                }
+            }
+
+            // Verificar duplicatas na própria lista
+            const combinacoes = permissoes.map(p => `${p.rota}_${p.dominio || 'localhost'}`);
+            const setCombinacoes = new Set(combinacoes);
+
+            if (combinacoes.length !== setCombinacoes.size) {
+                throw new CustomError({
+                    statusCode: HttpStatusCodes.BAD_REQUEST.code,
+                    errorType: 'validationError',
+                    field: 'permissoes',
+                    details: [],
+                    customMessage: 'Permissões duplicadas encontradas na lista'
+                });
+            }
+        } catch (error) {
+            console.error('Erro ao validar permissões:', error);
             throw error;
         }
     }
