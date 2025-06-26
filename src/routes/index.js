@@ -1,4 +1,6 @@
 import express from "express";
+import swaggerJsDoc from "swagger-jsdoc";
+import swaggerUI from "swagger-ui-express";
 import authMiddleware from "../middlewares/AuthMiddleware.js";
 import rotasProdutos from "./produtoRoutes.js";
 import rotasFornecedores from "./fornecedorRoutes.js";
@@ -6,15 +8,21 @@ import rotasUsuarios from "./usuarioRoutes.js";
 import rotasMovimentacoes from './movimentacaoRoutes.js';
 import rotasAuth from './authRoutes.js';
 import rotasLogs from './logRoutes.js';
+import getSwaggerOptions from "../docs/config/head.js";
 import dotenv from "dotenv";
 
 dotenv.config();
 
 const routes = (app) => {
   
-  // Rota para encaminhar da raiz para /login
+  // Configuração do Swagger
+  const swaggerDocs = swaggerJsDoc(getSwaggerOptions());
+  app.use('/api-docs', swaggerUI.serve);
+  app.get('/api-docs', swaggerUI.setup(swaggerDocs));
+  
+  // Rota para encaminhar da raiz para a documentação
   app.get("/", (req, res) => {
-    res.redirect("/login");
+    res.redirect("/api-docs");
   });
 
   // Rotas públicas (não necessitam de autenticação)
