@@ -168,6 +168,9 @@ Authorization: Bearer your_jwt_token
 ### Desativar Usuário
 `PATCH http://localhost:5011/api/usuarios/desativar/:id`
 
+### Reativar Usuário
+`PATCH http://localhost:5011/api/usuarios/reativar/:id`
+
 ### Atualizar Usuário
 `PATCH http://localhost:5011/api/usuarios/:matricula`
 

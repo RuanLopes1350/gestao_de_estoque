@@ -182,20 +182,20 @@ class UsuarioRepository {
         }
         return usuario;
     }
-    /*
-    async desativarUsuario(matricula) { 
-        const usuario = await this.model.findOneAndUpdate (
-            { matricula },
+    
+    async desativarUsuario(id) { 
+        const usuario = await this.model.findByIdAndUpdate (
+            id,
             { ativo: false },
             { new: true }
         );
         return usuario;
     }
-    */
-    async desativarUsuario(id) { 
-        const usuario = await this.model.findByIdAndUpdate ( // trocar findByIdAndUpdate por findOneAndUpdate
+
+    async reativarUsuario(id) { 
+        const usuario = await this.model.findByIdAndUpdate (
             id,
-            { ativo: false },
+            { ativo: true },
             { new: true }
         );
         return usuario;

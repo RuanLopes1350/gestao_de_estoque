@@ -210,61 +210,7 @@ class UsuarioController {
         }
     }
 
-    /*
     async desativarUsuario(req, res) {
-        console.log('Estou no desativarUsuario em UsuarioController');
-
-        try {
-            const { matricula } = req.params || {};
-            if (!matricula) {
-                throw new CustomError({
-                    statusCode: HttpStatusCodes.BAD_REQUEST.code,
-                    errorType: 'validationError',
-                    field: 'matricula',
-                    details: [],
-                    customMessage: 'Matricula do usuario é obrigatorio para desativar.'
-                });
-            }
-
-            try {
-                UsuarioIdSchema.parse(matricula);
-            } catch (error) {
-                throw new CustomError({
-                    statusCode: HttpStatusCodes.BAD_REQUEST.code,
-                    errorType: 'validationError',
-                    field: 'matricula',
-                    details: [],
-                    customMessage: 'Matricula do usuario invalído.'
-                })
-            }
-
-            const data = await this.service.desativarUsuario(matricula);
-            return CommonResponse.success(res, data, 200, 'Usuario desativado com sucesso');
-        } catch (error) {
-            if (error.statusCode === 404) {
-                return CommonResponse.error(
-                    res,
-                    error.statusCode,
-                    error.errorType,
-                    error.field,
-                    error.details,
-                    'Usuario não encontrado. Verifique se a matricula está correta'
-                );
-            }
-            // return CommonResponse.error(res, error);  trocando esse commonResponse pelo que está abaixo
-            return CommonResponse.error(
-                res,
-                error.statusCode || 500,
-                error.errorType || 'internalError',
-                error.field || '',
-                error.details || [],
-                error.customMessage || 'Erro inesperado ao processar a solicitação.'
-);
-
-        }
-    }*/
-   //----------------------------------------------------------------------------------------
-   async desativarUsuario(req, res) {
            console.log('Estou no desativarUsusario em UsuarioController');
    
            try {
@@ -273,9 +219,9 @@ class UsuarioController {
                    throw new CustomError({
                        statusCode: HttpStatusCodes.BAD_REQUEST.code,
                        errorType: 'validationError',
-                       field: 'matricula',
+                       field: 'id',
                        details: [],
-                       customMessage: 'Matricula do usuario é obrigatório para desativar.'
+                       customMessage: 'ID do usuario é obrigatório para desativar.'
                    });
                }
    
@@ -285,9 +231,9 @@ class UsuarioController {
                    throw new CustomError({
                        statusCode: HttpStatusCodes.BAD_REQUEST.code,
                        errorType: 'validationError',
-                       field: 'matricula',
+                       field: 'id',
                        details: [],
-                       customMessage: 'Matricula do usuario inválido.'
+                       customMessage: 'ID do usuario inválido.'
                    });
                }
    
@@ -301,7 +247,7 @@ class UsuarioController {
                        error.errorType,
                        error.field,
                        error.details,
-                       'Usuario não encontrado. Verifique se a matricula está correta.'
+                       'Usuario não encontrado. Verifique se o id está correto.'
                    );
                }
                //return CommonResponse.error(res, error);
@@ -314,49 +260,56 @@ class UsuarioController {
                 error.customMessage || error.message || 'Erro interno no servidor.');
            }
     }
-// -------------------------------------------------------------------------------------------------
+
     async reativarUsuario(req, res) {
-        console.log('Estou no reativarUsuario em UsuarioController');
-
-        try {
-            const { matricula } = req.params || {};
-            if (!matricula) {
-                throw new CustomError({
-                    statusCode: HttpStatusCodes.BAD_REQUEST.code,
-                    errorType: 'validationError',
-                    field: 'matricula',
-                    details: [],
-                    customMessage: 'Matricula do usuario é obrigatório para reativar.'
-                });
-            }
-
-            try {
-                UsuarioIdSchema.parse(matricula);
-            } catch (error) {
-                throw new CustomError({
-                    statusCode: HttpStatusCodes.BAD_REQUEST.code,
-                    errorType: 'validationError',
-                    field: 'id',
-                    details: [],
-                    customMessage: 'Matricula do usuario inválido.'
-                });
-            }
-
-            const data = await this.service.reativarUsuario(matricula);
-            return CommonResponse.success(res, data, 200, 'Usuario reativado com sucesso.');
-        } catch (error) {
-            if (error.statusCode === 404) {
-                return CommonResponse.error(
-                    res,
-                    error.statusCode,
-                    error.errorType,
-                    error.field,
-                    error.details,
-                    'Usuario não encontrado. Verifique se a matricula está correta.'
-                );
-            }
-            return CommonResponse.error(res, error);
-        }
+           console.log('Estou no reativarUsusario em UsuarioController');
+   
+           try {
+               const { id } = req.params || {};
+               if (!id) {
+                   throw new CustomError({
+                       statusCode: HttpStatusCodes.BAD_REQUEST.code,
+                       errorType: 'validationError',
+                       field: 'id',
+                       details: [],
+                       customMessage: 'ID do usuario é obrigatório para reativar.'
+                   });
+               }
+   
+               try {
+                   UsuarioIdSchema.parse(id);
+               } catch (error) {
+                   throw new CustomError({
+                       statusCode: HttpStatusCodes.BAD_REQUEST.code,
+                       errorType: 'validationError',
+                       field: 'id',
+                       details: [],
+                       customMessage: 'ID do usuario inválido.'
+                   });
+               }
+   
+               const data = await this.service.reativarUsuario(id);
+               return CommonResponse.success(res, data, 200, 'Usuario reativado com sucesso.');
+           } catch (error) {
+               if (error.statusCode === 404) {
+                   return CommonResponse.error(
+                       res,
+                       error.statusCode,
+                       error.errorType,
+                       error.field,
+                       error.details,
+                       'Usuario não encontrado. Verifique se o id está correto.'
+                   );
+               }
+               //return CommonResponse.error(res, error);
+               return CommonResponse.error(
+                res,
+                error.statusCode || 500,
+                error.errorType || 'serverError',
+                error.field || null,
+                error.details || [],
+                error.customMessage || error.message || 'Erro interno no servidor.');
+           }
     }
 
     async criarComSenha(req, res) {
