@@ -47,7 +47,7 @@ class ProdutoController {
         }
     }
 
-    async buscarProdutoPorID(req, res) {
+    async buscarProdutoPorID(req, res) { 
         console.log('Estou no buscarProdutoPorID em ProdutoController');
 
         try {

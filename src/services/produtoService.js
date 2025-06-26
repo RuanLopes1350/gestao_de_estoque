@@ -263,7 +263,7 @@ class ProdutoService {
         return await this.enriquecerComNomesFornecedores(data);
     }
 
-    async desativarProduto(id) {
+    async desativarProduto(id) { 
         console.log('Estou no desativarProduto em ProdutoService');
 
         if (!mongoose.Types.ObjectId.isValid(id)) {

@@ -20,6 +20,10 @@ export const UsuarioIdSchema = z.string().refine(id => {
     message: 'ID do usuário inválido'
 });
 
-export const UsuarioMatriculaSchema = z.string().min(1, {
-    message: 'A matrícula deve conter pelo menos 1 caractere'
-});
+// função para ativar/desativar usuarios por matricula (OBS: em desenvolvimento)
+export const UsuarioMatriculaSchema = z
+  .string()
+  .trim()
+  .regex(/^[A-Z]{4}[0-9]{3}$/, {
+    message: 'Matrícula deve seguir o padrão TEST001'
+  });

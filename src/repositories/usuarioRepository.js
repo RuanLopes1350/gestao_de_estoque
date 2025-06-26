@@ -182,7 +182,24 @@ class UsuarioRepository {
         }
         return usuario;
     }
+    
+    async desativarUsuario(id) { 
+        const usuario = await this.model.findByIdAndUpdate (
+            id,
+            { ativo: false },
+            { new: true }
+        );
+        return usuario;
+    }
 
+    async reativarUsuario(id) { 
+        const usuario = await this.model.findByIdAndUpdate (
+            id,
+            { ativo: true },
+            { new: true }
+        );
+        return usuario;
+    }
     /**
      * Armazenar accesstoken e refreshtoken no banco de dados
      */

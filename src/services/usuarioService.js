@@ -2,6 +2,7 @@ import UsuarioRepository from '../repositories/usuarioRepository.js';
 import mongoose from 'mongoose';
 import { CustomError, HttpStatusCodes } from '../utils/helpers/index.js';
 import bcrypt from 'bcrypt';
+import { UsuarioIdSchema } from '../utils/validators/schemas/zod/querys/UsuarioQuerySchema.js';
 
 class UsuarioService {
     constructor() {
@@ -123,6 +124,45 @@ class UsuarioService {
         } catch (error) {
             throw error;
         }
+    }
+    
+
+    async desativarUsuario(id) {
+    console.log('Estou no desativarUsuario em UsuarioService');
+
+    try {
+        UsuarioIdSchema.parse(id);
+    } catch (error) {
+        throw new CustomError({
+            statusCode: HttpStatusCodes.BAD_REQUEST.code,
+            errorType: 'validationError',
+            field: 'id',
+            details: [],
+            customMessage: 'ID do usuário inválido.'
+        });
+    }
+
+        const data = await this.repository.desativarUsuario(id);
+        return data;
+    }
+
+    async reativarUsuario(id) {
+    console.log('Estou no reativarUsuario em UsuarioService'); 
+
+    try {
+        UsuarioIdSchema.parse(id);
+    } catch (error) {
+        throw new CustomError({
+            statusCode: HttpStatusCodes.BAD_REQUEST.code,
+            errorType: 'validationError',
+            field: 'id',
+            details: [],
+            customMessage: 'ID do usuário inválido.'
+        });
+    }
+
+        const data = await this.repository.reativarUsuario(id);
+        return data;
     }
 
     async verificarEmailExistente(email) {

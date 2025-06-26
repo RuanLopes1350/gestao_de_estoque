@@ -204,7 +204,7 @@ class ProdutoRepository {
         }).sort({ estoque: 1 });
     }
 
-    async desativarProduto(id) {
+    async desativarProduto(id) { 
         const produto = await this.model.findByIdAndUpdate (
             id,
             { status: false },

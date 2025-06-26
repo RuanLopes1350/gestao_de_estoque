@@ -1,0 +1,49 @@
+{
+  "inicioSessao": "2025-06-23T21:17:09.047Z",
+  "usuario": {
+    "id": "684ccefad28f571293d09f49",
+    "matricula": "ADM0001",
+    "nome": "Administrador",
+    "perfil": "administrador"
+  },
+  "informacaoSistema": {
+    "ip": "::1",
+    "sistemaOperacional": "Desconhecido",
+    "navegador": "Desconhecido",
+    "userAgent": "PostmanRuntime/7.44.1"
+  },
+  "eventos": [
+    {
+      "timestamp": "2025-06-23T21:17:09.049Z",
+      "tipo": "LOGIN",
+      "ip": "::1",
+      "userAgent": "PostmanRuntime/7.44.1",
+      "sistemaOperacional": "Desconhecido",
+      "navegador": "Desconhecido",
+      "metodo": "POST",
+      "rota": "/auth/login",
+      "dados": {
+        "tipo": "login_sucesso",
+        "matricula": "ADM0001"
+      }
+    },
+    {
+      "timestamp": "2025-06-23T21:18:35.632Z",
+      "tipo": "DESATIVACAO_USUARIO",
+      "ip": "::1",
+      "userAgent": "PostmanRuntime/7.44.1",
+      "sistemaOperacional": "Desconhecido",
+      "navegador": "Desconhecido",
+      "metodo": "PATCH",
+      "rota": "/api/usuarios/desativar/TEST001",
+      "dados": {
+        "metodo": "PATCH",
+        "rota": "/api/usuarios/desativar/TEST001",
+        "params": {
+          "matricula": "TEST001"
+        },
+        "query": {}
+      }
+    }
+  ]
+}
