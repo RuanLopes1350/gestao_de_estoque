@@ -24,6 +24,16 @@ const app = express();
 // Conectando ao banco de dados
 await DbConect.conectar();
 
+// Middleware para logs de debug de todas as requisições
+app.use((req, res, next) => {
+    console.log(`🌐 ${new Date().toISOString()} - ${req.method} ${req.originalUrl}`);
+    console.log(`📍 Headers:`, req.headers);
+    console.log(`📦 Body:`, req.body);
+    console.log(`🔍 Query:`, req.query);
+    console.log(`📋 Params:`, req.params);
+    next();
+});
+
 // Middlewares de segurança
 app.use(helmet());
 
