@@ -1,0 +1,31 @@
+{
+  "inicioSessao": "2025-06-26T20:05:32.193Z",
+  "usuario": {
+    "id": "685da7e5eb630432f26b0564",
+    "matricula": "ADM0001",
+    "nome": "Administrador",
+    "perfil": "administrador"
+  },
+  "informacaoSistema": {
+    "ip": "::1",
+    "sistemaOperacional": "Desconhecido",
+    "navegador": "Desconhecido",
+    "userAgent": "PostmanRuntime/7.44.0"
+  },
+  "eventos": [
+    {
+      "timestamp": "2025-06-26T20:05:32.193Z",
+      "tipo": "LOGIN",
+      "ip": "::1",
+      "userAgent": "PostmanRuntime/7.44.0",
+      "sistemaOperacional": "Desconhecido",
+      "navegador": "Desconhecido",
+      "metodo": "POST",
+      "rota": "/auth/login",
+      "dados": {
+        "tipo": "login_sucesso",
+        "matricula": "ADM0001"
+      }
+    }
+  ]
+}

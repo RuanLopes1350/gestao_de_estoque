@@ -5,12 +5,22 @@ import seedUsuario from "./seedsUsuario.js";
 import seedFornecedor from "./seedsFornecedor.js";
 import seedProduto from "./seedsProduto.js";
 import seedMovimentacao from "./seedsMovimentacao.js";
+import seedRotas from "./seedRotas.js";
+import seedGrupos from "./seedGrupos.js";
 
 async function main() {
     try {
         console.log("🔄 Iniciando processo de seed no banco de dados...");
         await DbConnect.conectar();
         console.log("✅ Conexão com o banco de dados estabelecida.");
+        
+        // Seed das rotas do sistema (deve ser executado primeiro)
+        const rotas = await seedRotas();
+        console.log(`✅ Seed de ${rotas.length} rotas concluído.`);
+        
+        // Seed dos grupos de permissão (deve ser executado após as rotas)
+        const grupos = await seedGrupos();
+        console.log(`✅ Seed de ${grupos.length} grupos concluído.`);
         
         const usuarios = await seedUsuario();
         console.log(`✅ Seed de ${usuarios.length} usuários concluído.`);

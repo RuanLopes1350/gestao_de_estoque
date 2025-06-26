@@ -1,7 +1,7 @@
 import jwt from 'jsonwebtoken';
 import PermissionService from '../services/PermissionService.js';
 import Rota from '../models/Rotas.js';
-import { CustomError, errorHandler, messages } from '../utils/helpers/index.js';
+import { CustomError, messages } from '../utils/helpers/index.js';
 
 // Certifique-se de que as variáveis de ambiente estejam carregadas
 const JWT_SECRET = process.env.JWT_SECRET;
@@ -14,7 +14,6 @@ class AuthPermission {
     this.JWT_SECRET = JWT_SECRET;
     this.messages = messages;
     
-
     // Vincula o método handle ao contexto da instância
     this.handle = this.handle.bind(this);
   }
@@ -30,7 +29,7 @@ class AuthPermission {
           errorType: 'authenticationError',
           field: 'Authorization',
           details: [],
-          customMessage: this.messages.error.resourceNotFound('Token')
+          customMessage: 'Token de autenticação não fornecido'
         });
       }
 
@@ -46,7 +45,7 @@ class AuthPermission {
           errorType: 'authenticationError',
           field: 'Token',
           details: [],
-          customMessage: this.messages.error.resourceNotFound('Token')
+          customMessage: 'Token de autenticação inválido ou expirado'
         });
       }
       const userId = decoded.id;
@@ -55,19 +54,26 @@ class AuthPermission {
        * 3. Determina a rota e o domínio da requisição
        * Remove barras iniciais e finais, remove query strings e pega a primeira parte da URL
        */
-      const rotaReq = req.url.split('/').filter(Boolean)[0].split('?')[0];
-
-      const dominioReq = `localhost`; // domínio foi colocado como localhost para fins de teste
+      const urlPath = req.url.split('?')[0]; // Remove query string
+      const pathSegments = urlPath.split('/').filter(Boolean); // Remove elementos vazios
+      
+      // A primeira parte da URL após o domínio é considerada a rota
+      const rotaReq = pathSegments[0] ? pathSegments[0].toLowerCase() : '';
+      const dominioReq = 'localhost'; // Domínio configurado para desenvolvimento
 
       // 4. Busca a rota atual no banco de dados
-      const rotaDB = await this.Rota.findOne({ rota: rotaReq, dominio: dominioReq });
+      const rotaDB = await this.Rota.findOne({ 
+        rota: rotaReq, 
+        dominio: dominioReq 
+      });
+      
       if (!rotaDB) {
         throw new CustomError({
           statusCode: 404,
           errorType: 'resourceNotFound',
           field: 'Rota',
           details: [],
-          customMessage: this.messages.error.resourceNotFound('Rota')
+          customMessage: `Rota '${rotaReq}' não encontrada no sistema`
         });
       }
 
@@ -87,7 +93,7 @@ class AuthPermission {
           errorType: 'methodNotAllowed',
           field: 'Método',
           details: [],
-          customMessage: this.messages.error.resourceNotFound('Método.')
+          customMessage: `Método HTTP '${req.method}' não suportado`
         });
       }
 
@@ -98,36 +104,73 @@ class AuthPermission {
           errorType: 'forbidden',
           field: 'Rota',
           details: [],
-          customMessage: this.messages.error.resourceNotFound('Rota.')
+          customMessage: `Ação '${req.method}' não permitida na rota '${rotaReq}'`
         });
       }
 
-      // 7. Verifica se o usuário tem permissão
+      // 7. Verifica se o usuário tem permissão através do sistema de grupos/permissões
       const hasPermission = await this.permissionService.hasPermission(
         userId,
-        rotaReq.toLowerCase(),
-        rotaDB.dominio,
+        rotaReq,
+        dominioReq,
         metodo
       );
 
       if (!hasPermission) {
+        // Buscar informações do usuário para log detalhado
+        const userInfo = decoded.matricula || decoded.email || userId;
+        
+        console.warn(`Acesso negado para usuário ${userInfo} na rota ${rotaReq} com método ${req.method}`);
+        
         throw new CustomError({
           statusCode: 403,
           errorType: 'forbidden',
           field: 'Permissão',
           details: [],
-          customMessage: this.messages.error.resourceNotFound('Permissão')
+          customMessage: `Você não tem permissão para realizar a ação '${req.method}' na rota '${rotaReq}'`
         });
       }
 
-      // 8. Anexa o usuário ao objeto de requisição para uso posterior
-      req.user = { id: userId };
+      // 8. Log da autorização bem-sucedida
+      console.log(`Autorização concedida para usuário ${decoded.matricula || userId} na rota ${rotaReq} com método ${req.method}`);
 
-      // 9. Permite a continuação da requisição
+      // 9. Anexa informações do usuário ao objeto de requisição para uso posterior
+      req.user = { 
+        id: userId,
+        matricula: decoded.matricula,
+        perfil: decoded.perfil
+      };
+      req.rota = rotaReq;
+      req.metodo = metodo;
+
+      // 10. Permite a continuação da requisição
       next();
     } catch (error) {
-      // Utilize o handler de erros personalizado
-      errorHandler(error, req, res, next);
+      // Log do erro para depuração
+      console.error('Erro no middleware de autorização:', {
+        error: error.message,
+        url: req.url,
+        method: req.method,
+        userId: req.userId || 'não identificado'
+      });
+
+      // Retorna resposta de erro padronizada
+      if (error instanceof CustomError) {
+        return res.status(error.statusCode).json({
+          success: false,
+          message: error.customMessage,
+          type: error.errorType,
+          field: error.field,
+          details: error.details
+        });
+      }
+
+      // Erro genérico
+      return res.status(500).json({
+        success: false,
+        message: 'Erro interno do servidor ao verificar permissões',
+        type: 'serverError'
+      });
     }
   }
 }
