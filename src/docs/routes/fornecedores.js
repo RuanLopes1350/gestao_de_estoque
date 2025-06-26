@@ -254,6 +254,114 @@ const fornecedoresRoutes = {
                 500: commonResponses[500]()
             }
         }
+    },
+
+    "/api/fornecedores/desativar/{id}": {
+        patch: {
+            tags: ["Fornecedores"],
+            summary: "Desativa fornecedor",
+            description: `
+            Desativa um fornecedor do sistema (desativação lógica).
+            
+            **Funcionalidades:**
+            - Marca fornecedor como inativo
+            - Preserva histórico de atividades
+            - Registra ação nos logs do sistema
+            - Mantém integridade referencial
+            
+            **Permissões:** Apenas administradores podem desativar fornecedores.
+            `,
+            security: [{ bearerAuth: [] }],
+            parameters: [
+                {
+                    name: "id",
+                    in: "path",
+                    required: true,
+                    description: "ID do fornecedor a ser desativado",
+                    schema: { type: "string", example: "60d5ecb74f8e4b2b3c8d6e80" }
+                }
+            ],
+            responses: {
+                200: {
+                    description: "Fornecedor desativado com sucesso",
+                    content: {
+                        "application/json": {
+                            schema: {
+                                type: "object",
+                                properties: {
+                                    message: {
+                                        type: "string",
+                                        example: "Fornecedor desativado com sucesso"
+                                    },
+                                    fornecedor: {
+                                        "$ref": "#/components/schemas/FornecedorResponse"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                400: commonResponses[400](),
+                401: commonResponses[401](),
+                403: commonResponses[403](),
+                404: commonResponses[404](),
+                500: commonResponses[500]()
+            }
+        }
+    },
+
+    "/api/fornecedores/reativar/{id}": {
+        patch: {
+            tags: ["Fornecedores"],
+            summary: "Reativa fornecedor",
+            description: `
+            Reativa um fornecedor que estava desativado no sistema.
+            
+            **Funcionalidades:**
+            - Marca fornecedor como ativo novamente
+            - Permite novas operações comerciais
+            - Registra ação nos logs do sistema
+            - Reestabelece relacionamentos comerciais
+            
+            **Permissões:** Apenas administradores podem reativar fornecedores.
+            `,
+            security: [{ bearerAuth: [] }],
+            parameters: [
+                {
+                    name: "id",
+                    in: "path",
+                    required: true,
+                    description: "ID do fornecedor a ser reativado",
+                    schema: { type: "string", example: "60d5ecb74f8e4b2b3c8d6e80" }
+                }
+            ],
+            responses: {
+                200: {
+                    description: "Fornecedor reativado com sucesso",
+                    content: {
+                        "application/json": {
+                            schema: {
+                                type: "object",
+                                properties: {
+                                    message: {
+                                        type: "string",
+                                        example: "Fornecedor reativado com sucesso"
+                                    },
+                                    fornecedor: {
+                                        "$ref": "#/components/schemas/FornecedorResponse"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                400: commonResponses[400](),
+                401: commonResponses[401](),
+                403: commonResponses[403](),
+                404: commonResponses[404](),
+                500: commonResponses[500]()
+            }
+        }
     }
 };
 

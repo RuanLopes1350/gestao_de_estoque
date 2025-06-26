@@ -298,6 +298,131 @@ const usuariosRoutes = {
         }
     },
 
+    "/api/usuarios/desativar/{id}": {
+        patch: {
+            tags: ["Usuários"],
+            summary: "Desativa usuário",
+            description: `
+            Desativa um usuário do sistema (desativação lógica).
+            
+            **Funcionalidades:**
+            - Marca usuário como inativo
+            - Invalida tokens ativos do usuário
+            - Preserva histórico de atividades
+            - Registra ação nos logs do sistema
+            
+            **Permissões:** Apenas administradores podem desativar usuários.
+            **Regra:** Não é possível desativar o próprio usuário.
+            `,
+            security: [{ bearerAuth: [] }],
+            parameters: [
+                {
+                    name: "id",
+                    in: "path",
+                    required: true,
+                    description: "ID do usuário a ser desativado",
+                    schema: { type: "string", example: "60d5ecb74f8e4b2b3c8d6e7f" }
+                }
+            ],
+            responses: {
+                200: {
+                    description: "Usuário desativado com sucesso",
+                    content: {
+                        "application/json": {
+                            schema: {
+                                type: "object",
+                                properties: {
+                                    message: {
+                                        type: "string",
+                                        example: "Usuário desativado com sucesso"
+                                    },
+                                    usuario: {
+                                        "$ref": "#/components/schemas/UsuarioResponse"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                400: commonResponses[400](),
+                401: commonResponses[401](),
+                403: commonResponses[403](),
+                404: commonResponses[404](),
+                409: {
+                    description: "Não é possível desativar o próprio usuário",
+                    content: {
+                        "application/json": {
+                            schema: {
+                                type: "object",
+                                properties: {
+                                    message: {
+                                        type: "string",
+                                        example: "Não é possível desativar o próprio usuário"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                500: commonResponses[500]()
+            }
+        }
+    },
+
+    "/api/usuarios/reativar/{id}": {
+        patch: {
+            tags: ["Usuários"],
+            summary: "Reativa usuário",
+            description: `
+            Reativa um usuário que estava desativado no sistema.
+            
+            **Funcionalidades:**
+            - Marca usuário como ativo novamente
+            - Permite novo acesso ao sistema
+            - Registra ação nos logs do sistema
+            - Notifica por email sobre reativação
+            
+            **Permissões:** Apenas administradores podem reativar usuários.
+            `,
+            security: [{ bearerAuth: [] }],
+            parameters: [
+                {
+                    name: "id",
+                    in: "path",
+                    required: true,
+                    description: "ID do usuário a ser reativado",
+                    schema: { type: "string", example: "60d5ecb74f8e4b2b3c8d6e7f" }
+                }
+            ],
+            responses: {
+                200: {
+                    description: "Usuário reativado com sucesso",
+                    content: {
+                        "application/json": {
+                            schema: {
+                                type: "object",
+                                properties: {
+                                    message: {
+                                        type: "string",
+                                        example: "Usuário reativado com sucesso"
+                                    },
+                                    usuario: {
+                                        "$ref": "#/components/schemas/UsuarioResponse"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                400: commonResponses[400](),
+                401: commonResponses[401](),
+                403: commonResponses[403](),
+                404: commonResponses[404](),
+                500: commonResponses[500]()
+            }
+        }
+    },
+
     "/api/usuarios/{matricula}/alterar-senha": {
         patch: {
             tags: ["Usuários"],

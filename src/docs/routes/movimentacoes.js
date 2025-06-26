@@ -387,6 +387,126 @@ const movimentacoesRoutes = {
                 500: commonResponses[500]()
             }
         }
+    },
+
+    "/api/movimentacoes/desativar/{id}": {
+        patch: {
+            tags: ["Movimentações"],
+            summary: "Desativa movimentação",
+            description: `
+            Desativa uma movimentação do sistema (desativação lógica).
+            
+            **Funcionalidades:**
+            - Marca movimentação como inativa
+            - Preserva histórico de movimentações
+            - Registra ação nos logs do sistema
+            - Mantém integridade referencial
+            - Não afeta o estoque atual
+            
+            **Regras de Negócio:**
+            - Movimentação mantém-se no histórico
+            - Apenas status é alterado para inativo
+            - Logs de auditoria são registrados
+            
+            **Permissões:** Apenas administradores podem desativar movimentações.
+            `,
+            security: [{ bearerAuth: [] }],
+            parameters: [
+                {
+                    name: "id",
+                    in: "path",
+                    required: true,
+                    description: "ID da movimentação a ser desativada",
+                    schema: { type: "string", example: "60d5ecb74f8e4b2b3c8d6e90" }
+                }
+            ],
+            responses: {
+                200: {
+                    description: "Movimentação desativada com sucesso",
+                    content: {
+                        "application/json": {
+                            schema: {
+                                type: "object",
+                                properties: {
+                                    message: {
+                                        type: "string",
+                                        example: "Movimentação desativada com sucesso"
+                                    },
+                                    movimentacao: {
+                                        "$ref": "#/components/schemas/MovimentacaoResponse"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                400: commonResponses[400](),
+                401: commonResponses[401](),
+                403: commonResponses[403](),
+                404: commonResponses[404](),
+                500: commonResponses[500]()
+            }
+        }
+    },
+
+    "/api/movimentacoes/reativar/{id}": {
+        patch: {
+            tags: ["Movimentações"],
+            summary: "Reativa movimentação",
+            description: `
+            Reativa uma movimentação que estava desativada no sistema.
+            
+            **Funcionalidades:**
+            - Marca movimentação como ativa novamente
+            - Permite nova visualização nos relatórios
+            - Registra ação nos logs do sistema
+            - Reestabelece movimentação no histórico ativo
+            - Não afeta o estoque atual
+            
+            **Regras de Negócio:**
+            - Movimentação volta a aparecer em listagens ativas
+            - Histórico é mantido integralmente
+            - Logs de auditoria são registrados
+            
+            **Permissões:** Apenas administradores podem reativar movimentações.
+            `,
+            security: [{ bearerAuth: [] }],
+            parameters: [
+                {
+                    name: "id",
+                    in: "path",
+                    required: true,
+                    description: "ID da movimentação a ser reativada",
+                    schema: { type: "string", example: "60d5ecb74f8e4b2b3c8d6e90" }
+                }
+            ],
+            responses: {
+                200: {
+                    description: "Movimentação reativada com sucesso",
+                    content: {
+                        "application/json": {
+                            schema: {
+                                type: "object",
+                                properties: {
+                                    message: {
+                                        type: "string",
+                                        example: "Movimentação reativada com sucesso"
+                                    },
+                                    movimentacao: {
+                                        "$ref": "#/components/schemas/MovimentacaoResponse"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                400: commonResponses[400](),
+                401: commonResponses[401](),
+                403: commonResponses[403](),
+                404: commonResponses[404](),
+                500: commonResponses[500]()
+            }
+        }
     }
 };
 

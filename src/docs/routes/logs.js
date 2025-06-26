@@ -1,5 +1,5 @@
 const logsRoutes = {
-  '/logs': {
+  '/api/logs': {
     get: {
       tags: ['Logs'],
       summary: 'Buscar logs do sistema',
@@ -127,7 +127,7 @@ const logsRoutes = {
       }
     }
   },
-  '/logs/{id}': {
+  '/api/logs/{id}': {
     get: {
       tags: ['Logs'],
       summary: 'Buscar log específico',
@@ -177,7 +177,7 @@ const logsRoutes = {
       }
     }
   },
-  '/logs/auditoria': {
+  '/api/logs/auditoria': {
     get: {
       tags: ['Logs'],
       summary: 'Buscar logs de auditoria',
@@ -287,7 +287,7 @@ const logsRoutes = {
       }
     }
   },
-  '/logs/sistema': {
+  '/api/logs/sistema': {
     get: {
       tags: ['Logs'],
       summary: 'Buscar logs de sistema',
@@ -387,7 +387,7 @@ const logsRoutes = {
       }
     }
   },
-  '/logs/estatisticas': {
+  '/api/logs/estatisticas': {
     get: {
       tags: ['Logs'],
       summary: 'Obter estatísticas de logs',
@@ -466,7 +466,7 @@ const logsRoutes = {
       }
     }
   },
-  '/logs/exportar': {
+  '/api/logs/exportar': {
     post: {
       tags: ['Logs'],
       summary: 'Exportar logs',
@@ -527,7 +527,7 @@ const logsRoutes = {
       }
     }
   },
-  '/logs/limpeza': {
+  '/api/logs/limpeza': {
     delete: {
       tags: ['Logs'],
       summary: 'Limpeza de logs antigos',
@@ -569,6 +569,337 @@ const logsRoutes = {
         },
         '422': {
           $ref: '#/components/responses/ValidationError'
+        },
+        '500': {
+          $ref: '#/components/responses/InternalServerError'
+        }
+      }
+    }
+  },
+  '/api/logs/online-users': {
+    get: {
+      tags: ['Logs'],
+      summary: 'Listar usuários online',
+      description: 'Endpoint para listar usuários atualmente online no sistema. **Apenas administradores** podem acessar esta funcionalidade.',
+      security: [
+        {
+          BearerAuth: []
+        }
+      ],
+      responses: {
+        '200': {
+          description: 'Lista de usuários online retornada com sucesso',
+          content: {
+            'application/json': {
+              schema: {
+                type: 'object',
+                properties: {
+                  message: {
+                    type: 'string',
+                    example: 'Usuários online recuperados com sucesso'
+                  },
+                  data: {
+                    type: 'array',
+                    items: {
+                      type: 'object',
+                      properties: {
+                        id: {
+                          type: 'string',
+                          example: '60d5ecb74f8e4b2b3c8d6e7f'
+                        },
+                        nome: {
+                          type: 'string',
+                          example: 'João Silva'
+                        },
+                        matricula: {
+                          type: 'string',
+                          example: 'USR001'
+                        },
+                        ultimoAcesso: {
+                          type: 'string',
+                          format: 'date-time',
+                          example: '2024-01-15T10:30:00.000Z'
+                        }
+                      }
+                    }
+                  },
+                  total: {
+                    type: 'integer',
+                    example: 3
+                  },
+                  timestamp: {
+                    type: 'string',
+                    format: 'date-time',
+                    example: '2024-01-15T10:30:00.000Z'
+                  }
+                }
+              }
+            }
+          }
+        },
+        '401': {
+          $ref: '#/components/responses/Unauthorized'
+        },
+        '403': {
+          description: 'Acesso negado - Apenas administradores',
+          content: {
+            'application/json': {
+              schema: {
+                type: 'object',
+                properties: {
+                  message: {
+                    type: 'string',
+                    example: 'Acesso negado. Apenas administradores podem ver usuários online'
+                  },
+                  type: {
+                    type: 'string',
+                    example: 'permissionError'
+                  }
+                }
+              }
+            }
+          }
+        },
+        '500': {
+          $ref: '#/components/responses/InternalServerError'
+        }
+      }
+    }
+  },
+  '/api/logs/usuario/{userId}': {
+    get: {
+      tags: ['Logs'],
+      summary: 'Obter logs de usuário específico',
+      description: 'Endpoint para obter logs de um usuário específico. Permite rastrear atividades de um usuário particular.',
+      security: [
+        {
+          BearerAuth: []
+        }
+      ],
+      parameters: [
+        {
+          name: 'userId',
+          in: 'path',
+          required: true,
+          schema: {
+            type: 'string'
+          },
+          description: 'ID do usuário para buscar logs'
+        },
+        {
+          name: 'limit',
+          in: 'query',
+          required: false,
+          schema: {
+            type: 'integer',
+            minimum: 1,
+            maximum: 100,
+            default: 50
+          },
+          description: 'Quantidade de logs a retornar (máximo 100)'
+        }
+      ],
+      responses: {
+        '200': {
+          description: 'Logs do usuário retornados com sucesso',
+          content: {
+            'application/json': {
+              schema: {
+                $ref: '#/components/schemas/UserLogsResponse'
+              }
+            }
+          }
+        },
+        '400': {
+          $ref: '#/components/responses/BadRequest'
+        },
+        '401': {
+          $ref: '#/components/responses/Unauthorized'
+        },
+        '403': {
+          $ref: '#/components/responses/Forbidden'
+        },
+        '404': {
+          description: 'Usuário não encontrado',
+          content: {
+            'application/json': {
+              schema: {
+                type: 'object',
+                properties: {
+                  message: {
+                    type: 'string',
+                    example: 'Usuário não encontrado'
+                  }
+                }
+              }
+            }
+          }
+        },
+        '500': {
+          $ref: '#/components/responses/InternalServerError'
+        }
+      }
+    }
+  },
+  '/api/logs/search': {
+    get: {
+      tags: ['Logs'],
+      summary: 'Buscar eventos específicos',
+      description: 'Endpoint para buscar eventos específicos no sistema com filtros avançados. **Apenas administradores** podem acessar esta funcionalidade.',
+      security: [
+        {
+          BearerAuth: []
+        }
+      ],
+      parameters: [
+        {
+          name: 'eventType',
+          in: 'query',
+          required: false,
+          schema: {
+            type: 'string'
+          },
+          description: 'Tipo de evento a buscar'
+        },
+        {
+          name: 'startDate',
+          in: 'query',
+          required: false,
+          schema: {
+            type: 'string',
+            format: 'date'
+          },
+          description: 'Data de início para busca'
+        },
+        {
+          name: 'endDate',
+          in: 'query',
+          required: false,
+          schema: {
+            type: 'string',
+            format: 'date'
+          },
+          description: 'Data de fim para busca'
+        },
+        {
+          name: 'userId',
+          in: 'query',
+          required: false,
+          schema: {
+            type: 'string'
+          },
+          description: 'ID do usuário para filtrar eventos'
+        }
+      ],
+      responses: {
+        '200': {
+          description: 'Eventos encontrados com sucesso',
+          content: {
+            'application/json': {
+              schema: {
+                $ref: '#/components/schemas/EventSearchResponse'
+              }
+            }
+          }
+        },
+        '400': {
+          $ref: '#/components/responses/BadRequest'
+        },
+        '401': {
+          $ref: '#/components/responses/Unauthorized'
+        },
+        '403': {
+          $ref: '#/components/responses/Forbidden'
+        },
+        '500': {
+          $ref: '#/components/responses/InternalServerError'
+        }
+      }
+    }
+  },
+  '/api/logs/statistics': {
+    get: {
+      tags: ['Logs'],
+      summary: 'Obter estatísticas detalhadas de logs',
+      description: 'Endpoint para obter estatísticas detalhadas e métricas do sistema de logs. **Apenas administradores** podem acessar esta funcionalidade.',
+      security: [
+        {
+          BearerAuth: []
+        }
+      ],
+      responses: {
+        '200': {
+          description: 'Estatísticas de logs retornadas com sucesso',
+          content: {
+            'application/json': {
+              schema: {
+                $ref: '#/components/schemas/LogStatisticsResponse'
+              }
+            }
+          }
+        },
+        '401': {
+          $ref: '#/components/responses/Unauthorized'
+        },
+        '403': {
+          $ref: '#/components/responses/Forbidden'
+        },
+        '500': {
+          $ref: '#/components/responses/InternalServerError'
+        }
+      }
+    }
+  },
+  '/api/logs/critical': {
+    get: {
+      tags: ['Logs'],
+      summary: 'Obter eventos críticos',
+      description: 'Endpoint para obter eventos críticos do sistema que requerem atenção especial. **Apenas administradores** podem acessar esta funcionalidade.',
+      security: [
+        {
+          BearerAuth: []
+        }
+      ],
+      parameters: [
+        {
+          name: 'limit',
+          in: 'query',
+          required: false,
+          schema: {
+            type: 'integer',
+            minimum: 1,
+            maximum: 100,
+            default: 20
+          },
+          description: 'Quantidade de eventos críticos a retornar'
+        },
+        {
+          name: 'startDate',
+          in: 'query',
+          required: false,
+          schema: {
+            type: 'string',
+            format: 'date'
+          },
+          description: 'Data de início para busca de eventos críticos'
+        }
+      ],
+      responses: {
+        '200': {
+          description: 'Eventos críticos retornados com sucesso',
+          content: {
+            'application/json': {
+              schema: {
+                $ref: '#/components/schemas/CriticalEventsResponse'
+              }
+            }
+          }
+        },
+        '401': {
+          $ref: '#/components/responses/Unauthorized'
+        },
+        '403': {
+          $ref: '#/components/responses/Forbidden'
         },
         '500': {
           $ref: '#/components/responses/InternalServerError'
