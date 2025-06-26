@@ -1,0 +1,327 @@
+{
+  "inicioSessao": "2025-06-26T20:13:01.700Z",
+  "usuario": {
+    "id": "685da7e5eb630432f26b0564",
+    "matricula": "ADM0001",
+    "nome": "Administrador",
+    "perfil": "administrador"
+  },
+  "informacaoSistema": {
+    "ip": "::1",
+    "sistemaOperacional": "Desconhecido",
+    "navegador": "Desconhecido",
+    "userAgent": "PostmanRuntime/7.44.0"
+  },
+  "eventos": [
+    {
+      "timestamp": "2025-06-26T20:13:01.700Z",
+      "tipo": "LOGIN",
+      "ip": "::1",
+      "userAgent": "PostmanRuntime/7.44.0",
+      "sistemaOperacional": "Desconhecido",
+      "navegador": "Desconhecido",
+      "metodo": "POST",
+      "rota": "/auth/login",
+      "dados": {
+        "tipo": "login_sucesso",
+        "matricula": "ADM0001"
+      }
+    },
+    {
+      "timestamp": "2025-06-26T20:13:34.955Z",
+      "tipo": "CONSULTA_PRODUTOS",
+      "ip": "::1",
+      "userAgent": "PostmanRuntime/7.44.0",
+      "sistemaOperacional": "Desconhecido",
+      "navegador": "Desconhecido",
+      "metodo": "GET",
+      "rota": "/api/produtos/",
+      "dados": {
+        "metodo": "GET",
+        "rota": "/api/produtos/",
+        "params": {},
+        "query": {}
+      }
+    },
+    {
+      "timestamp": "2025-06-26T20:13:52.120Z",
+      "tipo": "CONSULTA_GRUPOS",
+      "ip": "::1",
+      "userAgent": "PostmanRuntime/7.44.0",
+      "sistemaOperacional": "Desconhecido",
+      "navegador": "Desconhecido",
+      "metodo": "GET",
+      "rota": "/api/grupos",
+      "dados": {
+        "metodo": "GET",
+        "rota": "/api/grupos",
+        "params": {},
+        "query": {}
+      }
+    },
+    {
+      "timestamp": "2025-06-26T20:16:38.973Z",
+      "tipo": "CADASTRO_USUARIO",
+      "ip": "::1",
+      "userAgent": "PostmanRuntime/7.44.0",
+      "sistemaOperacional": "Desconhecido",
+      "navegador": "Desconhecido",
+      "metodo": "POST",
+      "rota": "/api/usuarios",
+      "dados": {
+        "metodo": "POST",
+        "rota": "/api/usuarios",
+        "params": {},
+        "query": {}
+      }
+    },
+    {
+      "timestamp": "2025-06-26T20:16:39.198Z",
+      "tipo": "USUARIO_CRIADO",
+      "ip": "::1",
+      "userAgent": "PostmanRuntime/7.44.0",
+      "sistemaOperacional": "Desconhecido",
+      "navegador": "Desconhecido",
+      "metodo": "POST",
+      "rota": "/api/usuarios",
+      "dados": {
+        "usuario_criado": "685daaa781b6bccbd24b2786",
+        "matricula": "ADM1350",
+        "perfil": "administrador",
+        "criado_por": "ADM0001",
+        "prioridade": "CRITICA"
+      }
+    },
+    {
+      "timestamp": "2025-06-26T20:19:24.228Z",
+      "tipo": "ADICAO_PERMISSAO_USUARIO",
+      "ip": "::1",
+      "userAgent": "PostmanRuntime/7.44.0",
+      "sistemaOperacional": "Desconhecido",
+      "navegador": "Desconhecido",
+      "metodo": "POST",
+      "rota": "/api/usuarios/685daaa781b6bccbd24b2786/permissoes",
+      "dados": {
+        "metodo": "POST",
+        "rota": "/api/usuarios/685daaa781b6bccbd24b2786/permissoes",
+        "params": {
+          "id": "685daaa781b6bccbd24b2786"
+        },
+        "query": {}
+      }
+    },
+    {
+      "timestamp": "2025-06-26T20:19:24.317Z",
+      "tipo": "PERMISSAO_INDIVIDUAL_ADICIONADA",
+      "ip": "::1",
+      "userAgent": "PostmanRuntime/7.44.0",
+      "sistemaOperacional": "Desconhecido",
+      "navegador": "Desconhecido",
+      "metodo": "POST",
+      "rota": "/api/usuarios/685daaa781b6bccbd24b2786/permissoes",
+      "dados": {
+        "usuario_id": "685daaa781b6bccbd24b2786",
+        "permissao_adicionada": {
+          "rota": "produtos",
+          "dominio": "localhost"
+        },
+        "adicionado_por": "ADM0001",
+        "prioridade": "CRITICA"
+      }
+    },
+    {
+      "timestamp": "2025-06-26T20:19:35.674Z",
+      "tipo": "ADICAO_PERMISSAO_USUARIO",
+      "ip": "::1",
+      "userAgent": "PostmanRuntime/7.44.0",
+      "sistemaOperacional": "Desconhecido",
+      "navegador": "Desconhecido",
+      "metodo": "POST",
+      "rota": "/api/usuarios/685daaa781b6bccbd24b2786/permissoes",
+      "dados": {
+        "metodo": "POST",
+        "rota": "/api/usuarios/685daaa781b6bccbd24b2786/permissoes",
+        "params": {
+          "id": "685daaa781b6bccbd24b2786"
+        },
+        "query": {}
+      }
+    },
+    {
+      "timestamp": "2025-06-26T20:19:35.791Z",
+      "tipo": "PERMISSAO_INDIVIDUAL_ADICIONADA",
+      "ip": "::1",
+      "userAgent": "PostmanRuntime/7.44.0",
+      "sistemaOperacional": "Desconhecido",
+      "navegador": "Desconhecido",
+      "metodo": "POST",
+      "rota": "/api/usuarios/685daaa781b6bccbd24b2786/permissoes",
+      "dados": {
+        "usuario_id": "685daaa781b6bccbd24b2786",
+        "permissao_adicionada": {
+          "rota": "fornecedores",
+          "dominio": "localhost"
+        },
+        "adicionado_por": "ADM0001",
+        "prioridade": "CRITICA"
+      }
+    },
+    {
+      "timestamp": "2025-06-26T20:19:47.804Z",
+      "tipo": "ADICAO_PERMISSAO_USUARIO",
+      "ip": "::1",
+      "userAgent": "PostmanRuntime/7.44.0",
+      "sistemaOperacional": "Desconhecido",
+      "navegador": "Desconhecido",
+      "metodo": "POST",
+      "rota": "/api/usuarios/685daaa781b6bccbd24b2786/permissoes",
+      "dados": {
+        "metodo": "POST",
+        "rota": "/api/usuarios/685daaa781b6bccbd24b2786/permissoes",
+        "params": {
+          "id": "685daaa781b6bccbd24b2786"
+        },
+        "query": {}
+      }
+    },
+    {
+      "timestamp": "2025-06-26T20:19:47.922Z",
+      "tipo": "PERMISSAO_INDIVIDUAL_ADICIONADA",
+      "ip": "::1",
+      "userAgent": "PostmanRuntime/7.44.0",
+      "sistemaOperacional": "Desconhecido",
+      "navegador": "Desconhecido",
+      "metodo": "POST",
+      "rota": "/api/usuarios/685daaa781b6bccbd24b2786/permissoes",
+      "dados": {
+        "usuario_id": "685daaa781b6bccbd24b2786",
+        "permissao_adicionada": {
+          "rota": "usuarios",
+          "dominio": "localhost"
+        },
+        "adicionado_por": "ADM0001",
+        "prioridade": "CRITICA"
+      }
+    },
+    {
+      "timestamp": "2025-06-26T20:19:57.061Z",
+      "tipo": "ADICAO_PERMISSAO_USUARIO",
+      "ip": "::1",
+      "userAgent": "PostmanRuntime/7.44.0",
+      "sistemaOperacional": "Desconhecido",
+      "navegador": "Desconhecido",
+      "metodo": "POST",
+      "rota": "/api/usuarios/685daaa781b6bccbd24b2786/permissoes",
+      "dados": {
+        "metodo": "POST",
+        "rota": "/api/usuarios/685daaa781b6bccbd24b2786/permissoes",
+        "params": {
+          "id": "685daaa781b6bccbd24b2786"
+        },
+        "query": {}
+      }
+    },
+    {
+      "timestamp": "2025-06-26T20:19:57.176Z",
+      "tipo": "PERMISSAO_INDIVIDUAL_ADICIONADA",
+      "ip": "::1",
+      "userAgent": "PostmanRuntime/7.44.0",
+      "sistemaOperacional": "Desconhecido",
+      "navegador": "Desconhecido",
+      "metodo": "POST",
+      "rota": "/api/usuarios/685daaa781b6bccbd24b2786/permissoes",
+      "dados": {
+        "usuario_id": "685daaa781b6bccbd24b2786",
+        "permissao_adicionada": {
+          "rota": "grupos",
+          "dominio": "localhost"
+        },
+        "adicionado_por": "ADM0001",
+        "prioridade": "CRITICA"
+      }
+    },
+    {
+      "timestamp": "2025-06-26T20:20:04.321Z",
+      "tipo": "ADICAO_PERMISSAO_USUARIO",
+      "ip": "::1",
+      "userAgent": "PostmanRuntime/7.44.0",
+      "sistemaOperacional": "Desconhecido",
+      "navegador": "Desconhecido",
+      "metodo": "POST",
+      "rota": "/api/usuarios/685daaa781b6bccbd24b2786/permissoes",
+      "dados": {
+        "metodo": "POST",
+        "rota": "/api/usuarios/685daaa781b6bccbd24b2786/permissoes",
+        "params": {
+          "id": "685daaa781b6bccbd24b2786"
+        },
+        "query": {}
+      }
+    },
+    {
+      "timestamp": "2025-06-26T20:20:04.441Z",
+      "tipo": "PERMISSAO_INDIVIDUAL_ADICIONADA",
+      "ip": "::1",
+      "userAgent": "PostmanRuntime/7.44.0",
+      "sistemaOperacional": "Desconhecido",
+      "navegador": "Desconhecido",
+      "metodo": "POST",
+      "rota": "/api/usuarios/685daaa781b6bccbd24b2786/permissoes",
+      "dados": {
+        "usuario_id": "685daaa781b6bccbd24b2786",
+        "permissao_adicionada": {
+          "rota": "auth",
+          "dominio": "localhost"
+        },
+        "adicionado_por": "ADM0001",
+        "prioridade": "CRITICA"
+      }
+    },
+    {
+      "timestamp": "2025-06-26T20:20:11.225Z",
+      "tipo": "ADICAO_PERMISSAO_USUARIO",
+      "ip": "::1",
+      "userAgent": "PostmanRuntime/7.44.0",
+      "sistemaOperacional": "Desconhecido",
+      "navegador": "Desconhecido",
+      "metodo": "POST",
+      "rota": "/api/usuarios/685daaa781b6bccbd24b2786/permissoes",
+      "dados": {
+        "metodo": "POST",
+        "rota": "/api/usuarios/685daaa781b6bccbd24b2786/permissoes",
+        "params": {
+          "id": "685daaa781b6bccbd24b2786"
+        },
+        "query": {}
+      }
+    },
+    {
+      "timestamp": "2025-06-26T20:20:11.356Z",
+      "tipo": "PERMISSAO_INDIVIDUAL_ADICIONADA",
+      "ip": "::1",
+      "userAgent": "PostmanRuntime/7.44.0",
+      "sistemaOperacional": "Desconhecido",
+      "navegador": "Desconhecido",
+      "metodo": "POST",
+      "rota": "/api/usuarios/685daaa781b6bccbd24b2786/permissoes",
+      "dados": {
+        "usuario_id": "685daaa781b6bccbd24b2786",
+        "permissao_adicionada": {
+          "rota": "logs",
+          "dominio": "localhost"
+        },
+        "adicionado_por": "ADM0001",
+        "prioridade": "CRITICA"
+      }
+    },
+    {
+      "timestamp": "2025-06-26T20:20:33.174Z",
+      "tipo": "LOGOUT",
+      "dados": {
+        "tipo": "manual"
+      }
+    }
+  ],
+  "fimSessao": "2025-06-26T20:20:33.180Z",
+  "duracaoSessao": 451
+}

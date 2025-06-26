@@ -363,6 +363,192 @@ class UsuarioController {
             });
         }
     }
+
+    /**
+     * Adiciona usuário a um grupo
+     */
+    async adicionarUsuarioAoGrupo(req, res) {
+        console.log('Estou no adicionarUsuarioAoGrupo em UsuarioController');
+
+        try {
+            const { usuarioId, grupoId } = req.body;
+
+            if (!usuarioId || !grupoId) {
+                throw new CustomError({
+                    statusCode: HttpStatusCodes.BAD_REQUEST.code,
+                    errorType: 'validationError',
+                    field: 'body',
+                    details: [],
+                    customMessage: 'ID do usuário e ID do grupo são obrigatórios.'
+                });
+            }
+
+            const data = await this.service.adicionarUsuarioAoGrupo(usuarioId, grupoId);
+
+            // Registra evento crítico
+            LogMiddleware.logCriticalEvent(req.userId, 'USUARIO_ADICIONADO_GRUPO', {
+                usuario_id: usuarioId,
+                grupo_id: grupoId,
+                adicionado_por: req.userMatricula
+            }, req);
+
+            return CommonResponse.success(res, data, 200, 'Usuário adicionado ao grupo com sucesso.');
+        } catch (error) {
+            console.error('Erro no controller ao adicionar usuário ao grupo:', error);
+            return CommonResponse.error(res, error);
+        }
+    }
+
+    /**
+     * Remove usuário de um grupo
+     */
+    async removerUsuarioDoGrupo(req, res) {
+        console.log('Estou no removerUsuarioDoGrupo em UsuarioController');
+
+        try {
+            const { usuarioId, grupoId } = req.body;
+
+            if (!usuarioId || !grupoId) {
+                throw new CustomError({
+                    statusCode: HttpStatusCodes.BAD_REQUEST.code,
+                    errorType: 'validationError',
+                    field: 'body',
+                    details: [],
+                    customMessage: 'ID do usuário e ID do grupo são obrigatórios.'
+                });
+            }
+
+            const data = await this.service.removerUsuarioDoGrupo(usuarioId, grupoId);
+
+            // Registra evento crítico
+            LogMiddleware.logCriticalEvent(req.userId, 'USUARIO_REMOVIDO_GRUPO', {
+                usuario_id: usuarioId,
+                grupo_id: grupoId,
+                removido_por: req.userMatricula
+            }, req);
+
+            return CommonResponse.success(res, data, 200, 'Usuário removido do grupo com sucesso.');
+        } catch (error) {
+            console.error('Erro no controller ao remover usuário do grupo:', error);
+            return CommonResponse.error(res, error);
+        }
+    }
+
+    /**
+     * Adiciona permissão individual a um usuário
+     */
+    async adicionarPermissaoAoUsuario(req, res) {
+        console.log('Estou no adicionarPermissaoAoUsuario em UsuarioController');
+
+        try {
+            const { id } = req.params;
+            const permissao = req.body;
+
+            if (!id) {
+                throw new CustomError({
+                    statusCode: HttpStatusCodes.BAD_REQUEST.code,
+                    errorType: 'validationError',
+                    field: 'id',
+                    details: [],
+                    customMessage: 'ID do usuário é obrigatório.'
+                });
+            }
+
+            const data = await this.service.adicionarPermissaoAoUsuario(id, permissao);
+
+            // Registra evento crítico
+            LogMiddleware.logCriticalEvent(req.userId, 'PERMISSAO_INDIVIDUAL_ADICIONADA', {
+                usuario_id: id,
+                permissao_adicionada: {
+                    rota: permissao.rota,
+                    dominio: permissao.dominio
+                },
+                adicionado_por: req.userMatricula
+            }, req);
+
+            return CommonResponse.success(res, data, 200, 'Permissão adicionada ao usuário com sucesso.');
+        } catch (error) {
+            console.error('Erro no controller ao adicionar permissão ao usuário:', error);
+            return CommonResponse.error(res, error);
+        }
+    }
+
+    /**
+     * Remove permissão individual de um usuário
+     */
+    async removerPermissaoDoUsuario(req, res) {
+        console.log('Estou no removerPermissaoDoUsuario em UsuarioController');
+
+        try {
+            const { id } = req.params;
+            const { rota, dominio } = req.body;
+
+            if (!id) {
+                throw new CustomError({
+                    statusCode: HttpStatusCodes.BAD_REQUEST.code,
+                    errorType: 'validationError',
+                    field: 'id',
+                    details: [],
+                    customMessage: 'ID do usuário é obrigatório.'
+                });
+            }
+
+            if (!rota) {
+                throw new CustomError({
+                    statusCode: HttpStatusCodes.BAD_REQUEST.code,
+                    errorType: 'validationError',
+                    field: 'rota',
+                    details: [],
+                    customMessage: 'Nome da rota é obrigatório.'
+                });
+            }
+
+            const data = await this.service.removerPermissaoDoUsuario(id, rota, dominio);
+
+            // Registra evento crítico
+            LogMiddleware.logCriticalEvent(req.userId, 'PERMISSAO_INDIVIDUAL_REMOVIDA', {
+                usuario_id: id,
+                permissao_removida: {
+                    rota: rota,
+                    dominio: dominio || 'localhost'
+                },
+                removido_por: req.userMatricula
+            }, req);
+
+            return CommonResponse.success(res, data, 200, 'Permissão removida do usuário com sucesso.');
+        } catch (error) {
+            console.error('Erro no controller ao remover permissão do usuário:', error);
+            return CommonResponse.error(res, error);
+        }
+    }
+
+    /**
+     * Obtém permissões efetivas de um usuário
+     */
+    async obterPermissoesUsuario(req, res) {
+        console.log('Estou no obterPermissoesUsuario em UsuarioController');
+
+        try {
+            const { id } = req.params;
+
+            if (!id) {
+                throw new CustomError({
+                    statusCode: HttpStatusCodes.BAD_REQUEST.code,
+                    errorType: 'validationError',
+                    field: 'id',
+                    details: [],
+                    customMessage: 'ID do usuário é obrigatório.'
+                });
+            }
+
+            const data = await this.service.obterPermissoesUsuario(id);
+
+            return CommonResponse.success(res, data, 200, 'Permissões do usuário obtidas com sucesso.');
+        } catch (error) {
+            console.error('Erro no controller ao obter permissões do usuário:', error);
+            return CommonResponse.error(res, error);
+        }
+    }
 }
 
 export default UsuarioController;

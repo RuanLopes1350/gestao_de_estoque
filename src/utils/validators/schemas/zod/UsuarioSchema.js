@@ -24,6 +24,24 @@ export const UsuarioSchema = z.object({
         .regex(/[A-Z]/, 'Senha deve conter pelo menos uma letra maiuscula.')
         .regex(/[a-z]/, 'Senha deve conter pelo menos uma letra minuscula.')
         .regex(/[0-9]/, 'Senha deve conter pelo menos um numero.'),
+    // Grupos opcionais no cadastro
+    grupos: z.array(z.string().regex(/^[0-9a-fA-F]{24}$/, 'ID do grupo deve ser um ObjectId válido'))
+        .optional()
+        .default([])
+        .refine((grupos) => grupos.length <= 10, {
+            message: 'Usuário pode pertencer a no máximo 10 grupos'
+        }),
+    // Permissões individuais opcionais no cadastro
+    permissoes: z.array(z.object({
+        rota: z.string().min(1, 'Nome da rota é obrigatório'),
+        dominio: z.string().default('localhost'),
+        ativo: z.boolean().default(true),
+        buscar: z.boolean().default(false),
+        enviar: z.boolean().default(false),
+        substituir: z.boolean().default(false),
+        modificar: z.boolean().default(false),
+        excluir: z.boolean().default(false)
+    })).optional().default([])
 });
 
 export const UsuarioUpdateSchema = UsuarioSchema.partial();
