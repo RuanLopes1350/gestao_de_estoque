@@ -9,13 +9,14 @@ class Usuario {
         nome_usuario: { type: String, required: true },
         email: { type: String, required: true, unique: true },
         matricula: { type: String, required: true, unique: true },
-        senha: { type: String, required: true, select: false },
+        senha: { type: String, required: false, select: false }, // Não obrigatório inicialmente
         perfil: {
           type: String,
           enum: ["administrador", "gerente", "estoquista"],
           default: "estoquista"
         },
         ativo: { type: Boolean, default: true },
+        senha_definida: { type: Boolean, default: false }, // Nova flag para controlar se senha foi definida
         accesstoken: { type: String, select: false },
         refreshtoken: { type: String, select: false },
         token_recuperacao: { type: String, select: false },

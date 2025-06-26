@@ -549,6 +549,120 @@ class UsuarioController {
             return CommonResponse.error(res, error);
         }
     }
+
+    async cadastrarUsuarioSemSenha(req, res) {
+        console.log('Estou no cadastrarUsuarioSemSenha em UsuarioController');
+
+        try {
+            // Validar dados básicos (sem senha)
+            const { nome_usuario, email, matricula, perfil, grupos } = req.body;
+            
+            if (!nome_usuario || !email || !matricula) {
+                return CommonResponse.error(
+                    res,
+                    HttpStatusCodes.BAD_REQUEST.code,
+                    'validationError',
+                    'body',
+                    ['Nome, email e matrícula são obrigatórios'],
+                    'Dados obrigatórios não fornecidos.'
+                );
+            }
+
+            const dadosUsuario = {
+                nome_usuario,
+                email,
+                matricula,
+                perfil: perfil || 'estoquista',
+                grupos: grupos || []
+            };
+
+            const data = await this.service.cadastrarUsuarioSemSenha(dadosUsuario);
+
+            // Registra evento crítico de criação de usuário sem senha
+            LogMiddleware.logCriticalEvent(req.userId, 'USUARIO_CRIADO_SEM_SENHA', {
+                usuario_criado: data._id,
+                matricula: data.matricula,
+                perfil: data.perfil,
+                criado_por: req.userMatricula,
+                codigo_gerado: true // Não logamos o código por segurança
+            }, req);
+
+            return CommonResponse.created(
+                res,
+                {
+                    ...data,
+                    message: `Usuário cadastrado com sucesso. Código de segurança gerado: ${data.codigoSeguranca}`,
+                    instrucoes: "O usuário deve usar este código na endpoint '/auth/redefinir-senha/codigo' para definir sua senha. Código válido por 24 horas."
+                },
+                HttpStatusCodes.CREATED.code,
+                'Usuário cadastrado com sucesso.'
+            );
+        } catch (error) {
+            // Tratando erro Zod
+            if (error.name === 'ZodError') {
+                return CommonResponse.error(
+                    res,
+                    HttpStatusCodes.BAD_REQUEST.code,
+                    'validationError',
+                    'body',
+                    error.errors,
+                    'Dados de usuário inválidos. Verifique os campos e tente novamente.'
+                );
+            }
+
+            // Tratando erro no Mongoose
+            if (error.name === 'ValidationError') {
+                return CommonResponse.error(
+                    res,
+                    HttpStatusCodes.BAD_REQUEST.code,
+                    'validationError',
+                    'body',
+                    Object.values(error.errors).map(err => ({
+                        field: err.path,
+                        message: err.message
+                    })),
+                    'Erro de validação nos dados do usuário.'
+                );
+            }
+
+            // Tratando erro de duplicação (E11000)
+            if (error.code === 11000) {
+                const field = Object.keys(error.keyValue)[0];
+                const value = error.keyValue[field];
+                return CommonResponse.error(
+                    res,
+                    HttpStatusCodes.CONFLICT.code,
+                    'duplicateError',
+                    field,
+                    [{ field, value, message: `${field} já existe` }],
+                    `${field} '${value}' já está cadastrado no sistema.`
+                );
+            }
+
+            // Erro customizado
+            if (error.customMessage) {
+                return CommonResponse.error(
+                    res,
+                    error.statusCode || HttpStatusCodes.INTERNAL_SERVER_ERROR.code,
+                    error.errorType || 'serverError',
+                    error.field || 'unknown',
+                    error.details || [],
+                    error.customMessage
+                );
+            }
+
+            // Erro genérico
+            console.error('Erro não tratado no cadastrarUsuarioSemSenha:', error);
+            return CommonResponse.error(
+                res,
+                HttpStatusCodes.INTERNAL_SERVER_ERROR.code,
+                'serverError',
+                'unknown',
+                [],
+                'Erro interno do servidor ao cadastrar usuário.'
+            );
+        }
+    }
 }
 
 export default UsuarioController;

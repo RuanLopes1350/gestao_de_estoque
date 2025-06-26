@@ -190,6 +190,35 @@ class UsuarioService {
         return await this.repository.criarUsuario(dadosUsuario);
     }
 
+    async criarUsuarioSemSenha(dadosUsuario) {
+        console.log('Criando usuário sem senha - será enviado código de segurança');
+        
+        // Gerar código de segurança (6 dígitos)
+        const codigoSeguranca = Math.random().toString().slice(2, 8);
+        
+        // Definir expiração do código (24 horas)
+        const dataExpiracao = new Date();
+        dataExpiracao.setHours(dataExpiracao.getHours() + 24);
+        
+        // Preparar dados do usuário
+        const dadosUsuarioCompletos = {
+            ...dadosUsuario,
+            senha: null, // Sem senha inicial
+            ativo: false, // Usuário inativo até definir senha
+            codigo_recuperacao: codigoSeguranca,
+            data_expiracao_codigo: dataExpiracao,
+            senha_definida: false // Flag para indicar que senha não foi definida
+        };
+        
+        const usuarioCriado = await this.repository.criarUsuario(dadosUsuarioCompletos);
+        
+        // Retornar dados do usuário com código (para log/admin)
+        return {
+            ...usuarioCriado.toObject(),
+            codigoSeguranca // Temporário para retorno ao admin
+        };
+    }
+
     async revoke(token) {
         if (!token) {
             throw new CustomError({

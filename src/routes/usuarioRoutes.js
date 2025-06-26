@@ -214,6 +214,79 @@ router
     
 /**
  * @swagger
+ * /api/usuarios/cadastrar-sem-senha:
+ *   post:
+ *     summary: Cadastrar usuário sem senha (gera código de segurança)
+ *     description: Permite ao administrador cadastrar um usuário sem definir senha. Um código de segurança será gerado para que o usuário defina sua própria senha.
+ *     tags: [Usuários]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - nome_usuario
+ *               - email
+ *               - matricula
+ *             properties:
+ *               nome_usuario:
+ *                 type: string
+ *                 description: Nome completo do usuário
+ *                 example: "João Silva"
+ *               email:
+ *                 type: string
+ *                 format: email
+ *                 description: Email do usuário
+ *                 example: "joao.silva@empresa.com"
+ *               matricula:
+ *                 type: string
+ *                 description: Matrícula do usuário
+ *                 example: "12345"
+ *               perfil:
+ *                 type: string
+ *                 enum: [administrador, gerente, estoquista]
+ *                 description: Perfil do usuário
+ *                 example: "estoquista"
+ *               grupos:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *                 description: IDs dos grupos do usuário
+ *     responses:
+ *       201:
+ *         description: Usuário cadastrado com sucesso, código de segurança gerado
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Usuário cadastrado com sucesso. Código de segurança gerado: 123456"
+ *                 instrucoes:
+ *                   type: string
+ *                   example: "O usuário deve usar este código na endpoint '/auth/redefinir-senha/codigo' para definir sua senha."
+ *       400:
+ *         description: Dados inválidos
+ *       401:
+ *         description: Token inválido
+ *       409:
+ *         description: Usuário já existe
+ *       500:
+ *         description: Erro interno do servidor
+ */
+router.post(
+    "/cadastrar-sem-senha", 
+    LogMiddleware.log('CADASTRO_USUARIO_SEM_SENHA'),
+    asyncWrapper(usuarioController.cadastrarUsuarioSemSenha.bind(usuarioController))
+);
+
+router
+/**
+ * @swagger
  * /api/usuarios/busca:
  *   get:
  *     summary: Buscar usuário por matrícula
