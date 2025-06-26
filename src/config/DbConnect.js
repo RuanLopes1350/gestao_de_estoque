@@ -36,12 +36,18 @@ class DbConnect {
             if (process.env.NODE_ENV === 'development') {
                 mongoose.set('autoIndex', true); // Cria índices automaticamente
                 mongoose.set('debug', true); // Ativa logs de debug
-                // logger.info('Configurações de desenvolvimento ativadas: autoIndex e debug.');
+                console.log('🔧 Configurações de desenvolvimento ativadas: autoIndex e debug.');
+                console.log('📊 NODE_ENV:', process.env.NODE_ENV);
             } else {
                 mongoose.set('autoIndex', false); // Desativa criação automática de índices
                 mongoose.set('debug', false); // Desativa logs de debug
-                // logger.info('Configurações de produção ativadas: autoIndex e debug desativados.');
+                console.log('🏭 Configurações de produção ativadas: autoIndex e debug desativados.');
+                console.log('📊 NODE_ENV:', process.env.NODE_ENV);
             }
+
+            // FORÇA logs do Mongoose para debug (temporário)
+            mongoose.set('debug', true);
+            console.log('🐛 Debug do Mongoose FORÇADO para true');
 
             // Adiciona listeners para eventos do Mongoose
             mongoose.connection.on('connected', () => {
