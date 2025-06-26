@@ -77,5 +77,101 @@ class FornecedorController {
       return CommonResponse.error(res, error);
     }
   }
+
+  async desativarFornecedor(req, res) {
+    console.log("Estou no desativarFornecedor em FornecedorController");
+    try {
+      const { id } = req.params || {};
+      if (!id) {
+        throw new CustomError({
+          statusCode: HttpStatusCodes.BAD_REQUEST.code,
+          errorType: "validationError",
+          field: "id",
+          details: [],
+          customMessage: "ID do fornecedor é obrigatório para desativar.",
+        });
+      }
+
+      try {
+        FornecedorIdSchema.parse(id);
+      } catch (error) {
+        throw new CustomError({
+          statusCode: HttpStatusCodes.BAD_REQUEST.code,
+          errorType: "validationError",
+          field: "id",
+          details: [],
+          customMessage: "ID do fornecedor inválido.",
+        });
+      }
+
+      const data = await this.service.desativarFornecedor(id);
+      return CommonResponse.success(
+        res,
+        data,
+        200,
+        "fornecedor desativado com sucesso."
+      );
+    } catch (error) {
+      if (error.statusCode === 404) {
+        return CommonResponse.error(
+          res,
+          error.statusCode,
+          error.errorType,
+          error.field,
+          error.details,
+          "fornecedor não encontrado. Verifique se o ID está correto."
+        );
+      }
+      return CommonResponse.error(res, error);
+    }
+  }
+
+  async reativarFornecedor(req, res) {
+    console.log("Estou no reativarFornecedor em FornecedorController");
+    try {
+      const { id } = req.params || {};
+      if (!id) {
+        throw new CustomError({
+          statusCode: HttpStatusCodes.BAD_REQUEST.code,
+          errorType: "validationError",
+          field: "id",
+          details: [],
+          customMessage: "ID do fornecedor é obrigatório para reativar.",
+        });
+      }
+
+      try {
+        FornecedorIdSchema.parse(id);
+      } catch (error) {
+        throw new CustomError({
+          statusCode: HttpStatusCodes.BAD_REQUEST.code,
+          errorType: "validationError",
+          field: "id",
+          details: [],
+          customMessage: "ID do fornecedor inválido.",
+        });
+      }
+
+      const data = await this.service.reativarFornecedor(id);
+      return CommonResponse.success(
+        res,
+        data,
+        200,
+        "fornecedor reativado com sucesso."
+      );
+    } catch (error) {
+      if (error.statusCode === 404) {
+        return CommonResponse.error(
+          res,
+          error.statusCode,
+          error.errorType,
+          error.field,
+          error.details,
+          "fornecedor não encontrado. Verifique se o ID está correto."
+        );
+      }
+      return CommonResponse.error(res, error);
+    }
+  }
 }
 export default FornecedorController;

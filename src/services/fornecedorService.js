@@ -33,15 +33,49 @@ class FornecedorService {
   // DELETE /fornecedores/:id
   async deletar(id) {
     if (!mongoose.Types.ObjectId.isValid(id)) {
-        throw new CustomError({
-            statusCode: HttpStatusCodes.BAD_REQUEST.code,
-            errorType: 'validationError',
-            field: 'id',
-            details: [],
-            customMessage: 'ID do fornecedor inválido.'
-        });
+      throw new CustomError({
+        statusCode: HttpStatusCodes.BAD_REQUEST.code,
+        errorType: "validationError",
+        field: "id",
+        details: [],
+        customMessage: "ID do fornecedor inválido.",
+      });
     }
     const data = await this.repository.deletar(id);
+    return data;
+  }
+
+  async desativarFornecedor(id) {
+    console.log("Estou no desativarFornecedor em fornecedorService");
+
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      throw new CustomError({
+        statusCode: HttpStatusCodes.BAD_REQUEST.code,
+        errorType: "validationError",
+        field: "id",
+        details: [],
+        customMessage: "ID do forecedor inválido.",
+      });
+    }
+
+    const data = await this.repository.desativarFornecedor(id);
+    return data;
+  }
+
+  async reativarFornecedor(id) {
+    console.log("Estou no reativarFornecedor em fornecedorService");
+
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      throw new CustomError({
+        statusCode: HttpStatusCodes.BAD_REQUEST.code,
+        errorType: "validationError",
+        field: "id",
+        details: [],
+        customMessage: "ID do forecedor inválido.",
+      });
+    }
+
+    const data = await this.repository.reativarFornecedor(id);
     return data;
   }
 }
