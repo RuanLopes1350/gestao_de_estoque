@@ -247,6 +247,14 @@ class UsuarioRepository {
         );
     }
 
+    async atualizarSenhaCompleta(id, dadosAtualizacao) {
+        return await this.model.findByIdAndUpdate(
+            id,
+            dadosAtualizacao,
+            { new: true }
+        );
+    }
+
     async criarUsuario(dadosUsuario) {
         const novoUsuario = new this.model(dadosUsuario);
         return await novoUsuario.save();

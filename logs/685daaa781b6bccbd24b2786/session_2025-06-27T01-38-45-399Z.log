@@ -1,0 +1,63 @@
+{
+  "inicioSessao": "2025-06-27T01:38:45.400Z",
+  "usuario": {
+    "id": "685daaa781b6bccbd24b2786",
+    "matricula": "ADM1350",
+    "nome": "Ruan Lopes",
+    "perfil": "administrador"
+  },
+  "informacaoSistema": {
+    "ip": "::1",
+    "sistemaOperacional": "Desconhecido",
+    "navegador": "Desconhecido",
+    "userAgent": "PostmanRuntime/7.44.0"
+  },
+  "eventos": [
+    {
+      "timestamp": "2025-06-27T01:38:45.400Z",
+      "tipo": "LOGIN",
+      "ip": "::1",
+      "userAgent": "PostmanRuntime/7.44.0",
+      "sistemaOperacional": "Desconhecido",
+      "navegador": "Desconhecido",
+      "metodo": "POST",
+      "rota": "/auth/login",
+      "dados": {
+        "tipo": "login_sucesso",
+        "matricula": "ADM1350"
+      }
+    },
+    {
+      "timestamp": "2025-06-27T01:38:51.047Z",
+      "tipo": "CADASTRO_USUARIO",
+      "ip": "::1",
+      "userAgent": "PostmanRuntime/7.44.0",
+      "sistemaOperacional": "Desconhecido",
+      "navegador": "Desconhecido",
+      "metodo": "POST",
+      "rota": "/api/usuarios",
+      "dados": {
+        "metodo": "POST",
+        "rota": "/api/usuarios",
+        "params": {},
+        "query": {}
+      }
+    },
+    {
+      "timestamp": "2025-06-27T01:39:11.885Z",
+      "tipo": "CADASTRO_USUARIO",
+      "ip": "::1",
+      "userAgent": "PostmanRuntime/7.44.0",
+      "sistemaOperacional": "Desconhecido",
+      "navegador": "Desconhecido",
+      "metodo": "POST",
+      "rota": "/api/usuarios",
+      "dados": {
+        "metodo": "POST",
+        "rota": "/api/usuarios",
+        "params": {},
+        "query": {}
+      }
+    }
+  ]
+}

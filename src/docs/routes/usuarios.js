@@ -1,4 +1,4 @@
-import commonResponses from "../schemas/swaggerCommonResponses.js";
+import commonSchemas from "../schemas/common.js";
 
 const usuariosRoutes = {
     "/api/usuarios": {
@@ -17,35 +17,34 @@ const usuariosRoutes = {
             `,
             security: [{ bearerAuth: [] }],
             parameters: [
+                ...commonSchemas.PaginationParams,
                 {
-                    name: "page",
+                    name: "nome_usuario",
                     in: "query",
-                    description: "Número da página",
-                    schema: { type: "integer", default: 1, minimum: 1 }
+                    description: "Filtrar por nome de usuário (busca parcial)",
+                    schema: { type: "string", example: "joão" }
                 },
                 {
-                    name: "limit",
+                    name: "matricula",
                     in: "query",
-                    description: "Itens por página",
-                    schema: { type: "integer", default: 10, minimum: 1, maximum: 100 }
+                    description: "Filtrar por matrícula (busca parcial)",
+                    schema: { type: "string", example: "123" }
                 },
                 {
                     name: "perfil",
                     in: "query",
                     description: "Filtrar por perfil",
-                    schema: { type: "string", enum: ["administrador", "funcionario"], example: "funcionario" }
+                    schema: { 
+                        type: "string", 
+                        enum: ["administrador", "gerente", "estoquista"], 
+                        example: "estoquista" 
+                    }
                 },
                 {
                     name: "ativo",
                     in: "query",
-                    description: "Filtrar por status",
+                    description: "Filtrar por status ativo",
                     schema: { type: "boolean", example: true }
-                },
-                {
-                    name: "nome",
-                    in: "query",
-                    description: "Buscar por nome (parcial)",
-                    schema: { type: "string", example: "joão" }
                 }
             ],
             responses: {
@@ -53,36 +52,34 @@ const usuariosRoutes = {
                     description: "Usuários listados com sucesso",
                     content: {
                         "application/json": {
-                            schema: { "$ref": "#/components/schemas/UsuariosList" }
+                            schema: {
+                                $ref: "#/components/schemas/UsuarioListResponse"
+                            }
                         }
                     }
                 },
-                401: commonResponses[401](),
-                403: commonResponses[403](),
-                500: commonResponses[500]()
+                ...commonSchemas.CommonResponses
             }
         },
         post: {
             tags: ["Usuários"],
-            summary: "Cadastra novo usuário",
+            summary: "Cadastrar novo usuário",
             description: `
-            Cadastra um novo usuário no sistema.
+            Cadastra um novo usuário no sistema com senha.
             
-            **Funcionalidades:**
-            - Validação de matrícula única
-            - Validação de email único
-            - Criptografia automática da senha
-            - Definição de perfil de acesso
-            - Registro automático de logs
-            
-            **Permissões:** Apenas administradores podem cadastrar usuários.
+            **Validações:**
+            - Nome, email, matrícula e senha são obrigatórios
+            - Email e matrícula devem ser únicos
+            - Senha deve ter pelo menos 6 caracteres
             `,
             security: [{ bearerAuth: [] }],
             requestBody: {
                 required: true,
                 content: {
                     "application/json": {
-                        schema: { "$ref": "#/components/schemas/UsuarioCreate" }
+                        schema: {
+                            $ref: "#/components/schemas/UsuarioCreateRequest"
+                        }
                     }
                 }
             },
@@ -91,13 +88,12 @@ const usuariosRoutes = {
                     description: "Usuário cadastrado com sucesso",
                     content: {
                         "application/json": {
-                            schema: { "$ref": "#/components/schemas/UsuarioCreateResponse" }
+                            schema: {
+                                $ref: "#/components/schemas/UsuarioResponse"
+                            }
                         }
                     }
                 },
-                400: commonResponses[400](),
-                401: commonResponses[401](),
-                403: commonResponses[403](),
                 409: {
                     description: "Matrícula ou email já cadastrados",
                     content: {
@@ -105,40 +101,113 @@ const usuariosRoutes = {
                             schema: {
                                 type: "object",
                                 properties: {
+                                    success: {
+                                        type: "boolean",
+                                        example: false
+                                    },
                                     message: {
                                         type: "string",
-                                        example: "Matrícula ou email já está cadastrado no sistema"
+                                        example: "Usuário com este email ou matrícula já existe"
                                     }
                                 }
                             }
                         }
                     }
                 },
-                422: commonResponses[422](),
-                500: commonResponses[500]()
+                ...commonSchemas.CommonResponses
             }
         }
     },
 
-    "/api/usuarios/{matricula}": {
+    "/api/usuarios/cadastrar-sem-senha": {
+        post: {
+            tags: ["Usuários"],
+            summary: "Cadastrar usuário sem senha (gera código de segurança)",
+            description: `
+            Permite ao administrador cadastrar um usuário sem definir senha. 
+            Um código de segurança será gerado para que o usuário defina sua própria senha.
+            
+            **Fluxo:**
+            1. Administrador cadastra usuário com dados básicos
+            2. Sistema gera código de 6 dígitos válido por 24 horas
+            3. Usuário usa código no endpoint \`/auth/redefinir-senha/codigo\`
+            4. Conta é ativada automaticamente após definir senha
+            
+            **Vantagens:**
+            - Maior segurança (admin não conhece senhas)
+            - Usuário define sua própria senha
+            - Reutiliza sistema de recuperação existente
+            `,
+            security: [{ bearerAuth: [] }],
+            requestBody: {
+                required: true,
+                content: {
+                    "application/json": {
+                        schema: {
+                            $ref: "#/components/schemas/UsuarioCreateSemSenhaRequest"
+                        }
+                    }
+                }
+            },
+            responses: {
+                201: {
+                    description: "Usuário cadastrado com sucesso, código de segurança gerado",
+                    content: {
+                        "application/json": {
+                            schema: {
+                                $ref: "#/components/schemas/UsuarioCreateSemSenhaResponse"
+                            }
+                        }
+                    }
+                },
+                403: {
+                    description: "Acesso negado - apenas administradores podem cadastrar usuários",
+                    content: {
+                        "application/json": {
+                            schema: {
+                                $ref: "#/components/schemas/ErrorResponse"
+                            }
+                        }
+                    }
+                },
+                409: {
+                    description: "Matrícula ou email já cadastrados",
+                    content: {
+                        "application/json": {
+                            schema: {
+                                type: "object",
+                                properties: {
+                                    success: {
+                                        type: "boolean",
+                                        example: false
+                                    },
+                                    message: {
+                                        type: "string",
+                                        example: "Usuário com este email ou matrícula já existe"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                ...commonSchemas.CommonResponses
+            }
+        }
+    },
+
+    "/api/usuarios/{id}": {
         get: {
             tags: ["Usuários"],
-            summary: "Busca usuário por matrícula",
-            description: `
-            Retorna os dados de um usuário específico pela sua matrícula.
-            
-            **Permissões:** 
-            - Administradores podem ver qualquer usuário
-            - Funcionários podem ver apenas seus próprios dados
-            `,
+            summary: "Buscar usuário por ID",
+            description: "Retorna os dados de um usuário específico pelo seu ID.",
             security: [{ bearerAuth: [] }],
             parameters: [
                 {
-                    name: "matricula",
+                    name: "id",
                     in: "path",
                     required: true,
-                    description: "Matrícula do usuário",
-                    schema: { type: "string", example: "USR001" }
+                    description: "ID do usuário",
+                    schema: { type: "string", example: "60d5ecb54b24a12a5c8e4f1a" }
                 }
             ],
             responses: {
@@ -146,47 +215,36 @@ const usuariosRoutes = {
                     description: "Usuário encontrado com sucesso",
                     content: {
                         "application/json": {
-                            schema: { "$ref": "#/components/schemas/UsuarioResponse" }
+                            schema: {
+                                $ref: "#/components/schemas/UsuarioResponse"
+                            }
                         }
                     }
                 },
-                401: commonResponses[401](),
-                403: commonResponses[403](),
-                404: commonResponses[404](),
-                500: commonResponses[500]()
+                ...commonSchemas.CommonResponses
             }
         },
-        patch: {
+        put: {
             tags: ["Usuários"],
-            summary: "Atualiza usuário",
-            description: `
-            Atualiza os dados de um usuário existente.
-            
-            **Funcionalidades:**
-            - Atualização parcial de campos
-            - Validação de dados
-            - Controle de permissões
-            - Registro de logs de alteração
-            
-            **Permissões:**
-            - Administradores podem alterar qualquer usuário
-            - Funcionários podem alterar apenas alguns de seus próprios dados
-            `,
+            summary: "Atualizar usuário",
+            description: "Atualiza os dados de um usuário existente.",
             security: [{ bearerAuth: [] }],
             parameters: [
                 {
-                    name: "matricula",
+                    name: "id",
                     in: "path",
                     required: true,
-                    description: "Matrícula do usuário",
-                    schema: { type: "string", example: "USR001" }
+                    description: "ID do usuário",
+                    schema: { type: "string", example: "60d5ecb54b24a12a5c8e4f1a" }
                 }
             ],
             requestBody: {
                 required: true,
                 content: {
                     "application/json": {
-                        schema: { "$ref": "#/components/schemas/UsuarioUpdate" }
+                        schema: {
+                            $ref: "#/components/schemas/UsuarioUpdateRequest"
+                        }
                     }
                 }
             },
@@ -195,80 +253,60 @@ const usuariosRoutes = {
                     description: "Usuário atualizado com sucesso",
                     content: {
                         "application/json": {
-                            schema: { "$ref": "#/components/schemas/UsuarioUpdateResponse" }
+                            schema: {
+                                $ref: "#/components/schemas/UsuarioResponse"
+                            }
                         }
                     }
                 },
-                400: commonResponses[400](),
-                401: commonResponses[401](),
-                403: commonResponses[403](),
-                404: commonResponses[404](),
-                422: commonResponses[422](),
-                500: commonResponses[500]()
+                ...commonSchemas.CommonResponses
             }
         },
         delete: {
             tags: ["Usuários"],
-            summary: "Exclui usuário",
-            description: `
-            Exclui um usuário do sistema (exclusão lógica).
-            
-            **Funcionalidades:**
-            - Desativação do usuário
-            - Invalidação de tokens ativos
-            - Preservação do histórico
-            - Registro de logs
-            
-            **Permissões:** Apenas administradores podem excluir usuários.
-            **Regra:** Não é possível excluir o próprio usuário.
-            `,
+            summary: "Excluir usuário",
+            description: "Remove um usuário do sistema.",
             security: [{ bearerAuth: [] }],
             parameters: [
                 {
-                    name: "matricula",
+                    name: "id",
                     in: "path",
                     required: true,
-                    description: "Matrícula do usuário",
-                    schema: { type: "string", example: "USR001" }
+                    description: "ID do usuário",
+                    schema: { type: "string", example: "60d5ecb54b24a12a5c8e4f1a" }
                 }
             ],
             responses: {
-                200: commonResponses[200](),
-                401: commonResponses[401](),
-                403: commonResponses[403](),
-                404: commonResponses[404](),
-                409: {
-                    description: "Não é possível excluir o próprio usuário",
+                200: {
+                    description: "Usuário excluído com sucesso",
                     content: {
                         "application/json": {
                             schema: {
                                 type: "object",
                                 properties: {
+                                    success: {
+                                        type: "boolean",
+                                        example: true
+                                    },
                                     message: {
                                         type: "string",
-                                        example: "Não é possível excluir o próprio usuário"
+                                        example: "Usuário excluído com sucesso"
                                     }
                                 }
                             }
                         }
                     }
                 },
-                500: commonResponses[500]()
+                ...commonSchemas.CommonResponses
             }
         }
     },
-
     "/api/usuarios/busca": {
         get: {
             tags: ["Usuários"],
-            summary: "Busca usuário por matrícula específica",
+            summary: "Buscar usuário por matrícula",
             description: `
-            Busca um usuário específico pela matrícula usando query parameter.
-            
-            **Funcionalidades:**
-            - Busca exata por matrícula
-            - Validação de acesso
-            - Retorno de dados básicos
+            Busca um usuário específico pela matrícula.
             `,
             security: [{ bearerAuth: [] }],
             parameters: [
@@ -276,8 +314,8 @@ const usuariosRoutes = {
                     name: "matricula",
                     in: "query",
                     required: true,
-                    description: "Matrícula do usuário a buscar",
-                    schema: { type: "string", example: "USR001" }
+                    description: "Matrícula do usuário",
+                    schema: { type: "string", example: "12345" }
                 }
             ],
             responses: {
@@ -285,34 +323,32 @@ const usuariosRoutes = {
                     description: "Usuário encontrado com sucesso",
                     content: {
                         "application/json": {
-                            schema: { "$ref": "#/components/schemas/UsuarioResponse" }
+                            schema: {
+                                $ref: "#/components/schemas/UsuarioResponse"
+                            }
                         }
                     }
                 },
-                400: commonResponses[400](),
-                401: commonResponses[401](),
-                403: commonResponses[403](),
-                404: commonResponses[404](),
-                500: commonResponses[500]()
+                404: {
+                    description: "Usuário não encontrado",
+                    content: {
+                        "application/json": {
+                            schema: {
+                                $ref: "#/components/schemas/ErrorResponse"
+                            }
+                        }
+                    }
+                },
+                ...commonSchemas.CommonResponses
             }
         }
     },
-
     "/api/usuarios/desativar/{id}": {
         patch: {
             tags: ["Usuários"],
-            summary: "Desativa usuário",
+            summary: "Desativar usuário",
             description: `
-            Desativa um usuário do sistema (desativação lógica).
-            
-            **Funcionalidades:**
-            - Marca usuário como inativo
-            - Invalida tokens ativos do usuário
-            - Preserva histórico de atividades
-            - Registra ação nos logs do sistema
-            
-            **Permissões:** Apenas administradores podem desativar usuários.
-            **Regra:** Não é possível desativar o próprio usuário.
+            Desativa um usuário sem removê-lo do sistema.
             `,
             security: [{ bearerAuth: [] }],
             parameters: [
@@ -320,8 +356,8 @@ const usuariosRoutes = {
                     name: "id",
                     in: "path",
                     required: true,
-                    description: "ID do usuário a ser desativado",
-                    schema: { type: "string", example: "60d5ecb74f8e4b2b3c8d6e7f" }
+                    description: "ID do usuário",
+                    schema: { type: "string", example: "60d5ecb54b24a12a5c8e4f1a" }
                 }
             ],
             responses: {
@@ -330,59 +366,21 @@ const usuariosRoutes = {
                     content: {
                         "application/json": {
                             schema: {
-                                type: "object",
-                                properties: {
-                                    message: {
-                                        type: "string",
-                                        example: "Usuário desativado com sucesso"
-                                    },
-                                    usuario: {
-                                        "$ref": "#/components/schemas/UsuarioResponse"
-                                    }
-                                }
+                                $ref: "#/components/schemas/UsuarioResponse"
                             }
                         }
                     }
                 },
-                400: commonResponses[400](),
-                401: commonResponses[401](),
-                403: commonResponses[403](),
-                404: commonResponses[404](),
-                409: {
-                    description: "Não é possível desativar o próprio usuário",
-                    content: {
-                        "application/json": {
-                            schema: {
-                                type: "object",
-                                properties: {
-                                    message: {
-                                        type: "string",
-                                        example: "Não é possível desativar o próprio usuário"
-                                    }
-                                }
-                            }
-                        }
-                    }
-                },
-                500: commonResponses[500]()
+                ...commonSchemas.CommonResponses
             }
         }
     },
-
     "/api/usuarios/reativar/{id}": {
         patch: {
             tags: ["Usuários"],
-            summary: "Reativa usuário",
+            summary: "Reativar usuário",
             description: `
-            Reativa um usuário que estava desativado no sistema.
-            
-            **Funcionalidades:**
-            - Marca usuário como ativo novamente
-            - Permite novo acesso ao sistema
-            - Registra ação nos logs do sistema
-            - Notifica por email sobre reativação
-            
-            **Permissões:** Apenas administradores podem reativar usuários.
+            Reativa um usuário previamente desativado.
             `,
             security: [{ bearerAuth: [] }],
             parameters: [
@@ -390,8 +388,8 @@ const usuariosRoutes = {
                     name: "id",
                     in: "path",
                     required: true,
-                    description: "ID do usuário a ser reativado",
-                    schema: { type: "string", example: "60d5ecb74f8e4b2b3c8d6e7f" }
+                    description: "ID do usuário",
+                    schema: { type: "string", example: "60d5ecb54b24a12a5c8e4f1a" }
                 }
             ],
             responses: {
@@ -400,70 +398,211 @@ const usuariosRoutes = {
                     content: {
                         "application/json": {
                             schema: {
+                                $ref: "#/components/schemas/UsuarioResponse"
+                            }
+                        }
+                    }
+                },
+                ...commonSchemas.CommonResponses
+            }
+        }
+    },
+    "/api/usuarios/grupos/adicionar": {
+        post: {
+            tags: ["Usuários"],
+            summary: "Adicionar usuário a um grupo",
+            description: `
+            Adiciona um usuário a um grupo específico.
+            `,
+            security: [{ bearerAuth: [] }],
+            requestBody: {
+                required: true,
+                content: {
+                    "application/json": {
+                        schema: {
+                            type: "object",
+                            required: ["usuario_id", "grupo_id"],
+                            properties: {
+                                usuario_id: {
+                                    type: "string",
+                                    description: "ID do usuário",
+                                    example: "60d5ecb54b24a12a5c8e4f1a"
+                                },
+                                grupo_id: {
+                                    type: "string",
+                                    description: "ID do grupo",
+                                    example: "60d5ecb54b24a12a5c8e4f1b"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            responses: {
+                200: {
+                    description: "Usuário adicionado ao grupo com sucesso",
+                    content: {
+                        "application/json": {
+                            schema: {
                                 type: "object",
                                 properties: {
+                                    success: {
+                                        type: "boolean",
+                                        example: true
+                                    },
                                     message: {
                                         type: "string",
-                                        example: "Usuário reativado com sucesso"
-                                    },
-                                    usuario: {
-                                        "$ref": "#/components/schemas/UsuarioResponse"
+                                        example: "Usuário adicionado ao grupo com sucesso"
                                     }
                                 }
                             }
                         }
                     }
                 },
-                400: commonResponses[400](),
-                401: commonResponses[401](),
-                403: commonResponses[403](),
-                404: commonResponses[404](),
-                500: commonResponses[500]()
+                ...commonSchemas.CommonResponses
             }
         }
     },
-
-    "/api/usuarios/{matricula}/alterar-senha": {
-        patch: {
+    "/api/usuarios/grupos/remover": {
+        post: {
             tags: ["Usuários"],
-            summary: "Altera senha do usuário",
+            summary: "Remover usuário de um grupo",
             description: `
-            Permite que o usuário altere sua própria senha.
-            
-            **Funcionalidades:**
-            - Validação da senha atual
-            - Criptografia da nova senha
-            - Invalidação de tokens ativos
-            - Registro de logs de segurança
-            
-            **Permissões:** Usuários podem alterar apenas sua própria senha.
+            Remove um usuário de um grupo específico.
             `,
             security: [{ bearerAuth: [] }],
-            parameters: [
-                {
-                    name: "matricula",
-                    in: "path",
-                    required: true,
-                    description: "Matrícula do usuário",
-                    schema: { type: "string", example: "USR001" }
-                }
-            ],
             requestBody: {
                 required: true,
                 content: {
                     "application/json": {
-                        schema: { "$ref": "#/components/schemas/AlterarSenhaRequest" }
+                        schema: {
+                            type: "object",
+                            required: ["usuario_id", "grupo_id"],
+                            properties: {
+                                usuario_id: {
+                                    type: "string",
+                                    description: "ID do usuário",
+                                    example: "60d5ecb54b24a12a5c8e4f1a"
+                                },
+                                grupo_id: {
+                                    type: "string",
+                                    description: "ID do grupo",
+                                    example: "60d5ecb54b24a12a5c8e4f1b"
+                                }
+                            }
+                        }
                     }
                 }
             },
             responses: {
-                200: commonResponses[200](),
-                400: commonResponses[400](),
-                401: commonResponses[401](),
-                403: commonResponses[403](),
-                404: commonResponses[404](),
-                422: commonResponses[422](),
-                500: commonResponses[500]()
+                200: {
+                    description: "Usuário removido do grupo com sucesso",
+                    content: {
+                        "application/json": {
+                            schema: {
+                                type: "object",
+                                properties: {
+                                    success: {
+                                        type: "boolean",
+                                        example: true
+                                    },
+                                    message: {
+                                        type: "string",
+                                        example: "Usuário removido do grupo com sucesso"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                ...commonSchemas.CommonResponses
+            }
+        }
+    },
+    "/api/usuarios/grupos/{userId}": {
+        get: {
+            tags: ["Usuários"],
+            summary: "Listar grupos de um usuário",
+            description: `
+            Lista todos os grupos aos quais um usuário pertence.
+            `,
+            security: [{ bearerAuth: [] }],
+            parameters: [
+                {
+                    name: "userId",
+                    in: "path",
+                    required: true,
+                    description: "ID do usuário",
+                    schema: { type: "string", example: "60d5ecb54b24a12a5c8e4f1a" }
+                }
+            ],
+            responses: {
+                200: {
+                    description: "Grupos do usuário listados com sucesso",
+                    content: {
+                        "application/json": {
+                            schema: {
+                                type: "object",
+                                properties: {
+                                    success: {
+                                        type: "boolean",
+                                        example: true
+                                    },
+                                    data: {
+                                        type: "object",
+                                        properties: {
+                                            grupos: {
+                                                type: "array",
+                                                items: { $ref: "#/components/schemas/Grupo" }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                ...commonSchemas.CommonResponses
+            }
+        },
+        delete: {
+            tags: ["Usuários"],
+            summary: "Remover usuário de todos os grupos",
+            description: `
+            Remove um usuário de todos os grupos aos quais pertence.
+            `,
+            security: [{ bearerAuth: [] }],
+            parameters: [
+                {
+                    name: "userId",
+                    in: "path",
+                    required: true,
+                    description: "ID do usuário",
+                    schema: { type: "string", example: "60d5ecb54b24a12a5c8e4f1a" }
+                }
+            ],
+            responses: {
+                200: {
+                    description: "Usuário removido de todos os grupos com sucesso",
+                    content: {
+                        "application/json": {
+                            schema: {
+                                type: "object",
+                                properties: {
+                                    success: {
+                                        type: "boolean",
+                                        example: true
+                                    },
+                                    message: {
+                                        type: "string",
+                                        example: "Usuário removido de todos os grupos com sucesso"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                ...commonSchemas.CommonResponses
             }
         }
     }

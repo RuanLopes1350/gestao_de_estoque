@@ -75,7 +75,6 @@ const usuarioController = new UsuarioController();
  *       required:
  *         - nome
  *         - matricula
- *         - senha
  *         - email
  *       properties:
  *         nome:
@@ -89,7 +88,7 @@ const usuarioController = new UsuarioController();
  *         senha:
  *           type: string
  *           format: password
- *           description: Senha do usuário
+ *           description: Senha do usuário (opcional - se não informada, usuário deve definir no primeiro login)
  *           example: "minhasenha123"
  *         email:
  *           type: string
@@ -180,7 +179,11 @@ router
  * @swagger
  * /api/usuarios:
  *   post:
- *     summary: Cadastrar novo usuário
+ *     summary: Cadastrar novo usuário (com ou sem senha)
+ *     description: |
+ *       Cadastra um novo usuário no sistema. A senha é opcional:
+ *       - **Com senha**: Usuário fica ativo e pode fazer login imediatamente
+ *       - **Sem senha**: Usuário fica inativo e recebe código para definir senha no primeiro login
  *     tags: [Usuários]
  *     security:
  *       - bearerAuth: []
@@ -196,7 +199,16 @@ router
  *         content:
  *           application/json:
  *             schema:
- *               $ref: '#/components/schemas/Usuario'
+ *               oneOf:
+ *                 - $ref: '#/components/schemas/Usuario'
+ *                 - type: object
+ *                   properties:
+ *                     message:
+ *                       type: string
+ *                       example: "Usuário cadastrado com sucesso. Código de segurança gerado: 123456"
+ *                     instrucoes:
+ *                       type: string
+ *                       example: "O usuário deve usar este código na endpoint '/auth/redefinir-senha/codigo' para definir sua senha."
  *       400:
  *         description: Dados inválidos
  *       401:
@@ -212,6 +224,73 @@ router
         asyncWrapper(usuarioController.cadastrarUsuario.bind(usuarioController))
     )
     
+/**
+ * @swagger
+ * /api/usuarios/cadastrar-sem-senha:
+ *   post:
+ *     summary: Cadastrar usuário sem senha (gera código de segurança)
+ *     description: Permite ao administrador cadastrar um usuário sem definir senha. Um código de segurança será gerado para que o usuário defina sua própria senha.
+ *     tags: [Usuários]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - nome_usuario
+ *               - email
+ *               - matricula
+ *             properties:
+ *               nome_usuario:
+ *                 type: string
+ *                 description: Nome completo do usuário
+ *                 example: "João Silva"
+ *               email:
+ *                 type: string
+ *                 format: email
+ *                 description: Email do usuário
+ *                 example: "joao.silva@empresa.com"
+ *               matricula:
+ *                 type: string
+ *                 description: Matrícula do usuário
+ *                 example: "12345"
+ *               perfil:
+ *                 type: string
+ *                 enum: [administrador, gerente, estoquista]
+ *                 description: Perfil do usuário
+ *                 example: "estoquista"
+ *               grupos:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *                 description: IDs dos grupos do usuário
+ *     responses:
+ *       201:
+ *         description: Usuário cadastrado com sucesso, código de segurança gerado
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Usuário cadastrado com sucesso. Código de segurança gerado: 123456"
+ *                 instrucoes:
+ *                   type: string
+ *                   example: "O usuário deve usar este código na endpoint '/auth/redefinir-senha/codigo' para definir sua senha."
+ *       400:
+ *         description: Dados inválidos
+ *       401:
+ *         description: Token inválido
+ *       409:
+ *         description: Usuário já existe
+ *       500:
+ *         description: Erro interno do servidor
+ */
+router
 /**
  * @swagger
  * /api/usuarios/busca:

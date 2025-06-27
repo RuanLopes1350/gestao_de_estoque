@@ -18,7 +18,7 @@ export class AuthService {
     }
 
     async autenticar(matricula, senha) {
-        const usuario = await this.usuarioRepository.buscarPorMatricula(matricula, '+senha');
+        const usuario = await this.usuarioRepository.buscarPorMatricula(matricula, '+senha +senha_definida');
 
         if (!usuario) {
             throw new CustomError({
@@ -33,6 +33,15 @@ export class AuthService {
                 statusCode: 401,
                 errorType: 'authError',
                 customMessage: 'Usuário inativo'
+            });
+        }
+
+        // Verificar se a senha foi definida
+        if (!usuario.senha_definida || !usuario.senha) {
+            throw new CustomError({
+                statusCode: 401,
+                errorType: 'authError',
+                customMessage: 'Usuário ainda não definiu sua senha. Use o código de segurança fornecido para definir sua senha.'
             });
         }
 
@@ -236,7 +245,7 @@ export class AuthService {
 
         // Verificar se o código não expirou
         const agora = new Date();
-        if (usuario.token_recuperacao_expira && usuario.token_recuperacao_expira < agora) {
+        if (usuario.data_expiracao_codigo && usuario.data_expiracao_codigo < agora) {
             throw new CustomError({
                 statusCode: 401,
                 errorType: 'authError',
@@ -247,11 +256,24 @@ export class AuthService {
         // Hash da nova senha
         const senhaCriptografada = await bcrypt.hash(novaSenha, 10);
 
-        // Atualizar senha e remover informações de recuperação
-        await this.usuarioRepository.atualizarSenha(usuario._id, senhaCriptografada);
+        // Atualizar senha, ativar usuário e remover informações de recuperação
+        await this.usuarioRepository.atualizarSenhaCompleta(usuario._id, {
+            senha: senhaCriptografada,
+            senha_definida: true,
+            ativo: true,
+            codigo_recuperacao: null,
+            data_expiracao_codigo: null,
+            token_recuperacao: null,
+            token_recuperacao_expira: null
+        });
+
+        // Verificar se é primeira definição de senha
+        const isPrimeiraDefinicao = !usuario.senha_definida;
 
         return {
-            message: 'Senha atualizada com sucesso'
+            message: isPrimeiraDefinicao ? 
+                'Senha definida com sucesso! Sua conta está ativa e você já pode fazer login.' : 
+                'Senha atualizada com sucesso'
         };
     }
 }

@@ -182,9 +182,16 @@ class UsuarioService {
     }
 
     async criarUsuario(dadosUsuario) {
-        // Se a senha não estiver hash, faça o hash
+        // Se há senha e não está hash, faça o hash
         if (dadosUsuario.senha && !dadosUsuario.senha.startsWith('$2')) {
             dadosUsuario.senha = await bcrypt.hash(dadosUsuario.senha, 10);
+        }
+        
+        // Se não há senha, define que a senha não foi definida
+        if (!dadosUsuario.senha) {
+            dadosUsuario.senha_definida = false;
+        } else {
+            dadosUsuario.senha_definida = true;
         }
 
         return await this.repository.criarUsuario(dadosUsuario);

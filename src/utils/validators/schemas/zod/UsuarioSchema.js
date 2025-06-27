@@ -23,7 +23,8 @@ export const UsuarioSchema = z.object({
         .min(7, 'Senha deve ter pelo menos 7 caracteres')
         .regex(/[A-Z]/, 'Senha deve conter pelo menos uma letra maiuscula.')
         .regex(/[a-z]/, 'Senha deve conter pelo menos uma letra minuscula.')
-        .regex(/[0-9]/, 'Senha deve conter pelo menos um numero.'),
+        .regex(/[0-9]/, 'Senha deve conter pelo menos um numero.')
+        .optional(), // Agora a senha é opcional
     // Grupos opcionais no cadastro
     grupos: z.array(z.string().regex(/^[0-9a-fA-F]{24}$/, 'ID do grupo deve ser um ObjectId válido'))
         .optional()
