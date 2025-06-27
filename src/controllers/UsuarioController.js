@@ -90,54 +90,111 @@ class UsuarioController {
     }
 
     async cadastrarUsuario(req, res) {
-    console.log('Estou no cadastrarUsuario em UsuarioController');
+        console.log('Estou no cadastrarUsuario em UsuarioController');
 
-    try {
-        const parsedData = UsuarioSchema.parse(req.body);
-        const data = await this.service.cadastrarUsuario(parsedData);
+        try {
+            const parsedData = UsuarioSchema.parse(req.body);
+            
+            // Se não há senha, será criado usuário para definir senha no primeiro login
+            if (!parsedData.senha) {
+                console.log('Criando usuário sem senha - será enviado código de segurança');
+                
+                // Gerar código de segurança (6 dígitos)
+                const codigoSeguranca = Math.random().toString().slice(2, 8);
+                
+                // Definir expiração do código (24 horas)
+                const dataExpiracao = new Date();
+                dataExpiracao.setHours(dataExpiracao.getHours() + 24);
+                
+                // Preparar dados do usuário sem senha
+                parsedData.senha = null;
+                parsedData.ativo = false; // Usuário inativo até definir senha
+                parsedData.codigo_recuperacao = codigoSeguranca;
+                parsedData.data_expiracao_codigo = dataExpiracao;
+                parsedData.senha_definida = false;
+                
+                const data = await this.service.cadastrarUsuario(parsedData);
 
-        // Registra evento crítico de criação de usuário
-        LogMiddleware.logCriticalEvent(req.userId, 'USUARIO_CRIADO', {
-            usuario_criado: data._id,
-            matricula: data.matricula,
-            perfil: data.perfil,
-            criado_por: req.userMatricula
-        }, req);
+                // Registra evento crítico de criação de usuário sem senha
+                LogMiddleware.logCriticalEvent(req.userId, 'USUARIO_CRIADO_SEM_SENHA', {
+                    usuario_criado: data._id,
+                    matricula: data.matricula,
+                    perfil: data.perfil,
+                    criado_por: req.userMatricula,
+                    codigo_gerado: true // Não logamos o código por segurança
+                }, req);
 
-        return CommonResponse.created(
-            res,
-            data,
-            HttpStatusCodes.CREATED.code,
-            'Usuário cadastrado com sucesso.'
-        );
-    } catch (error) {
-        // Tratando erro Zod
-        if (error.name === 'ZodError') {
-            return CommonResponse.error(
-                res,
-                HttpStatusCodes.BAD_REQUEST.code,
-                'validationError',
-                'body',
-                error.errors,
-                'Dados de usuário inválidos. Verifique os campos e tente novamente.'
-            );
+                return CommonResponse.created(
+                    res,
+                    {
+                        ...data.toObject(),
+                        message: `Usuário cadastrado com sucesso. Código de segurança gerado: ${codigoSeguranca}`,
+                        instrucoes: "O usuário deve usar este código na endpoint '/auth/redefinir-senha/codigo' para definir sua senha. Código válido por 24 horas."
+                    },
+                    HttpStatusCodes.CREATED.code,
+                    'Usuário cadastrado com sucesso sem senha.'
+                );
+            } else {
+                // Cadastro com senha (caso especial do admin)
+                const data = await this.service.cadastrarUsuario(parsedData);
+
+                // Registra evento crítico de criação de usuário
+                LogMiddleware.logCriticalEvent(req.userId, 'USUARIO_CRIADO', {
+                    usuario_criado: data._id,
+                    matricula: data.matricula,
+                    perfil: data.perfil,
+                    criado_por: req.userMatricula
+                }, req);
+
+                return CommonResponse.created(
+                    res,
+                    data,
+                    HttpStatusCodes.CREATED.code,
+                    'Usuário cadastrado com sucesso.'
+                );
+            }
+        } catch (error) {
+            // Tratando erro Zod
+            if (error.name === 'ZodError') {
+                return CommonResponse.error(
+                    res,
+                    HttpStatusCodes.BAD_REQUEST.code,
+                    'validationError',
+                    'body',
+                    error.errors,
+                    'Dados de usuário inválidos. Verifique os campos e tente novamente.'
+                );
+            }
+
+            // Tratando erro no Mongoose
+            if (error.name === 'ValidationError') {
+                return CommonResponse.error(
+                    res,
+                    HttpStatusCodes.BAD_REQUEST.code,
+                    'validationError',
+                    Object.keys(error.errors)[0],
+                    Object.values(error.errors).map(e => e.message),
+                    'Validação de dados falhou. Verifique os campos obrigatórios.'
+                );
+            }
+
+            // Tratando erro de duplicação (E11000)
+            if (error.code === 11000) {
+                const field = Object.keys(error.keyValue)[0];
+                const value = error.keyValue[field];
+                return CommonResponse.error(
+                    res,
+                    HttpStatusCodes.CONFLICT.code,
+                    'duplicateError',
+                    field,
+                    [{ field, value, message: `${field} já existe` }],
+                    `${field} '${value}' já está cadastrado no sistema.`
+                );
+            }
+
+            return CommonResponse.error(res, error);
         }
-
-        // Tratando erro no Mongoose
-        if (error.name === 'ValidationError') {
-            return CommonResponse.error(
-                res,
-                HttpStatusCodes.BAD_REQUEST.code,
-                'validationError',
-                Object.keys(error.errors)[0],
-                Object.values(error.errors).map(e => e.message),
-                'Validação de dados falhou. Verifique os campos obrigatórios.'
-            );
-        }
-
-        return CommonResponse.error(res, error);
     }
-}
 
 
     async atualizarUsuario(req, res) {
@@ -547,120 +604,6 @@ class UsuarioController {
         } catch (error) {
             console.error('Erro no controller ao obter permissões do usuário:', error);
             return CommonResponse.error(res, error);
-        }
-    }
-
-    async cadastrarUsuarioSemSenha(req, res) {
-        console.log('Estou no cadastrarUsuarioSemSenha em UsuarioController');
-
-        try {
-            // Validar dados básicos (sem senha)
-            const { nome_usuario, email, matricula, perfil, grupos } = req.body;
-            
-            if (!nome_usuario || !email || !matricula) {
-                return CommonResponse.error(
-                    res,
-                    HttpStatusCodes.BAD_REQUEST.code,
-                    'validationError',
-                    'body',
-                    ['Nome, email e matrícula são obrigatórios'],
-                    'Dados obrigatórios não fornecidos.'
-                );
-            }
-
-            const dadosUsuario = {
-                nome_usuario,
-                email,
-                matricula,
-                perfil: perfil || 'estoquista',
-                grupos: grupos || []
-            };
-
-            const data = await this.service.cadastrarUsuarioSemSenha(dadosUsuario);
-
-            // Registra evento crítico de criação de usuário sem senha
-            LogMiddleware.logCriticalEvent(req.userId, 'USUARIO_CRIADO_SEM_SENHA', {
-                usuario_criado: data._id,
-                matricula: data.matricula,
-                perfil: data.perfil,
-                criado_por: req.userMatricula,
-                codigo_gerado: true // Não logamos o código por segurança
-            }, req);
-
-            return CommonResponse.created(
-                res,
-                {
-                    ...data,
-                    message: `Usuário cadastrado com sucesso. Código de segurança gerado: ${data.codigoSeguranca}`,
-                    instrucoes: "O usuário deve usar este código na endpoint '/auth/redefinir-senha/codigo' para definir sua senha. Código válido por 24 horas."
-                },
-                HttpStatusCodes.CREATED.code,
-                'Usuário cadastrado com sucesso.'
-            );
-        } catch (error) {
-            // Tratando erro Zod
-            if (error.name === 'ZodError') {
-                return CommonResponse.error(
-                    res,
-                    HttpStatusCodes.BAD_REQUEST.code,
-                    'validationError',
-                    'body',
-                    error.errors,
-                    'Dados de usuário inválidos. Verifique os campos e tente novamente.'
-                );
-            }
-
-            // Tratando erro no Mongoose
-            if (error.name === 'ValidationError') {
-                return CommonResponse.error(
-                    res,
-                    HttpStatusCodes.BAD_REQUEST.code,
-                    'validationError',
-                    'body',
-                    Object.values(error.errors).map(err => ({
-                        field: err.path,
-                        message: err.message
-                    })),
-                    'Erro de validação nos dados do usuário.'
-                );
-            }
-
-            // Tratando erro de duplicação (E11000)
-            if (error.code === 11000) {
-                const field = Object.keys(error.keyValue)[0];
-                const value = error.keyValue[field];
-                return CommonResponse.error(
-                    res,
-                    HttpStatusCodes.CONFLICT.code,
-                    'duplicateError',
-                    field,
-                    [{ field, value, message: `${field} já existe` }],
-                    `${field} '${value}' já está cadastrado no sistema.`
-                );
-            }
-
-            // Erro customizado
-            if (error.customMessage) {
-                return CommonResponse.error(
-                    res,
-                    error.statusCode || HttpStatusCodes.INTERNAL_SERVER_ERROR.code,
-                    error.errorType || 'serverError',
-                    error.field || 'unknown',
-                    error.details || [],
-                    error.customMessage
-                );
-            }
-
-            // Erro genérico
-            console.error('Erro não tratado no cadastrarUsuarioSemSenha:', error);
-            return CommonResponse.error(
-                res,
-                HttpStatusCodes.INTERNAL_SERVER_ERROR.code,
-                'serverError',
-                'unknown',
-                [],
-                'Erro interno do servidor ao cadastrar usuário.'
-            );
         }
     }
 }

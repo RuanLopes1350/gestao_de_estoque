@@ -75,7 +75,6 @@ const usuarioController = new UsuarioController();
  *       required:
  *         - nome
  *         - matricula
- *         - senha
  *         - email
  *       properties:
  *         nome:
@@ -89,7 +88,7 @@ const usuarioController = new UsuarioController();
  *         senha:
  *           type: string
  *           format: password
- *           description: Senha do usuário
+ *           description: Senha do usuário (opcional - se não informada, usuário deve definir no primeiro login)
  *           example: "minhasenha123"
  *         email:
  *           type: string
@@ -180,7 +179,11 @@ router
  * @swagger
  * /api/usuarios:
  *   post:
- *     summary: Cadastrar novo usuário
+ *     summary: Cadastrar novo usuário (com ou sem senha)
+ *     description: |
+ *       Cadastra um novo usuário no sistema. A senha é opcional:
+ *       - **Com senha**: Usuário fica ativo e pode fazer login imediatamente
+ *       - **Sem senha**: Usuário fica inativo e recebe código para definir senha no primeiro login
  *     tags: [Usuários]
  *     security:
  *       - bearerAuth: []
@@ -196,7 +199,16 @@ router
  *         content:
  *           application/json:
  *             schema:
- *               $ref: '#/components/schemas/Usuario'
+ *               oneOf:
+ *                 - $ref: '#/components/schemas/Usuario'
+ *                 - type: object
+ *                   properties:
+ *                     message:
+ *                       type: string
+ *                       example: "Usuário cadastrado com sucesso. Código de segurança gerado: 123456"
+ *                     instrucoes:
+ *                       type: string
+ *                       example: "O usuário deve usar este código na endpoint '/auth/redefinir-senha/codigo' para definir sua senha."
  *       400:
  *         description: Dados inválidos
  *       401:
@@ -278,12 +290,6 @@ router
  *       500:
  *         description: Erro interno do servidor
  */
-router.post(
-    "/cadastrar-sem-senha", 
-    LogMiddleware.log('CADASTRO_USUARIO_SEM_SENHA'),
-    asyncWrapper(usuarioController.cadastrarUsuarioSemSenha.bind(usuarioController))
-);
-
 router
 /**
  * @swagger
