@@ -45,7 +45,7 @@ class Usuario {
          */
         permissoes: [
           {
-            rota: { type: String, index: true, required: true }, // usuários / grupos / unidades / rotas
+            rota: { type: String, index: true, required: true }, // /usuários / grupos / unidades / rotas
             dominio: { type: String }, // http://localhost:3000
             ativo: { type: Boolean, default: false },  // false
             buscar: { type: Boolean, default: false },    // false

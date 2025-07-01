@@ -25,7 +25,7 @@ PORTS=(2281 4155)
 USERS=("gilberto" "gilberto")
 KEYS=("$HOME/.ssh/id_ed25519" "$HOME/.ssh/id_ed25519")
 REMOTE_PATHS=(
-  "/media/gilberto/8ec83127-285d-48ea-a16b-431c3e64447a1/repositorio/@@repositorios_oficial-verificado/@projetos_aula/2025/flutter/api_meals"
+  "/mnt/dados/repositorio/@@repositorios_oficial-verificado/@projetos_aula/2025/flutter/api_meals"
   "/home/gilberto/aula/repositorios/@@repositorios_oficial-verificado/api_meals"
 )
 

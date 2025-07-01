@@ -7,7 +7,7 @@ import Projeto from '../../models/Projeto.js';
 
 // Importa as funções utilitárias separadas
 import { deepCopy, generateExample } from '../utils/schemaGenerate.js';
-import estudantesRoutes from '../routes/estudantes.js';
+import estudantesRoutes from '../paths/estudantes.js';
 
 // Registra o plugin para que o Mongoose ganhe o método jsonSchema()
 mongooseSchemaJsonSchema(mongoose);

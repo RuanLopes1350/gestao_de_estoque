@@ -2,49 +2,34 @@
 import dotenv from 'dotenv';
 import mongoose from 'mongoose';
 import { URL } from 'url';
-import SendMail from '../utils/SendMail.js'; // Assegure-se de que este caminho está correto
+import SendMail from '../utils/SendMail.js';
 import logger from '../utils/logger.js';
-import { Db } from 'mongodb';
 
-dotenv.config(); // Carrega as variáveis de ambiente
+dotenv.config();
 
-/**
- * Classe responsável por gerenciar a conexão com o MongoDB.
- */
+let mongoServer = null;
+
 class DbConnect {
-    /**
-     * Estabelece a conexão com o MongoDB.
-     */
     static async conectar() {
         try {
-            const mongoUri = process.env.DB_URL;
+            let mongoUri = process.env.DB_URL;
 
-            if (!mongoUri) {
-                throw new Error("A variável de ambiente DB_URL não foi definida.");
-            }
-
-            // Log seguro indicando que a URI está definida
-            logger.info('DB_URL está definida.');
-
-            // Configuração de strictQuery baseada no ambiente
-            if (process.env.NODE_ENV === 'development' || process.env.NODE_ENV === 'test') {
-                mongoose.set('strictQuery', false);
+            if (process.env.USE_IN_MEMORY_DB === 'true') {
+                const { MongoMemoryServer } = await import('mongodb-memory-server');
+                mongoServer = await MongoMemoryServer.create();
+                mongoUri = mongoServer.getUri();
+                logger.info('MongoDB em memória iniciado.');
             } else {
-                mongoose.set('strictQuery', true);
+                if (!mongoUri) {
+                    throw new Error("A variável de ambiente DB_URL não foi definida.");
+                }
+                logger.info('DB_URL está definida.');
             }
 
-            // Configurações condicional para autoIndex e debug
-            if (process.env.NODE_ENV === 'development') {
-                mongoose.set('autoIndex', true); // Cria índices automaticamente
-                mongoose.set('debug', true); // Ativa logs de debug
-                logger.info('Configurações de desenvolvimento ativadas: autoIndex e debug.');
-            } else {
-                mongoose.set('autoIndex', true); // Desativa criação automática de índices
-                mongoose.set('debug', false); // Desativa logs de debug
-                logger.info('Configurações de produção ativadas: autoIndex e debug desativados.');
-            }
+            mongoose.set('strictQuery', process.env.NODE_ENV !== 'development' && process.env.NODE_ENV !== 'test');
+            mongoose.set('autoIndex', true);
+            mongoose.set('debug', process.env.NODE_ENV === 'development');
 
-            // Adiciona listeners para eventos do Mongoose
             mongoose.connection.on('connected', () => {
                 logger.info('Mongoose conectado ao MongoDB.');
             });
@@ -60,46 +45,39 @@ class DbConnect {
                 logger.info('Mongoose desconectado do MongoDB.');
             });
 
-            // Conexão com opções configuráveis via variáveis de ambiente
             await mongoose.connect(mongoUri, {
-                serverSelectionTimeoutMS: process.env.MONGO_SERVER_SELECTION_TIMEOUT_MS
-                    ? parseInt(process.env.MONGO_SERVER_SELECTION_TIMEOUT_MS)
-                    : 5000,
-                socketTimeoutMS: process.env.MONGO_SOCKET_TIMEOUT_MS
-                    ? parseInt(process.env.MONGO_SOCKET_TIMEOUT_MS)
-                    : 45000,
-                connectTimeoutMS: process.env.MONGO_CONNECT_TIMEOUT_MS
-                    ? parseInt(process.env.MONGO_CONNECT_TIMEOUT_MS)
-                    : 10000,
+                serverSelectionTimeoutMS: 5000,
+                socketTimeoutMS: 45000,
+                connectTimeoutMS: 10000,
                 retryWrites: true,
-                maxPoolSize: process.env.MONGO_MAX_POOL_SIZE
-                    ? parseInt(process.env.MONGO_MAX_POOL_SIZE)
-                    : 10,
+                maxPoolSize: 10,
             });
 
             logger.info('Conexão com o banco estabelecida!');
         } catch (error) {
-            logger.error(`Erro na conexão com o banco de dados em ${new Date().toISOString()}: ${error.message}`);
+            logger.error(`Erro na conexão com o banco de dados: ${error.message}`);
             if (process.env.NODE_ENV !== 'test') {
                 SendMail.enviaEmailErrorDbConect(error, new URL(import.meta.url).pathname, new Date());
             }
-            throw error; // Re-lança o erro para permitir que o aplicativo lide com a falha de conexão
+            throw error;
         }
     }
 
-    /**
-     * Desconecta do MongoDB.
-     */
     static async desconectar() {
         try {
             await mongoose.disconnect();
             logger.info('Conexão com o banco encerrada!');
+
+            if (mongoServer) {
+                await mongoServer.stop();
+                logger.info('MongoDB em memória finalizado.');
+            }
         } catch (error) {
-            logger.error(`Erro ao desconectar do banco de dados em ${new Date().toISOString()}: ${error.message}`);
+            logger.error(`Erro ao desconectar do banco de dados: ${error.message}`);
             if (process.env.NODE_ENV !== 'test') {
                 SendMail.enviaEmailErrorDbConect(error, new URL(import.meta.url).pathname, new Date());
             }
-            throw error; // Re-lança o erro para permitir que o aplicativo lide com a falha de desconexão
+            throw error;
         }
     }
 }

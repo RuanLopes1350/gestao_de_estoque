@@ -1,29 +1,31 @@
-import authPaths from "../routes/auth.js";
-import usuariosPaths from "../routes/usuarios.js";
+import authPaths from "../paths/auth.js";
+import usuariosPaths from "../paths/usuarios.js";
 import authSchemas from "../schemas/authSchema.js";
 import usuariosSchemas from "../schemas/usuariosSchema.js";
-import gruposPaths from "../routes/grupos.js";
+import gruposPaths from "../paths/grupos.js";
 import gruposSchemas from "../schemas/gruposSchema.js";
-import unidadesPaths from "../routes/unidades.js";
+import unidadesPaths from "../paths/unidades.js";
 import unidadesSchemas from "../schemas/unidadesSchema.js";
-import rotasPaths from "../routes/rotas.js";
+import rotasPaths from "../paths/rotas.js";
 import rotasSchemas from "../schemas/rotasSchema.js";
-import cursoPaths from "../routes/cursos.js";
+import cursoPaths from "../paths/cursos.js";
 import cursosSchemas from "../schemas/cursosSchema.js";
-import estudantesPaths from "../routes/estudantes.js";
+import estudantesPaths from "../paths/estudantes.js";
 import estudantesSchemas from "../schemas/estudantesSchema.js";
-import turmasPaths from "../routes/turmas.js";
+import turmasPaths from "../paths/turmas.js";
 import turmasSchemas from "../schemas/turmasSchema.js";
-import estagiosPaths from "../routes/estagios.js";
+import estagiosPaths from "../paths/estagios.js";
 import estagiosSchemas from "../schemas/estagiosSchema.js";
-import projetosPaths from "../routes/projetos.js";
+import projetosPaths from "../paths/projetos.js";
 import projetosSchemas from "../schemas/projetosSchema.js";
-import refeicoesPaths from "../routes/refeicoes.js";
+import refeicoesPaths from "../paths/refeicoes.js";
 import refeicoesSchemas from "../schemas/refeicoesSchema.js";
-import refeicoesTurmasPaths from "../routes/refeicoesTurmas.js";
+import refeicoesTurmasPaths from "../paths/refeicoesTurmas.js";
 import refeicoesTurmasSchemas from "../schemas/refeicoesTurmasSchema.js";
-import suppliersPaths from "../routes/supplier.js";
+import suppliersPaths from "../paths/supplier.js";
 import suppliersSchemas from "../schemas/suppliersSchema.js";
+import examplesSchemas from "../schemas/examplesSchema.js";
+import examplesPaths from "../paths/examples.js";
 
 // Função para definir as URLs do servidor dependendo do ambiente
 const getServersInCorrectOrder = () => {
@@ -104,6 +106,10 @@ const getSwaggerOptions = () => {
                 {
                     name: "Fornecedores",
                     description: "Rotas para gestão de fornecedores"
+                },
+                {
+                    name: "Examples",
+                    description: "Exemplos de requisições e respostas"
                 }
             ],
             paths: {
@@ -122,7 +128,12 @@ const getSwaggerOptions = () => {
                 ...projetosPaths,
                 ...refeicoesPaths,
                 ...refeicoesTurmasPaths,
-                ...suppliersPaths
+                ...suppliersPaths,
+
+                /**
+                 * Exemplos de requisições e respostas
+                 */
+                ...examplesPaths
 
 
             },
@@ -151,8 +162,13 @@ const getSwaggerOptions = () => {
                     ...projetosSchemas,
                     ...refeicoesSchemas,
                     ...refeicoesTurmasSchemas,
-                    ...suppliersSchemas
+                    ...suppliersSchemas,
 
+                    /** 
+                     * Schemas de exemplos
+                     */
+
+                    ...examplesSchemas
                 }
             },
             security: [{

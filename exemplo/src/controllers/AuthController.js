@@ -40,7 +40,7 @@ class AuthController {
 
     // Validar apenas o email
     const validatedBody = UsuarioUpdateSchema.parse(body);
-    const data = await this.service.recuperaSenha(req, validatedBody);
+    const data = await this.service.recuperaSenha(validatedBody);
     return CommonResponse.success(res, data);
   }
 

@@ -15,7 +15,6 @@ class AuthPermission {
     this.Rota = Rota;
     this.JWT_SECRET_ACCESS_TOKEN = JWT_SECRET_ACCESS_TOKEN;
     this.messages = messages;
-    
 
     // Vincula o método handle ao contexto da instância
     this.handle = this.handle.bind(this);

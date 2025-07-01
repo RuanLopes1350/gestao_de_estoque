@@ -42,7 +42,7 @@ const authSchemas = {
       nbf: { type: "string", description: "Timestamp UNIX de início de validade do token", example: 1672527600, },
     },
   },
-  singupPost: {
+  signupPost: {
     type: "object",
     properties: {
       nome: { type: "string", description: "Nome do usuário" },
