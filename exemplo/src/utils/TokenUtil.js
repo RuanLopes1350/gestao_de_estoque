@@ -44,14 +44,11 @@ class TokenUtil {
    * Gera token único para recuperação de senha com validade de 1 hora (retorna Promise<string>)
    */
   generatePasswordRecoveryToken(id) {
-    // Definindo uma chave secreta explícita como fallback
-    const secret = process.env.JWT_SECRET_PASSWORD_RECOVERY || 'senha_recovery_secret';
-
     return new Promise((resolve, reject) => {
       jwt.sign(
         { id },
-        secret,
-        { expiresIn: process.env.JWT_PASSWORD_RECOVERY_EXPIRATION || '1h' },
+        process.env.JWT_SECRET_PASSWORD_RECOVERY,
+        { expiresIn: process.env.JWT_PASSWORD_RECOVERY_EXPIRATION || '30m' },
         (err, token) => {
           if (err) {
             return reject(err);
@@ -109,19 +106,37 @@ class TokenUtil {
   /**
    * Decodifica um token de recuperação de senha e retorna o payload.id ou rejeita com o erro
    */
-  decodePasswordRecoveryToken(token) {
+  decodePasswordRecoveryToken(token, key = process.env.JWT_SECRET_PASSWORD_RECOVERY) {
     return new Promise((resolve, reject) => {
-      jwt.verify(
-        token,
-        process.env.JWT_SECRET_PASSWORD_RECOVERY || 'senha_recovery_secret',
-        (err, decoded) => {
-          if (err) {
-            return reject(err);
+      try {
+        jwt.verify(
+          token,
+          key,
+          (err, decoded) => {
+            if (err) {
+              // Pode ser JsonWebTokenError, TokenExpiredError, etc.
+              return reject(err);
+            }
+
+            // Se decodificou corretamente, retorna apenas o campo 'id'
+            // (supondo que sempre haja um `id` no payload)
+            resolve(decoded.id);
           }
-          resolve(decoded.id);
-        }
-      );
-    });
+        );
+      }
+      catch (error) {
+        throw new CustomError({
+          statusCode: HttpStatusCodes.UNAUTHORIZED.code,
+          errorType: 'unauthorized',
+          field: 'Token',
+          details: [],
+          customMessage: messages.error.unauthorized('Token inválido')
+        });
+      }
+    }
+
+
+    );
   }
 
 }

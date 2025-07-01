@@ -12,7 +12,7 @@ class PermissionService {
         this.Usuario = Usuario;
         this.Grupo = Grupo;
         this.Rota = Rota;
-        this.messages = messages;        
+        this.messages = messages;
     }
 
     async hasPermission(userId, rota, dominio, metodo) {
@@ -47,10 +47,9 @@ class PermissionService {
 
             const hasPermissao = permissoesUnicas.some(permissao => {
                 return (
-                    permissao.rota === rota &&
+                    permissao.rota === rota && 
                     permissao.dominio === dominio &&
-                    permissao.ativo &&
-                    permissao[metodo] 
+                    permissao.ativo && permissao[metodo]
                 );
             });
 

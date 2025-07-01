@@ -14,6 +14,14 @@ import { fileURLToPath } from 'url';
 
 const app = express();
 
+// Conexão com o banco de dados.
+DbConnect.conectar()
+  .then(() => logger.info('Conexão com o banco de dados estabelecida com sucesso.'))
+  .catch((error) => {
+    logger.error('Erro ao conectar com o banco de dados:', error);
+    process.exit(1); // Encerra o processo se a conexão falhar.     
+  });
+
 /* ───────────── 1. Upload de arquivos ───────────── */
 app.use(fileUpload({
   createParentPath: true,
@@ -22,8 +30,6 @@ app.use(fileUpload({
   responseOnLimit: 'Tamanho do arquivo excede o limite permitido.'
 }));
 
-/* ───────────── 2. Conexão ao banco ───────────── */
-await DbConnect.conectar();
 
 /* ───────────── 3. Middlewares globais ───────────── */
 app.use(helmet());

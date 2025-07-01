@@ -43,6 +43,7 @@ const usuariosSchemas = {
   },
   UsuarioPost: {
     ...deepCopy(usuarioJsonSchema),
+    required: ["nome", "email"],
     description: "Schema para criação de usuário"
   },
   UsuarioPutPatch: {
@@ -59,12 +60,12 @@ const usuariosSchemas = {
     ...deepCopy(usuarioJsonSchema),
     description: "Schema para resposta de login de usuário"
   },
-  SingUpPost: {
+  signupPost: {
     ...deepCopy(usuarioJsonSchema),
     required: ["nome", "email", "senha"],
     description: "Schema para cadastro de usuário"
   },
-  SingUpPostDestalhes: {
+  signupPostDestalhes: {
     ...deepCopy(usuarioJsonSchema),
     required: ["nome", "email", "senha"],
     description: "Schema para detalhes do cadastro de usuário"
@@ -74,14 +75,14 @@ const usuariosSchemas = {
 
 // Mapeamento para definir, de forma individual, quais campos serão removidos de cada schema
 const removalMapping = {
-  UsuarioListagem: ['accesstoken', 'refreshtoken', 'tokenUnico', 'senha'],
-  UsuarioDetalhes: ['accesstoken', 'tokenUnico', 'refreshtoken', 'senha'],
-  UsuarioPost: ['accesstoken', 'refreshtoken', 'tokenUnico', 'createdAt', 'updatedAt', '__v', '_id', 'senha'],
-  UsuarioPutPatch: ['accesstoken', 'refreshtoken', 'tokenUnico', 'senha', 'email', 'createdAt', 'updatedAt', '__v', '_id'],
-  UsuarioLogin: ['tokenUnico', 'senha', '__v', '_id'],
-  UsuarioRespostaLogin: ['tokenUnico', 'senha', 'createdAt', 'updatedAt', '__v'],
-  SingUpPost: ['accesstoken', 'refreshtoken', 'tokenUnico', 'createdAt', 'updatedAt', '__v', '_id', 'ativo', 'permissoes', 'grupos', 'unidades', 'codigo_recupera_senha', 'exp_codigo_recupera_senha'],
-  SingUpPostDestalhes: ['accesstoken', 'refreshtoken', 'tokenUnico', 'createdAt', 'updatedAt', '__v', '_id', 'ativo', 'permissoes', 'grupos', 'unidades', 'codigo_recupera_senha', 'exp_codigo_recupera_senha', 'senha']
+  UsuarioListagem: ['accesstoken', 'refreshtoken', 'tokenUnico', 'senha', 'codigo_recupera_senha', 'exp_codigo_recupera_senha'],
+  UsuarioDetalhes: ['accesstoken', 'tokenUnico', 'refreshtoken', 'senha', 'codigo_recupera_senha', 'exp_codigo_recupera_senha'],
+  UsuarioPost: ['accesstoken', 'refreshtoken', 'tokenUnico', 'createdAt', 'updatedAt', '__v', '_id', 'senha', 'codigo_recupera_senha', 'exp_codigo_recupera_senha'],
+  UsuarioPutPatch: ['accesstoken', 'refreshtoken', 'tokenUnico', 'senha', 'email', 'createdAt', 'updatedAt', '__v', '_id', 'codigo_recupera_senha', 'exp_codigo_recupera_senha'],
+  UsuarioLogin: ['tokenUnico', 'senha', '__v', '_id', 'codigo_recupera_senha', 'exp_codigo_recupera_senha'],
+  UsuarioRespostaLogin: ['tokenUnico', 'senha', 'createdAt', 'updatedAt', '__v', 'codigo_recupera_senha', 'exp_codigo_recupera_senha'],
+  signupPost: ['accesstoken', 'refreshtoken', 'tokenUnico', 'createdAt', 'updatedAt', '__v', '_id', 'ativo', 'permissoes', 'grupos', 'unidades', 'codigo_recupera_senha', 'exp_codigo_recupera_senha'],
+  signupPostDestalhes: ['accesstoken', 'refreshtoken', 'tokenUnico', 'createdAt', 'updatedAt', '__v', '_id', 'ativo', 'permissoes', 'grupos', 'unidades', 'codigo_recupera_senha', 'exp_codigo_recupera_senha', 'senha']
 }
 
 // Aplica a remoção de campos de forma individual a cada schema
@@ -98,7 +99,7 @@ const usuarioMongooseSchema = Usuario.schema;
 usuariosSchemas.UsuarioListagem.example = await generateExample(usuariosSchemas.UsuarioListagem, null, usuarioMongooseSchema);
 usuariosSchemas.UsuarioDetalhes.example = await generateExample(usuariosSchemas.UsuarioDetalhes, null, usuarioMongooseSchema);
 usuariosSchemas.UsuarioPost.example = await generateExample(usuariosSchemas.UsuarioPost, null, usuarioMongooseSchema);
-usuariosSchemas.SingUpPost.example = await generateExample(usuariosSchemas.SingUpPost, null, usuarioMongooseSchema);
+usuariosSchemas.signupPost.example = await generateExample(usuariosSchemas.signupPost, null, usuarioMongooseSchema);
 usuariosSchemas.UsuarioPutPatch.example = await generateExample(usuariosSchemas.UsuarioPutPatch, null, usuarioMongooseSchema);
 usuariosSchemas.UsuarioLogin.example = await generateExample(usuariosSchemas.UsuarioLogin, null, usuarioMongooseSchema);
 usuariosSchemas.UsuarioRespostaLogin.example = await generateExample(usuariosSchemas.UsuarioRespostaLogin, null, usuarioMongooseSchema);

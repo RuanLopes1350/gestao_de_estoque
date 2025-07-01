@@ -12,15 +12,14 @@ import fetch from 'node-fetch'
 import UsuarioRepository from '../repositories/UsuarioRepository.js';
 
 class AuthService {
-    constructor({ tokenUtil: injectedTokenUtil, usuarioRepository, authRepository } = {}) {
+    constructor({ tokenUtil: injectedTokenUtil } = {}) {
         // Se nada for injetado, usa a instância importada
         this.TokenUtil = injectedTokenUtil || tokenUtil;
-        this.usuarioRepository = usuarioRepository || new UsuarioRepository();
-        this.repository = new UsuarioRepository();
+         this.repository = new UsuarioRepository();
     }
 
     async carregatokens(id, token) {
-        const data = await this.usuarioRepository.buscarPorId(id, { includeTokens: true });
+        const data = await this.repository.buscarPorId(id, { includeTokens: true });
         return { data };
     }
 
@@ -38,7 +37,7 @@ class AuthService {
         console.log('Estou no logar em AuthService');
 
         // Buscar o usuário pelo email
-        const userEncontrado = await this.usuarioRepository.buscarPorEmail(body.email);
+        const userEncontrado = await this.repository.buscarPorEmail(body.email);
         if (!userEncontrado) {
 
             /**
@@ -74,7 +73,7 @@ class AuthService {
         const accesstoken = await this.TokenUtil.generateAccessToken(userEncontrado._id);
 
         // Buscar o usuário com os tokens já armazenados
-        const userComTokens = await this.usuarioRepository.buscarPorId(userEncontrado._id, true);
+        const userComTokens = await this.repository.buscarPorId(userEncontrado._id, true);
         let refreshtoken = userComTokens.refreshtoken;
         console.log("refresh token no banco", refreshtoken);
 
@@ -105,7 +104,7 @@ class AuthService {
         await this.repository.armazenarTokens(userEncontrado._id, accesstoken, refreshtoken);
 
         // Buscar novamente o usuário e remover a senha
-        const userLogado = await this.usuarioRepository.buscarPorEmail(body.email);
+        const userLogado = await this.repository.buscarPorEmail(body.email);
         delete userLogado.senha;
         const userObjeto = userLogado.toObject();
 
@@ -118,10 +117,13 @@ class AuthService {
     async recuperaSenha(body) {
         console.log('Estou em RecuperaSenhaService');
 
+        console.log('Dados recebidos para recuperação de senha:', body);
         // ───────────────────────────────────────────────
         // Passo 1 – Buscar usuário pelo e-mail informado
         // ───────────────────────────────────────────────
-        const userEncontrado = await this.usuarioRepository.buscarPorEmail(body.email);
+        const userEncontrado = await this.repository.buscarPorEmail(body.email);
+
+        console.log('Usuário encontrado:', userEncontrado);
 
         // Se não encontrar, lança erro 404
         if (!userEncontrado) {
@@ -148,14 +150,16 @@ class AuthService {
         // Passo 3 – Garantir unicidade do código gerado 
         // ───────────────────────────────────────────────
         let codigoExistente =
-            await this.usuarioRepository.buscarPorPorCodigoRecuperacao(codigoRecuperaSenha);
+            await this.repository.buscarPorPorCodigoRecuperacao(codigoRecuperaSenha);
         console.log('Código existente:', codigoExistente);
 
+        console.log(codigoExistente)
+        
         while (codigoExistente) {
             console.log('Código já existe, gerando um novo código');
             codigoRecuperaSenha = generateCode();
             codigoExistente =
-                await this.usuarioRepository.buscarPorPorCodigoRecuperacao(codigoRecuperaSenha);
+                await this.repository.buscarPorPorCodigoRecuperacao(codigoRecuperaSenha);
         }
         console.log('Código gerado:', codigoRecuperaSenha);
 
@@ -170,7 +174,7 @@ class AuthService {
         // Passo 5 – Persistir token + código no usuário
         // ───────────────────────────────────────────────
         const expMs = Date.now() + 60 * 60 * 1000; // 1 hora de expiração
-        const data = await this.usuarioRepository.atualizar(userEncontrado._id, {
+        const data = await this.repository.atualizar(userEncontrado._id, {
             tokenUnico,
             codigo_recupera_senha: codigoRecuperaSenha,
             exp_codigo_recupera_senha: new Date(expMs).toISOString() // Armazenar expiração como string ISO TMZ0 Ex.: 2023-10-01T12:00:00.000Z
@@ -290,7 +294,7 @@ class AuthService {
         console.log('Senha hasheada:', senhaHasheada);
 
         // Buscar usuário pelo token unico
-        const usuario = await this.usuarioRepository.buscarPorTokenUnico(tokenRecuperacao);
+        const usuario = await this.repository.buscarPorTokenUnico(tokenRecuperacao);
         if (!usuario) {
             throw new CustomError({
                 statusCode: HttpStatusCodes.NOT_FOUND.code,
@@ -301,7 +305,7 @@ class AuthService {
         }
 
         // 3) Atualiza no repositório (já com hash)
-        const usuarioAtualizado = await this.usuarioRepository.atualizarSenha(usuarioId, senhaHasheada);
+        const usuarioAtualizado = await this.repository.atualizarSenha(usuarioId, senhaHasheada);
         if (!usuarioAtualizado) {
             throw new CustomError({
                 statusCode: HttpStatusCodes.INTERNAL_SERVER_ERROR.code,
@@ -319,7 +323,7 @@ class AuthService {
      */
     async atualizarSenhaCodigo(codigoRecuperaSenha, senhaBody) {
         // 1) Busca usuário pelo código de recuperação
-        const user = await this.usuarioRepository.buscarPorPorCodigoRecuperacao(
+        const user = await this.repository.buscarPorPorCodigoRecuperacao(
             codigoRecuperaSenha
         );
         if (!user) {
@@ -345,7 +349,7 @@ class AuthService {
         const senhaHasheada = await AuthHelper.hashPassword(senhaBody.senha);
 
         // 4) Atualiza no repositório
-        const atualizado = await this.usuarioRepository.atualizarSenha(
+        const atualizado = await this.repository.atualizarSenha(
             user._id,
             senhaHasheada
         );
@@ -363,7 +367,7 @@ class AuthService {
 
 
     async refresh(id, token) {
-        const userEncontrado = await this.usuarioRepository.buscarPorId(id, { includeTokens: true });
+        const userEncontrado = await this.repository.buscarPorId(id, { includeTokens: true });
 
         if (!userEncontrado) {
             throw new CustomError({
@@ -404,7 +408,7 @@ class AuthService {
         await this.repository.armazenarTokens(id, accesstoken, refreshtoken);
 
         // monta o objeto de usuário com os tokens para resposta
-        const userLogado = await this.usuarioRepository.buscarPorId(id, { includeTokens: true });
+        const userLogado = await this.repository.buscarPorId(id, { includeTokens: true });
         delete userLogado.senha;
         const userObjeto = userLogado.toObject();
 

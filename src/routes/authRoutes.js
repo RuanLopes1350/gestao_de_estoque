@@ -1,6 +1,7 @@
 import express from 'express';
 import AuthController from '../controllers/AuthController.js';
 import authMiddleware from '../middlewares/AuthMiddleware.js';
+import { asyncWrapper } from '../utils/helpers/index.js';
 
 const router = express.Router();
 
@@ -116,7 +117,7 @@ const router = express.Router();
  *         description: Erro interno do servidor
  */
 // Rotas públicas
-router.post('/login', (req, res) => AuthController.login(req, res));
+router.post('/login', asyncWrapper(AuthController.login.bind(AuthController)));
 
 /**
  * @swagger
@@ -146,7 +147,7 @@ router.post('/login', (req, res) => AuthController.login(req, res));
  *       500:
  *         description: Erro interno do servidor
  */
-router.post('/refresh', (req, res) => AuthController.refresh(req, res));
+router.post('/refresh', asyncWrapper(AuthController.refresh.bind(AuthController)));
 
 /**
  * @swagger
@@ -170,7 +171,7 @@ router.post('/refresh', (req, res) => AuthController.refresh(req, res));
  *       500:
  *         description: Erro interno do servidor
  */
-router.post('/recuperar-senha', AuthController.solicitarRecuperacaoSenha.bind(AuthController));
+router.post('/recuperar-senha', asyncWrapper(AuthController.solicitarRecuperacaoSenha.bind(AuthController)));
 
 /**
  * @swagger
@@ -192,7 +193,7 @@ router.post('/recuperar-senha', AuthController.solicitarRecuperacaoSenha.bind(Au
  *       500:
  *         description: Erro interno do servidor
  */
-router.post('/redefinir-senha/token', AuthController.redefinirSenhaComToken.bind(AuthController));
+router.post('/redefinir-senha/token', asyncWrapper(AuthController.redefinirSenhaComToken.bind(AuthController)));
 
 /**
  * @swagger
@@ -214,7 +215,7 @@ router.post('/redefinir-senha/token', AuthController.redefinirSenhaComToken.bind
  *       500:
  *         description: Erro interno do servidor
  */
-router.post('/redefinir-senha/codigo', AuthController.redefinirSenhaComCodigo.bind(AuthController));
+router.post('/redefinir-senha/codigo', asyncWrapper(AuthController.redefinirSenhaComCodigo.bind(AuthController)));
 
 /**
  * @swagger
@@ -233,7 +234,7 @@ router.post('/redefinir-senha/codigo', AuthController.redefinirSenhaComCodigo.bi
  *         description: Erro interno do servidor
  */
 // Rotas protegidas
-router.post('/logout', authMiddleware, (req, res) => AuthController.logout(req, res));
+router.post('/logout', authMiddleware, asyncWrapper(AuthController.logout.bind(AuthController)));
 
 /**
  * @swagger
@@ -251,6 +252,6 @@ router.post('/logout', authMiddleware, (req, res) => AuthController.logout(req, 
  *       500:
  *         description: Erro interno do servidor
  */
-router.post('/revoke', authMiddleware, (req, res) => AuthController.revoke(req, res));
+router.post('/revoke', authMiddleware, asyncWrapper(AuthController.revoke.bind(AuthController)));
 
 export default router;
