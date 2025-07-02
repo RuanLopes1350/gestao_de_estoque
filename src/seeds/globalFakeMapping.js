@@ -6,6 +6,8 @@ import Usuario from '../models/Usuario.js';
 import Fornecedor from '../models/Fornecedor.js';
 import Produto from '../models/Produto.js';
 import Movimentacao from '../models/Movimentacao.js';
+import Grupo from '../models/Grupo.js';
+import Rota from '../models/Rotas.js';
 
 // Função para verificar se um modelo existe e está corretamente definido
 function isValidModel(model) {
@@ -49,6 +51,8 @@ const modelMappings = [
     { model: Fornecedor, mapping: 'fornecedor' },
     { model: Produto, mapping: 'produto' },
     { model: Movimentacao, mapping: 'movimentacao' },
+    { model: Grupo, mapping: 'grupo' },
+    { model: Rota, mapping: 'rota' },
 ];
 
 function validateAllMappings(fakeMapping) {
@@ -65,19 +69,70 @@ function getGlobalFakeMapping() {
     const fakeMapping = {
         usuario: {
             nome_usuario: () => fakerPT_BR.person.fullName(),
+            email: () => fakerPT_BR.internet.email(),
             matricula: () => fakerPT_BR.string.alphanumeric(6).toUpperCase(),
             senha: () => fakerPT_BR.internet.password(15),
-            cargo: () => fakerPT_BR.helpers.arrayElement(['Gerente', 'Assistente', 'Operador', 'Analista', 'Supervisor']),
+            perfil: () => fakerPT_BR.helpers.arrayElement(['administrador', 'gerente', 'vendedor', 'estoquista']),
+            ativo: () => fakerPT_BR.datatype.boolean(0.9),
+            online: () => fakerPT_BR.datatype.boolean(0.3),
             data_cadastro: () => fakerPT_BR.date.past(),
             data_ultima_atualizacao: () => fakerPT_BR.date.recent(),
+            // Novos campos para o sistema de permissões
+            grupos: () => [], // Array de ObjectIds - será preenchido nas seeds
+            permissoes: () => {
+                // Permissões individuais aleatórias (sem duplicatas)
+                const recursos = ['produtos', 'fornecedores', 'usuarios', 'grupos', 'logs'];
+                const acoes = ['buscar', 'enviar', 'substituir', 'modificar', 'excluir'];
+                const permissoes = [];
+                const permissoesUnicas = new Set(); // Para evitar duplicatas
+                
+                // Gera algumas permissões aleatórias
+                const numPermissoes = fakerPT_BR.number.int({ min: 0, max: 3 });
+                for (let i = 0; i < numPermissoes; i++) {
+                    const recurso = fakerPT_BR.helpers.arrayElement(recursos);
+                    const chaveUnica = `${recurso}_localhost`; // rota + domínio
+                    
+                    // Evita duplicatas
+                    if (!permissoesUnicas.has(chaveUnica)) {
+                        permissoesUnicas.add(chaveUnica);
+                        
+                        // Gera ações aleatórias para esta rota
+                        const acaoAleatoria = fakerPT_BR.helpers.arrayElement(acoes);
+                        const permissao = {
+                            rota: recurso,
+                            dominio: 'localhost',
+                            ativo: true,
+                            buscar: false,
+                            enviar: false,
+                            substituir: false,
+                            modificar: false,
+                            excluir: false
+                        };
+                        
+                        // Ativa apenas a ação selecionada
+                        permissao[acaoAleatoria] = true;
+                        
+                        permissoes.push(permissao);
+                    }
+                }
+                
+                return permissoes;
+            }
         },
         fornecedor: {
             nome_fornecedor: () => fakerPT_BR.company.name(),
             cnpj: () => fakerPT_BR.string.numeric(14),
-            endereco: () => [{ 
-                telefone: fakerPT_BR.phone.number(),
-                email: fakerPT_BR.internet.email()
-            }]
+            telefone: () => fakerPT_BR.phone.number('##-####-####'),
+            email: () => fakerPT_BR.internet.email(),
+            endereco: [
+                {
+                    logradouro: () => fakerPT_BR.location.street(),
+                    bairro: () => fakerPT_BR.location.streetName(),
+                    cidade: () => fakerPT_BR.location.city(),
+                    estado: () => fakerPT_BR.location.state(),
+                    cep: () => fakerPT_BR.location.zipCode(),
+                },
+            ],
         },
         produto: {
             nome_produto: () => fakerPT_BR.commerce.productName(),
@@ -120,7 +175,46 @@ function getGlobalFakeMapping() {
                 id_fornecedor: () => fakerPT_BR.number.int({ min: 1, max: 100 }),
                 nome_fornecedor: () => fakerPT_BR.company.name(),
             }
-        }
+        },
+        grupo: {
+            nome: () => fakerPT_BR.helpers.arrayElement([
+                'Administradores', 'Gerentes', 'Estoquistas', 'Auditores', 
+                'Vendedores', 'Supervisores', 'Operadores', 'Consultores'
+            ]),
+            descricao: () => fakerPT_BR.lorem.sentence(),
+            ativo: () => fakerPT_BR.datatype.boolean(0.9), // 90% chance de estar ativo
+            data_criacao: () => fakerPT_BR.date.past(),
+            data_atualizacao: () => fakerPT_BR.date.recent(),
+            permissoes: () => {
+                const rotas = ['produtos', 'fornecedores', 'usuarios', 'grupos', 'logs', 'relatorios', 'dashboard'];
+                const rotaAleatoria = fakerPT_BR.helpers.arrayElement(rotas);
+                return {
+                    rota: rotaAleatoria,
+                    dominio: 'localhost',
+                    ativo: true,
+                    buscar: fakerPT_BR.datatype.boolean(0.8),
+                    enviar: fakerPT_BR.datatype.boolean(0.6),
+                    substituir: fakerPT_BR.datatype.boolean(0.5),
+                    modificar: fakerPT_BR.datatype.boolean(0.7),
+                    excluir: fakerPT_BR.datatype.boolean(0.3)
+                };
+            }
+        },
+        rota: {
+            rota: () => fakerPT_BR.helpers.arrayElement([
+                'produtos', 'fornecedores', 'usuarios', 'grupos', 'movimentacoes',
+                'auth', 'logs', 'relatorios', 'dashboard', 'configuracoes'
+            ]),
+            dominio: () => fakerPT_BR.helpers.arrayElement(['localhost', 'sistema.com', 'app.sistema.com']),
+            ativo: () => fakerPT_BR.datatype.boolean(0.95), // 95% chance de estar ativo
+            buscar: () => fakerPT_BR.datatype.boolean(0.9),
+            enviar: () => fakerPT_BR.datatype.boolean(0.7),
+            substituir: () => fakerPT_BR.datatype.boolean(0.6),
+            modificar: () => fakerPT_BR.datatype.boolean(0.8),
+            excluir: () => fakerPT_BR.datatype.boolean(0.4),
+            createdAt: () => fakerPT_BR.date.past(),
+            updatedAt: () => fakerPT_BR.date.recent()
+        },
     };
 
     // Valide os mapeamentos, ignorando erros

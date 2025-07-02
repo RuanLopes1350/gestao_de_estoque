@@ -1,24 +1,12 @@
-// src/utils/validators/schemas/zod/LoginSchema.js
-
 import { z } from 'zod';
 
-/** Definição da expressão regular para a senha
- * Padrão: 1 letra maiúscula, 1 letra minúscula, 1 número
- * Tamanho mínimo: 8 caracteres
- **/
-const senhaRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[A-Za-z\d@$!%*?&]{8,}$/;
+const regexSenha = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[A-Za-z\d@$!%*?&]{8,}$/;
 
-const LoginSchema = z.object({
-    email: z.string().email('Formato de email inválido.').min(1, 'Campo email é obrigatório.'),
-    senha: z
-        .string()
-        .min(8, 'A senha deve ter pelo menos 8 caracteres.')
-        .refine((senha) => {
-            if (!senha) return true; // Senha é opcional
-            return senhaRegex.test(senha);
+export const LoginSchema = z.object({
+    matricula: z.number().min(7, 'matricula deve conter pelo menos 7 caracteres.'),
+    senha: z.string().min(6, 'Senha deve ter pelo menos 6 caracteres').refine((senha) => {
+            return regexSenha.test(senha,)
         }, {
-            message: 'A senha deve conter pelo menos 1 letra maiúscula, 1 letra minúscula, 1 número e no mínimo 8 caracteres.',
-        }),
+            message: 'Senha deve possuir pelo menos uma letra maiúscula, uma letra minúscula, um número, e no mínimo 8 caracteres.'
+        })
 });
-
-export { LoginSchema };

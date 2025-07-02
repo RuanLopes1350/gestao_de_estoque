@@ -3,7 +3,7 @@ import mongoose from 'mongoose';
 import { CustomError, HttpStatusCodes } from '../utils/helpers/index.js';
 import Produto from '../models/Produto.js';
 
-class ProdutoService {
+class ProdutoService { 
     constructor() {
         this.repository = new ProdutoRepository();
     }
@@ -77,7 +77,7 @@ class ProdutoService {
         return resultado;
     }
 
-    async cadastrarProduto(dadosProduto) {
+    async cadastrarProduto(dadosProduto) { 
         console.log('Estou no criar em ProdutoService');
 
         if (!dadosProduto.data_ultima_entrada) {
@@ -263,7 +263,7 @@ class ProdutoService {
         return await this.enriquecerComNomesFornecedores(data);
     }
 
-    async desativarProduto(id) {
+    async desativarProduto(id) { 
         console.log('Estou no desativarProduto em ProdutoService');
 
         if (!mongoose.Types.ObjectId.isValid(id)) {

@@ -357,7 +357,7 @@ class MovimentacaoService {
                     // Atualizar estoque
                     await this.produtoService.atualizarProduto(produto._id, {
                         quantidade_estoque: produto.quantidade_estoque + produtoMov.quantidade_produtos,
-                        data_ultima_entrada: new Date()
+                        data_ultima_entradaup: new Date()
                     });
                 } catch (error) {
                     if (error.statusCode !== HttpStatusCodes.BAD_REQUEST.code) {
@@ -488,6 +488,40 @@ class MovimentacaoService {
         
         // Chamada ao repository com filtro avançado
         return this.repository.filtrarMovimentacoesAvancado(filtros, opcoesPaginacao);
+    }
+
+    async desativarMovimentacao(id) {
+        console.log('Estou no desativarMovimentacao em movimentacaoService');
+
+        if (!mongoose.Types.ObjectId.isValid(id)) {
+            throw new CustomError({
+                statusCode: HttpStatusCodes.BAD_REQUEST.code,
+                errorType: 'validationError',
+                field: 'id',
+                details: [],
+                customMessage: 'ID da movimentacao inválido.'
+            });
+        }
+
+        const data = await this.repository.desativarMovimentacao(id);
+        return data;
+    }
+
+    async reativarMovimentacao(id) {
+        console.log('Estou no reativarMovimentacao em movimentacaoService');
+
+        if (!mongoose.Types.ObjectId.isValid(id)) {
+            throw new CustomError({
+                statusCode: HttpStatusCodes.BAD_REQUEST.code,
+                errorType: 'validationError',
+                field: 'id',
+                details: [],
+                customMessage: 'ID da movimentacao inválido.'
+            });
+        }
+
+        const data = await this.repository.reativarMovimentacao(id);
+        return data;
     }
 }
 

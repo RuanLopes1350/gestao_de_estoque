@@ -117,7 +117,7 @@ class ProdutoRepository {
     async cadastrarProduto(dadosProduto) {
         const produtoExistente = await this.model.findOne({ codigo_produto: dadosProduto.codigo_produto });
         if (produtoExistente) {
-            throw new CustomError({
+            throw new CustomError({ 
                 statusCode: 400,
                 errorType: 'validationError',
                 field: 'codigo_produto',
@@ -204,7 +204,7 @@ class ProdutoRepository {
         }).sort({ estoque: 1 });
     }
 
-    async desativarProduto(id) {
+    async desativarProduto(id) { 
         const produto = await this.model.findByIdAndUpdate (
             id,
             { status: false },

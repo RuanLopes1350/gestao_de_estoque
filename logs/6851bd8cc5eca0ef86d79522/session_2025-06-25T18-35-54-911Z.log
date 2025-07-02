@@ -1,0 +1,47 @@
+{
+  "inicioSessao": "2025-06-25T18:35:54.911Z",
+  "usuario": {
+    "id": "6851bd8cc5eca0ef86d79522",
+    "matricula": "ADM1350",
+    "nome": "Ruan Lopes",
+    "perfil": "administrador"
+  },
+  "informacaoSistema": {
+    "ip": "::1",
+    "sistemaOperacional": "Desconhecido",
+    "navegador": "Desconhecido",
+    "userAgent": "PostmanRuntime/7.44.0"
+  },
+  "eventos": [
+    {
+      "timestamp": "2025-06-25T18:35:54.915Z",
+      "tipo": "LOGIN",
+      "ip": "::1",
+      "userAgent": "PostmanRuntime/7.44.0",
+      "sistemaOperacional": "Desconhecido",
+      "navegador": "Desconhecido",
+      "metodo": "POST",
+      "rota": "/auth/login",
+      "dados": {
+        "tipo": "login_sucesso",
+        "matricula": "ADM1350"
+      }
+    },
+    {
+      "timestamp": "2025-06-25T18:36:09.786Z",
+      "tipo": "CONSULTA_USUARIOS",
+      "ip": "::1",
+      "userAgent": "PostmanRuntime/7.44.0",
+      "sistemaOperacional": "Desconhecido",
+      "navegador": "Desconhecido",
+      "metodo": "GET",
+      "rota": "/api/usuarios",
+      "dados": {
+        "metodo": "GET",
+        "rota": "/api/usuarios",
+        "params": {},
+        "query": {}
+      }
+    }
+  ]
+}

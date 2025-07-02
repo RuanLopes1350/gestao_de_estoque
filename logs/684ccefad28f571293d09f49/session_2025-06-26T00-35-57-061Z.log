@@ -1,0 +1,49 @@
+{
+  "inicioSessao": "2025-06-26T00:35:57.061Z",
+  "usuario": {
+    "id": "684ccefad28f571293d09f49",
+    "matricula": "ADM0001",
+    "nome": "Administrador",
+    "perfil": "administrador"
+  },
+  "informacaoSistema": {
+    "ip": "::1",
+    "sistemaOperacional": "Desconhecido",
+    "navegador": "Desconhecido",
+    "userAgent": "PostmanRuntime/7.44.0"
+  },
+  "eventos": [
+    {
+      "timestamp": "2025-06-26T00:35:57.061Z",
+      "tipo": "LOGIN",
+      "ip": "::1",
+      "userAgent": "PostmanRuntime/7.44.0",
+      "sistemaOperacional": "Desconhecido",
+      "navegador": "Desconhecido",
+      "metodo": "POST",
+      "rota": "/auth/login",
+      "dados": {
+        "tipo": "login_sucesso",
+        "matricula": "ADM0001"
+      }
+    },
+    {
+      "timestamp": "2025-06-26T00:36:11.786Z",
+      "tipo": "DESATIVACAO_FORNECEDOR",
+      "ip": "::1",
+      "userAgent": "PostmanRuntime/7.44.0",
+      "sistemaOperacional": "Desconhecido",
+      "navegador": "Desconhecido",
+      "metodo": "PATCH",
+      "rota": "/api/fornecedores/desativar/68521e69a614fd0c4a743dd4",
+      "dados": {
+        "metodo": "PATCH",
+        "rota": "/api/fornecedores/desativar/68521e69a614fd0c4a743dd4",
+        "params": {
+          "id": "68521e69a614fd0c4a743dd4"
+        },
+        "query": {}
+      }
+    }
+  ]
+}

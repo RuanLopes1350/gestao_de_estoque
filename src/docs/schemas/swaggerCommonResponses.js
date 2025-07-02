@@ -1,35 +1,173 @@
-// src/docs/swaggerCommonResponses.js
+// Respostas comuns para uso em toda a documentação Swagger
 
-import HttpStatusCodes from "../../utils/helpers/HttpStatusCodes.js";
+const commonResponses = {
+    200: (schema) => ({
+        description: "Operação realizada com sucesso",
+        content: {
+            "application/json": {
+                schema: schema ? { "$ref": schema } : {
+                    type: "object",
+                    properties: {
+                        message: {
+                            type: "string",
+                            example: "Operação realizada com sucesso"
+                        },
+                        data: {
+                            type: "object",
+                            description: "Dados da resposta"
+                        }
+                    }
+                }
+            }
+        }
+    }),
+    
+    201: (schema) => ({
+        description: "Recurso criado com sucesso",
+        content: {
+            "application/json": {
+                schema: schema ? { "$ref": schema } : {
+                    type: "object",
+                    properties: {
+                        message: {
+                            type: "string",
+                            example: "Recurso criado com sucesso"
+                        },
+                        data: {
+                            type: "object",
+                            description: "Dados do recurso criado"
+                        }
+                    }
+                }
+            }
+        }
+    }),
 
-const swaggerCommonResponses = {};
-
-// Percorre todas as chaves do HttpStatusCodes e cria dinamicamente
-// um método para cada status code, no mesmo padrão que você já utiliza.
-Object.keys(HttpStatusCodes).forEach((statusKey) => {
-    const { code, message } = HttpStatusCodes[statusKey];
-
-    swaggerCommonResponses[code] = (schemaRef = null, description = message) => ({
-        description,
+    400: () => ({
+        description: "Requisição inválida",
         content: {
             "application/json": {
                 schema: {
                     type: "object",
                     properties: {
-                        data: schemaRef
-                            ? { $ref: schemaRef }
-                            : { type: "array", items: {}, example: [] },
-                        message: { type: "string", example: message },
-                        errors: {
-                            type: "array",
-                            // Para status de erro, retorna um array com um objeto contendo a mensagem
-                            example: code >= 400 ? [{ message }] : [],
+                        message: {
+                            type: "string",
+                            example: "Dados inválidos fornecidos"
                         },
-                    },
-                },
-            },
-        },
-    });
-});
+                        type: {
+                            type: "string",
+                            example: "validationError"
+                        }
+                    }
+                }
+            }
+        }
+    }),
 
-export default swaggerCommonResponses;
+    401: () => ({
+        description: "Não autorizado - Token inválido ou ausente",
+        content: {
+            "application/json": {
+                schema: {
+                    type: "object",
+                    properties: {
+                        message: {
+                            type: "string",
+                            example: "Token de acesso inválido ou ausente"
+                        },
+                        type: {
+                            type: "string",
+                            example: "authenticationError"
+                        }
+                    }
+                }
+            }
+        }
+    }),
+
+    403: () => ({
+        description: "Acesso negado - Permissões insuficientes",
+        content: {
+            "application/json": {
+                schema: {
+                    type: "object",
+                    properties: {
+                        message: {
+                            type: "string",
+                            example: "Acesso negado. Permissões insuficientes"
+                        },
+                        type: {
+                            type: "string",
+                            example: "permissionError"
+                        }
+                    }
+                }
+            }
+        }
+    }),
+
+    404: () => ({
+        description: "Recurso não encontrado",
+        content: {
+            "application/json": {
+                schema: {
+                    type: "object",
+                    properties: {
+                        message: {
+                            type: "string",
+                            example: "Recurso não encontrado"
+                        },
+                        type: {
+                            type: "string",
+                            example: "resourceNotFound"
+                        }
+                    }
+                }
+            }
+        }
+    }),
+
+    422: () => ({
+        description: "Erro de validação",
+        content: {
+            "application/json": {
+                schema: {
+                    type: "object",
+                    properties: {
+                        message: {
+                            type: "string",
+                            example: "Erro de validação nos dados fornecidos"
+                        },
+                        type: {
+                            type: "string",
+                            example: "validationError"
+                        }
+                    }
+                }
+            }
+        }
+    }),
+
+    500: () => ({
+        description: "Erro interno do servidor",
+        content: {
+            "application/json": {
+                schema: {
+                    type: "object",
+                    properties: {
+                        message: {
+                            type: "string",
+                            example: "Erro interno do servidor"
+                        },
+                        type: {
+                            type: "string",
+                            example: "internalError"
+                        }
+                    }
+                }
+            }
+        }
+    })
+};
+
+export default commonResponses;

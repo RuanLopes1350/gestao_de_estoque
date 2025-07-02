@@ -1,168 +1,460 @@
-import grupoSchemas from "../schemas/gruposSchema.js";
-import authSchemas from "../schemas/authSchema.js";
-import commonResponses from "../schemas/swaggerCommonResponses.js";
-import { generateParameters } from "./utils/generateParameters.js"; // ajuste o caminho conforme necessário
+import commonSchemas from "../schemas/common.js";
 
 const gruposRoutes = {
-    "/grupos": {
+    "/api/grupos": {
         get: {
             tags: ["Grupos"],
             summary: "Lista todos os grupos",
-            description:
-                "Coloque aqui uma descrição mais detalhada do que esse endpoint faz, regras de negócio, permissões, etc.",
+            description: `
+            Lista todos os grupos cadastrados no sistema com suporte a paginação e filtros.
+            
+            **Funcionalidades:**
+            - Paginação automática
+            - Filtros por nome, status
+            - Busca por texto
+            - Ordenação customizável
+            - Controle de permissões
+            `,
             security: [{ bearerAuth: [] }],
-            // Gerando os parâmetros a partir do JSON Schema recursivamente
-            parameters: generateParameters(grupoSchemas.GrupoFiltro),
+            parameters: [
+                ...commonSchemas.PaginationParams,
+                {
+                    name: "nome",
+                    in: "query",
+                    description: "Filtrar por nome do grupo (busca parcial)",
+                    schema: { type: "string", example: "admin" }
+                },
+                {
+                    name: "ativo",
+                    in: "query",
+                    description: "Filtrar por status",
+                    schema: { type: "boolean", example: true }
+                }
+            ],
             responses: {
-                200: commonResponses[200]("#/components/schemas/GrupoListagem"),
-                400: commonResponses[400](),
-                401: commonResponses[401](),
-                404: commonResponses[404](),
-                498: commonResponses[498](),
-                500: commonResponses[500]()
+                200: {
+                    description: "Lista de grupos retornada com sucesso",
+                    content: {
+                        "application/json": {
+                            schema: {
+                                allOf: [
+                                    { $ref: "#/components/schemas/SuccessResponse" },
+                                    {
+                                        type: "object",
+                                        properties: {
+                                            data: {
+                                                type: "object",
+                                                properties: {
+                                                    grupos: {
+                                                        type: "array",
+                                                        items: { $ref: "#/components/schemas/Grupo" }
+                                                    },
+                                                    pagination: { $ref: "#/components/schemas/PaginationInfo" }
+                                                }
+                                            }
+                                        }
+                                    }
+                                ]
+                            }
+                        }
+                    }
+                },
+                400: { $ref: "#/components/responses/BadRequest" },
+                401: { $ref: "#/components/responses/Unauthorized" },
+                403: { $ref: "#/components/responses/Forbidden" },
+                500: { $ref: "#/components/responses/InternalServerError" }
             }
         },
         post: {
             tags: ["Grupos"],
-            summary: "Cria um novo grupo",
-            description:
-                "Coloque aqui uma descrição mais detalhada do que esse endpoint faz, regras de negócio, permissões, etc.",
+            summary: "Criar novo grupo",
+            description: `
+            Cria um novo grupo no sistema com as permissões especificadas.
+            
+            **Regras de negócio:**
+            - Nome do grupo deve ser único
+            - Apenas administradores podem criar grupos
+            - Permissões devem ser válidas
+            `,
             security: [{ bearerAuth: [] }],
             requestBody: {
+                required: true,
                 content: {
                     "application/json": {
-                        schema: {
-                            $ref: "#/components/schemas/GrupoPost"
-                        }
+                        schema: { $ref: "#/components/schemas/GrupoInput" }
                     }
                 }
             },
             responses: {
-                201: commonResponses[201]("#/components/schemas/GrupoDetalhes"),
-                400: commonResponses[400](),
-                401: commonResponses[401](),
-                498: commonResponses[498](),
-                500: commonResponses[500]()
+                201: {
+                    description: "Grupo criado com sucesso",
+                    content: {
+                        "application/json": {
+                            schema: {
+                                allOf: [
+                                    { $ref: "#/components/schemas/SuccessResponse" },
+                                    {
+                                        type: "object",
+                                        properties: {
+                                            data: { $ref: "#/components/schemas/Grupo" }
+                                        }
+                                    }
+                                ]
+                            }
+                        }
+                    }
+                },
+                400: { $ref: "#/components/responses/BadRequest" },
+                401: { $ref: "#/components/responses/Unauthorized" },
+                403: { $ref: "#/components/responses/Forbidden" },
+                409: { $ref: "#/components/responses/Conflict" },
+                500: { $ref: "#/components/responses/InternalServerError" }
             }
         }
     },
-    "/grupos/{id}": { // endpoint ajustado para manter o padrão plural
+    "/api/grupos/{id}": {
         get: {
             tags: ["Grupos"],
-            summary: "Obtém detalhes de um grupo",
-            description:
-                "Coloque aqui uma descrição mais detalhada do que esse endpoint faz, regras de negócio, permissões, etc.",
+            summary: "Buscar grupo por ID",
+            description: `
+            Retorna os detalhes de um grupo específico pelo seu ID.
+            
+            **Informações retornadas:**
+            - Dados básicos do grupo
+            - Lista completa de permissões
+            - Histórico de atualizações
+            `,
             security: [{ bearerAuth: [] }],
             parameters: [
                 {
                     name: "id",
                     in: "path",
                     required: true,
-                    schema: {
-                        type: "integer"
-                    }
+                    description: "ID único do grupo",
+                    schema: { type: "string", example: "60f7b3b3b3b3b3b3b3b3b3b3" }
                 }
             ],
             responses: {
-                200: commonResponses[200]("#/components/schemas/GrupoDetalhes"),
-                400: commonResponses[400](),
-                401: commonResponses[401](),
-                404: commonResponses[404](),
-                498: commonResponses[498](),
-                500: commonResponses[500]()
+                200: {
+                    description: "Grupo encontrado com sucesso",
+                    content: {
+                        "application/json": {
+                            schema: {
+                                allOf: [
+                                    { $ref: "#/components/schemas/SuccessResponse" },
+                                    {
+                                        type: "object",
+                                        properties: {
+                                            data: { $ref: "#/components/schemas/Grupo" }
+                                        }
+                                    }
+                                ]
+                            }
+                        }
+                    }
+                },
+                400: { $ref: "#/components/responses/BadRequest" },
+                401: { $ref: "#/components/responses/Unauthorized" },
+                403: { $ref: "#/components/responses/Forbidden" },
+                404: { $ref: "#/components/responses/NotFound" },
+                500: { $ref: "#/components/responses/InternalServerError" }
             }
         },
         patch: {
             tags: ["Grupos"],
-            summary: "Atualiza um grupo",
-            description:
-                "Coloque aqui uma descrição mais detalhada do que esse endpoint faz, regras de negócio, permissões, etc.",
+            summary: "Atualizar grupo",
+            description: `
+            Atualiza as informações de um grupo existente.
+            
+            **Funcionalidades:**
+            - Atualização parcial de campos
+            - Validação de permissões
+            - Log de auditoria automático
+            `,
             security: [{ bearerAuth: [] }],
             parameters: [
                 {
                     name: "id",
                     in: "path",
                     required: true,
-                    schema: {
-                        type: "integer"
-                    }
+                    description: "ID único do grupo",
+                    schema: { type: "string", example: "60f7b3b3b3b3b3b3b3b3b3b3" }
                 }
             ],
             requestBody: {
+                required: true,
                 content: {
                     "application/json": {
-                        schema: {
-                            $ref: "#/components/schemas/GrupoPutPatch"
-                        }
+                        schema: { $ref: "#/components/schemas/GrupoUpdate" }
                     }
                 }
             },
             responses: {
-                200: commonResponses[200]("#/components/schemas/GrupoDetalhes"),
-                400: commonResponses[400](),
-                401: commonResponses[401](),
-                404: commonResponses[404](),
-                498: commonResponses[498](),
-                500: commonResponses[500]()
-            }
-        },
-        put: {
-            tags: ["Grupos"],
-            summary: "Atualiza um grupo",
-            description:
-                "Coloque aqui uma descrição mais detalhada do que esse endpoint faz, regras de negócio, permissões, etc.",
-            security: [{ bearerAuth: [] }],
-            parameters: [
-                {
-                    name: "id",
-                    in: "path",
-                    required: true,
-                    schema: {
-                        type: "integer"
-                    }
-                }
-            ],
-            requestBody: {
-                content: {
-                    "application/json": {
-                        schema: {
-                            $ref: "#/components/schemas/GrupoPutPatch"
+                200: {
+                    description: "Grupo atualizado com sucesso",
+                    content: {
+                        "application/json": {
+                            schema: {
+                                allOf: [
+                                    { $ref: "#/components/schemas/SuccessResponse" },
+                                    {
+                                        type: "object",
+                                        properties: {
+                                            data: { $ref: "#/components/schemas/Grupo" }
+                                        }
+                                    }
+                                ]
+                            }
                         }
                     }
-                }
-            },
-            responses: {
-                200: commonResponses[200]("#/components/schemas/GrupoDetalhes"),
-                400: commonResponses[400](),
-                401: commonResponses[401](),
-                404: commonResponses[404](),
-                498: commonResponses[498](),
-                500: commonResponses[500]()
+                },
+                400: { $ref: "#/components/responses/BadRequest" },
+                401: { $ref: "#/components/responses/Unauthorized" },
+                403: { $ref: "#/components/responses/Forbidden" },
+                404: { $ref: "#/components/responses/NotFound" },
+                409: { $ref: "#/components/responses/Conflict" },
+                500: { $ref: "#/components/responses/InternalServerError" }
             }
         },
         delete: {
             tags: ["Grupos"],
-            summary: "Deleta um grupo",
-            description:
-                "Coloque aqui uma descrição mais detalhada do que esse endpoint faz, regras de negócio, permissões, etc.",
+            summary: "Excluir grupo",
+            description: `
+            Remove um grupo do sistema permanentemente.
+            
+            **Validações:**
+            - Grupo não pode ter usuários associados
+            - Apenas administradores podem excluir grupos
+            - Operação irreversível
+            `,
             security: [{ bearerAuth: [] }],
             parameters: [
                 {
                     name: "id",
                     in: "path",
                     required: true,
-                    schema: {
-                        type: "integer"
-                    }
+                    description: "ID único do grupo",
+                    schema: { type: "string", example: "60f7b3b3b3b3b3b3b3b3b3b3" }
                 }
             ],
             responses: {
-                200: commonResponses[200](),
-                400: commonResponses[400](),
-                401: commonResponses[401](),
-                404: commonResponses[404](),
-                498: commonResponses[498](),
-                500: commonResponses[500]()
+                204: { description: "Grupo excluído com sucesso" },
+                400: { $ref: "#/components/responses/BadRequest" },
+                401: { $ref: "#/components/responses/Unauthorized" },
+                403: { $ref: "#/components/responses/Forbidden" },
+                404: { $ref: "#/components/responses/NotFound" },
+                409: { $ref: "#/components/responses/Conflict" },
+                500: { $ref: "#/components/responses/InternalServerError" }
+            }
+        }
+    },
+    "/api/grupos/desativar/{id}": {
+        patch: {
+            tags: ["Grupos"],
+            summary: "Desativar grupo",
+            description: `
+            Desativa um grupo sem removê-lo do sistema.
+            `,
+            security: [{ bearerAuth: [] }],
+            parameters: [
+                {
+                    name: "id",
+                    in: "path",
+                    required: true,
+                    description: "ID único do grupo",
+                    schema: { type: "string", example: "60f7b3b3b3b3b3b3b3b3b3b3" }
+                }
+            ],
+            responses: {
+                200: {
+                    description: "Grupo desativado com sucesso",
+                    content: {
+                        "application/json": {
+                            schema: {
+                                allOf: [
+                                    { $ref: "#/components/schemas/SuccessResponse" },
+                                    {
+                                        type: "object",
+                                        properties: {
+                                            data: { $ref: "#/components/schemas/Grupo" }
+                                        }
+                                    }
+                                ]
+                            }
+                        }
+                    }
+                },
+                400: { $ref: "#/components/responses/BadRequest" },
+                401: { $ref: "#/components/responses/Unauthorized" },
+                403: { $ref: "#/components/responses/Forbidden" },
+                404: { $ref: "#/components/responses/NotFound" },
+                500: { $ref: "#/components/responses/InternalServerError" }
+            }
+        }
+    },
+    "/api/grupos/{id}/ativar": {
+        patch: {
+            tags: ["Grupos"],
+            summary: "Ativar grupo",
+            description: `
+            Ativa um grupo previamente desativado.
+            `,
+            security: [{ bearerAuth: [] }],
+            parameters: [
+                {
+                    name: "id",
+                    in: "path",
+                    required: true,
+                    description: "ID único do grupo",
+                    schema: { type: "string", example: "60f7b3b3b3b3b3b3b3b3b3b3" }
+                }
+            ],
+            responses: {
+                200: {
+                    description: "Grupo ativado com sucesso",
+                    content: {
+                        "application/json": {
+                            schema: {
+                                allOf: [
+                                    { $ref: "#/components/schemas/SuccessResponse" },
+                                    {
+                                        type: "object",
+                                        properties: {
+                                            data: { $ref: "#/components/schemas/Grupo" }
+                                        }
+                                    }
+                                ]
+                            }
+                        }
+                    }
+                },
+                400: { $ref: "#/components/responses/BadRequest" },
+                401: { $ref: "#/components/responses/Unauthorized" },
+                403: { $ref: "#/components/responses/Forbidden" },
+                404: { $ref: "#/components/responses/NotFound" },
+                500: { $ref: "#/components/responses/InternalServerError" }
+            }
+        }
+    },
+    "/api/grupos/{id}/permissoes": {
+        post: {
+            tags: ["Grupos"],
+            summary: "Adicionar permissão ao grupo",
+            description: `
+            Adiciona uma nova permissão a um grupo específico.
+            `,
+            security: [{ bearerAuth: [] }],
+            parameters: [
+                {
+                    name: "id",
+                    in: "path",
+                    required: true,
+                    description: "ID único do grupo",
+                    schema: { type: "string", example: "60f7b3b3b3b3b3b3b3b3b3b3" }
+                }
+            ],
+            requestBody: {
+                required: true,
+                content: {
+                    "application/json": {
+                        schema: {
+                            type: "object",
+                            required: ["permissao"],
+                            properties: {
+                                permissao: {
+                                    type: "string",
+                                    description: "Nome da permissão",
+                                    example: "ADMIN_PRODUTOS"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            responses: {
+                200: {
+                    description: "Permissão adicionada com sucesso",
+                    content: {
+                        "application/json": {
+                            schema: {
+                                allOf: [
+                                    { $ref: "#/components/schemas/SuccessResponse" },
+                                    {
+                                        type: "object",
+                                        properties: {
+                                            data: { $ref: "#/components/schemas/Grupo" }
+                                        }
+                                    }
+                                ]
+                            }
+                        }
+                    }
+                },
+                400: { $ref: "#/components/responses/BadRequest" },
+                401: { $ref: "#/components/responses/Unauthorized" },
+                403: { $ref: "#/components/responses/Forbidden" },
+                404: { $ref: "#/components/responses/NotFound" },
+                500: { $ref: "#/components/responses/InternalServerError" }
+            }
+        },
+        delete: {
+            tags: ["Grupos"],
+            summary: "Remover permissão do grupo",
+            description: `
+            Remove uma permissão específica de um grupo.
+            `,
+            security: [{ bearerAuth: [] }],
+            parameters: [
+                {
+                    name: "id",
+                    in: "path",
+                    required: true,
+                    description: "ID único do grupo",
+                    schema: { type: "string", example: "60f7b3b3b3b3b3b3b3b3b3b3" }
+                }
+            ],
+            requestBody: {
+                required: true,
+                content: {
+                    "application/json": {
+                        schema: {
+                            type: "object",
+                            required: ["permissao"],
+                            properties: {
+                                permissao: {
+                                    type: "string",
+                                    description: "Nome da permissão",
+                                    example: "ADMIN_PRODUTOS"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            responses: {
+                200: {
+                    description: "Permissão removida com sucesso",
+                    content: {
+                        "application/json": {
+                            schema: {
+                                allOf: [
+                                    { $ref: "#/components/schemas/SuccessResponse" },
+                                    {
+                                        type: "object",
+                                        properties: {
+                                            data: { $ref: "#/components/schemas/Grupo" }
+                                        }
+                                    }
+                                ]
+                            }
+                        }
+                    }
+                },
+                400: { $ref: "#/components/responses/BadRequest" },
+                401: { $ref: "#/components/responses/Unauthorized" },
+                403: { $ref: "#/components/responses/Forbidden" },
+                404: { $ref: "#/components/responses/NotFound" },
+                500: { $ref: "#/components/responses/InternalServerError" }
             }
         }
     }

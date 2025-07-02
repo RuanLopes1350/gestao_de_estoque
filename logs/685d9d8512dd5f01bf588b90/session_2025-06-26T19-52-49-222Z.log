@@ -1,0 +1,63 @@
+{
+  "inicioSessao": "2025-06-26T19:52:49.222Z",
+  "usuario": {
+    "id": "685d9d8512dd5f01bf588b90",
+    "matricula": "ADM0001",
+    "nome": "Administrador",
+    "perfil": "administrador"
+  },
+  "informacaoSistema": {
+    "ip": "::1",
+    "sistemaOperacional": "Desconhecido",
+    "navegador": "Desconhecido",
+    "userAgent": "PostmanRuntime/7.44.0"
+  },
+  "eventos": [
+    {
+      "timestamp": "2025-06-26T19:52:49.224Z",
+      "tipo": "LOGIN",
+      "ip": "::1",
+      "userAgent": "PostmanRuntime/7.44.0",
+      "sistemaOperacional": "Desconhecido",
+      "navegador": "Desconhecido",
+      "metodo": "POST",
+      "rota": "/auth/login",
+      "dados": {
+        "tipo": "login_sucesso",
+        "matricula": "ADM0001"
+      }
+    },
+    {
+      "timestamp": "2025-06-26T19:57:32.105Z",
+      "tipo": "CONSULTA_GRUPOS",
+      "ip": "::1",
+      "userAgent": "PostmanRuntime/7.44.0",
+      "sistemaOperacional": "Desconhecido",
+      "navegador": "Desconhecido",
+      "metodo": "GET",
+      "rota": "/api/grupos",
+      "dados": {
+        "metodo": "GET",
+        "rota": "/api/grupos",
+        "params": {},
+        "query": {}
+      }
+    },
+    {
+      "timestamp": "2025-06-26T20:00:27.629Z",
+      "tipo": "CONSULTA_GRUPOS",
+      "ip": "::1",
+      "userAgent": "PostmanRuntime/7.44.0",
+      "sistemaOperacional": "Desconhecido",
+      "navegador": "Desconhecido",
+      "metodo": "GET",
+      "rota": "/api/grupos",
+      "dados": {
+        "metodo": "GET",
+        "rota": "/api/grupos",
+        "params": {},
+        "query": {}
+      }
+    }
+  ]
+}
