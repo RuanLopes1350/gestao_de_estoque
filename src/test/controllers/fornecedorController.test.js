@@ -1,35 +1,38 @@
-import FornecedorController from '../../controllers/FornecedorController.js';
-import FornecedorService from '../../services/fornecedorService.js';
-import { CommonResponse, HttpStatusCodes } from '../../utils/helpers/index.js';
-import { FornecedorIdSchema } from '../../utils/validators/schemas/zod/querys/FornecedorQuerySchema.js';
+import FornecedorController from "../../controllers/FornecedorController.js";
+import FornecedorService from "../../services/fornecedorService.js";
+import { CommonResponse, HttpStatusCodes } from "../../utils/helpers/index.js";
+import { FornecedorIdSchema } from "../../utils/validators/schemas/zod/querys/FornecedorQuerySchema.js";
 
-jest.mock('../../services/fornecedorService.js');
-jest.mock('../../utils/validators/schemas/zod/querys/FornecedorQuerySchema.js', () => ({
-  FornecedorIdSchema: {
-    parse: jest.fn()
-  }
-}));
+jest.mock("../../services/fornecedorService.js");
+jest.mock(
+  "../../utils/validators/schemas/zod/FornecedorQuerySchema.js",
+  () => ({
+    FornecedorIdSchema: {
+      parse: jest.fn(),
+    },
+  })
+);
 
-jest.mock('../../utils/helpers/index.js', () => {
-  const originalModule = jest.requireActual('../../utils/helpers/index.js');
+jest.mock("../../utils/helpers/index.js", () => {
+  const originalModule = jest.requireActual("../../utils/helpers/index.js");
 
   return {
     ...originalModule,
     CommonResponse: {
       success: jest.fn(),
       error: jest.fn(),
-      created: jest.fn()
+      created: jest.fn(),
     },
     HttpStatusCodes: {
       OK: { code: 200 },
       CREATED: { code: 201 },
       BAD_REQUEST: { code: 400 },
-      NOT_FOUND: { code: 404 }
-    }
+      NOT_FOUND: { code: 404 },
+    },
   };
 });
 
-describe('FornecedorController', () => {
+describe("FornecedorController", () => {
   let fornecedorController;
   let mockService;
   let req, res;
@@ -42,7 +45,7 @@ describe('FornecedorController', () => {
       listar: jest.fn(),
       buscarPorId: jest.fn(),
       atualizar: jest.fn(),
-      deletar: jest.fn()
+      deletar: jest.fn(),
     };
 
     FornecedorService.mockImplementation(() => mockService);
@@ -53,7 +56,7 @@ describe('FornecedorController', () => {
 
     res = {
       status: jest.fn().mockReturnThis(),
-      json: jest.fn()
+      json: jest.fn(),
     };
   });
 
@@ -164,7 +167,10 @@ describe('FornecedorController', () => {
 
       await controller.atualizar(req, res);
 
-      expect(controller.service.atualizar).toHaveBeenCalledWith("123", req.body);
+      expect(controller.service.atualizar).toHaveBeenCalledWith(
+        "123",
+        req.body
+      );
       expect(CommonResponse.success).toHaveBeenCalledWith(
         res,
         fakeData,
