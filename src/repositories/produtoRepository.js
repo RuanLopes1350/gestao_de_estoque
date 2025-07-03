@@ -51,40 +51,36 @@ class ProdutoRepository {
         
         // Processar busca por nome de fornecedor (se houver)
         if (nome_fornecedor) {
-            try {
-                // Para esta busca, precisamos primeiro encontrar o ID do fornecedor pelo nome
-                const Fornecedor = mongoose.model('fornecedores');
-                const fornecedores = await Fornecedor.find({
-                    nome_fornecedor: { $regex: nome_fornecedor, $options: 'i' }
-                }).select('_id');
+            // Para esta busca, precisamos primeiro encontrar o ID do fornecedor pelo nome
+            const Fornecedor = mongoose.model('fornecedores');
+            const fornecedores = await Fornecedor.find({
+                nome_fornecedor: { $regex: nome_fornecedor, $options: 'i' }
+            }).select('_id');
+            
+            // Se encontrou fornecedores, adiciona aos filtros
+            if (fornecedores.length > 0) {
+                const fornecedorIds = fornecedores.map(f => {
+                    const tempId = f._id.toString().substring(0, 8); 
+                    return parseInt(tempId, 16) % 1000;
+                });
                 
-                // Se encontrou fornecedores, adiciona aos filtros
-                if (fornecedores.length > 0) {
-                    const fornecedorIds = fornecedores.map(f => {
-                        const tempId = f._id.toString().substring(0, 8); 
-                        return parseInt(tempId, 16) % 1000;
-                    });
-                    
-                    filtros.id_fornecedor = { $in: fornecedorIds };
-                    console.log(`Aplicando filtro por nome de fornecedor: "${nome_fornecedor}" (IDs: ${fornecedorIds.join(', ')})`);
-                } else {
-                    // Se não encontrar fornecedores, retorna resultado vazio paginado
-                    console.log(`Nenhum fornecedor encontrado com o nome: "${nome_fornecedor}"`);
-                    return {
-                        docs: [],
-                        totalDocs: 0,
-                        limit: limite,
-                        totalPages: 0,
-                        page: page,
-                        pagingCounter: 0,
-                        hasPrevPage: false,
-                        hasNextPage: false,
-                        prevPage: null,
-                        nextPage: null
-                    };
-                }
-            } catch (error) {
-                console.error('Erro ao buscar fornecedor por nome:', error);
+                filtros.id_fornecedor = { $in: fornecedorIds };
+                console.log(`Aplicando filtro por nome de fornecedor: "${nome_fornecedor}" (IDs: ${fornecedorIds.join(', ')})`);
+            } else {
+                // Se não encontrar fornecedores, retorna resultado vazio paginado
+                console.log(`Nenhum fornecedor encontrado com o nome: "${nome_fornecedor}"`);
+                return {
+                    docs: [],
+                    totalDocs: 0,
+                    limit: limite,
+                    totalPages: 0,
+                    page: page,
+                    pagingCounter: 0,
+                    hasPrevPage: false,
+                    hasNextPage: false,
+                    prevPage: null,
+                    nextPage: null
+                };
             }
         }
     
