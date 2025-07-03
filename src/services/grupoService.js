@@ -12,12 +12,7 @@ class GrupoService {
      * @returns {Object} - Resultado paginado ou grupo único
      */
     async listar(req) {
-        try {
-            return await this.repository.listar(req);
-        } catch (error) {
-            console.error('Erro no service ao listar grupos:', error);
-            throw error;
-        }
+        return await this.repository.listar(req);
     }
 
     /**
@@ -26,12 +21,7 @@ class GrupoService {
      * @returns {Object} - Dados do grupo
      */
     async buscarPorId(id) {
-        try {
-            return await this.repository.buscarPorId(id);
-        } catch (error) {
-            console.error('Erro no service ao buscar grupo por ID:', error);
-            throw error;
-        }
+        return await this.repository.buscarPorId(id);
     }
 
     /**
@@ -63,25 +53,20 @@ class GrupoService {
      * @returns {Object} - Grupo atualizado
      */
     async atualizar(id, dadosAtualizacao) {
-        try {
-            // Verificar se o grupo existe
-            await this.repository.buscarPorId(id);
+        // Verificar se o grupo existe
+        await this.repository.buscarPorId(id);
 
-            // Validar nome único se está sendo alterado
-            if (dadosAtualizacao.nome) {
-                await this.validarNomeUnico(dadosAtualizacao.nome, id);
-            }
-
-            // Validar permissões se fornecidas
-            if (dadosAtualizacao.permissoes && dadosAtualizacao.permissoes.length > 0) {
-                await this.validarPermissoes(dadosAtualizacao.permissoes);
-            }
-
-            return await this.repository.atualizar(id, dadosAtualizacao);
-        } catch (error) {
-            console.error('Erro no service ao atualizar grupo:', error);
-            throw error;
+        // Validar nome único se está sendo alterado
+        if (dadosAtualizacao.nome) {
+            await this.validarNomeUnico(dadosAtualizacao.nome, id);
         }
+
+        // Validar permissões se fornecidas
+        if (dadosAtualizacao.permissoes && dadosAtualizacao.permissoes.length > 0) {
+            await this.validarPermissoes(dadosAtualizacao.permissoes);
+        }
+
+        return await this.repository.atualizar(id, dadosAtualizacao);
     }
 
     /**
@@ -90,15 +75,10 @@ class GrupoService {
      * @returns {Boolean} - Sucesso da operação
      */
     async deletar(id) {
-        try {
-            // Verificar se o grupo existe
-            await this.repository.buscarPorId(id);
+        // Verificar se o grupo existe
+        await this.repository.buscarPorId(id);
 
-            return await this.repository.deletar(id);
-        } catch (error) {
-            console.error('Erro no service ao deletar grupo:', error);
-            throw error;
-        }
+        return await this.repository.deletar(id);
     }
 
     /**
@@ -108,12 +88,7 @@ class GrupoService {
      * @returns {Object} - Grupo atualizado
      */
     async alterarStatus(id, ativo) {
-        try {
-            return await this.repository.alterarStatus(id, ativo);
-        } catch (error) {
-            console.error('Erro no service ao alterar status do grupo:', error);
-            throw error;
-        }
+        return await this.repository.alterarStatus(id, ativo);
     }
 
     // MÉTODOS AUXILIARES
