@@ -4,6 +4,7 @@ import dotenv from 'dotenv';
 import UsuarioRepository from '../repositories/usuarioRepository.js';
 import CustomError from '../utils/helpers/CustomError.js';
 import TokenUtil from '../utils/TokenUtil.js';
+import EmailService from './EmailService.js';
 
 dotenv.config();
 
@@ -188,10 +189,8 @@ export class AuthService {
         // Salvar token e código no usuário
         await this.usuarioRepository.atualizarTokenRecuperacao(usuario._id, token, codigo);
 
-        // No ambiente real, aqui enviaríamos um email com o link para reset
-        // Simular o envio de email (em produção, implemente o envio real)
-        console.log(`Link de recuperação: https://seusite.com/reset-password?token=${token}`);
-        console.log(`Código de recuperação: ${codigo}`);
+        // Tentar enviar email de recuperação
+        await EmailService.enviarCodigoRecuperacao(usuario, codigo);
 
         return {
             message: 'Solicitação de recuperação de senha recebida, um email será enviado com as instruções para recuperação de senha'

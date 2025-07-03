@@ -19,6 +19,7 @@
     "@opentelemetry/exporter-jaeger": "^2.0.1",
     "@opentelemetry/resources": "^2.0.1",
     "@opentelemetry/sdk-node": "^0.201.1",
+    "axios": "^1.10.0",
     "bcrypt": "^6.0.0",
     "bcryptjs": "^3.0.2",
     "chai": "^5.2.0",

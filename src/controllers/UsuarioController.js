@@ -1,4 +1,5 @@
 import UsuarioService from "../services/usuarioService.js";
+import EmailService from "../services/EmailService.js";
 import { CommonResponse, CustomError, HttpStatusCodes } from "../utils/helpers/index.js";
 import { UsuarioSchema, UsuarioUpdateSchema } from "../utils/validators/schemas/zod/UsuarioSchema.js";
 import { UsuarioQuerySchema, UsuarioIdSchema, UsuarioMatriculaSchema } from "../utils/validators/schemas/zod/querys/UsuarioQuerySchema.js";
@@ -92,21 +93,36 @@ class UsuarioController {
             
             const data = await this.service.cadastrarUsuario(parsedData);
 
+            // Tentar enviar email de primeiro acesso
+            const emailResult = await EmailService.enviarCodigoCadastro(data, codigoSeguranca);
+
             // Registra evento crítico de criação de usuário sem senha
             LogMiddleware.logCriticalEvent(req.userId, 'USUARIO_CRIADO_SEM_SENHA', {
                 usuario_criado: data._id,
                 matricula: data.matricula,
                 perfil: data.perfil,
                 criado_por: req.userMatricula,
-                codigo_gerado: true // Não logamos o código por segurança
+                codigo_gerado: true,
+                email_enviado: emailResult.sentViaEmail
             }, req);
+
+            // Resposta baseada no resultado do envio do email
+            const responseMessage = emailResult.sentViaEmail 
+                ? `Usuário cadastrado com sucesso! Código de acesso enviado para ${data.email}. Código: ${codigoSeguranca}`
+                : `Usuário cadastrado com sucesso. Código de segurança: ${codigoSeguranca}`;
+
+            const responseInstructions = emailResult.sentViaEmail
+                ? `O usuário deve verificar o email ${data.email} para encontrar o código de acesso e a matrícula ${data.matricula}. Código também disponível aqui para referência.`
+                : `O usuário deve usar este código na endpoint '/auth/redefinir-senha/codigo' para definir sua senha. Código válido por 24 horas.`;
 
             return CommonResponse.created(
                 res,
                 {
                     ...data.toObject(),
-                    message: `Usuário cadastrado com sucesso. Código de segurança gerado: ${codigoSeguranca}`,
-                    instrucoes: "O usuário deve usar este código na endpoint '/auth/redefinir-senha/codigo' para definir sua senha. Código válido por 24 horas."
+                    message: responseMessage,
+                    instrucoes: responseInstructions,
+                    email_enviado: emailResult.sentViaEmail,
+                    motivo_email_nao_enviado: emailResult.sentViaEmail ? null : emailResult.reason
                 },
                 HttpStatusCodes.CREATED.code,
                 'Usuário cadastrado com sucesso sem senha.'
