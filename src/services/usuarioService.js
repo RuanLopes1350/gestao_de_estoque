@@ -129,48 +129,20 @@ class UsuarioService {
         // Verificar se o usuário existe antes de tentar deletar
         await this.buscarUsuarioPorID(id);
 
-        try {
-            const data = await this.repository.deletarUsuario(id);
-            return data;
-        } catch (error) {
-            throw error;
-        }
+        const data = await this.repository.deletarUsuario(id);
+        return data;
     }
     
 
     async desativarUsuario(id) {
-    console.log('Estou no desativarUsuario em UsuarioService');
-
-    try {
-        UsuarioIdSchema.parse(id);
-    } catch (error) {
-        throw new CustomError({
-            statusCode: HttpStatusCodes.BAD_REQUEST.code,
-            errorType: 'validationError',
-            field: 'id',
-            details: [],
-            customMessage: 'ID do usuário inválido.'
-        });
-    }
+        console.log('Estou no desativarUsuario em UsuarioService');
 
         const data = await this.repository.desativarUsuario(id);
         return data;
     }
 
     async reativarUsuario(id) {
-    console.log('Estou no reativarUsuario em UsuarioService'); 
-
-    try {
-        UsuarioIdSchema.parse(id);
-    } catch (error) {
-        throw new CustomError({
-            statusCode: HttpStatusCodes.BAD_REQUEST.code,
-            errorType: 'validationError',
-            field: 'id',
-            details: [],
-            customMessage: 'ID do usuário inválido.'
-        });
-    }
+        console.log('Estou no reativarUsuario em UsuarioService'); 
 
         const data = await this.repository.reativarUsuario(id);
         return data;
@@ -217,52 +189,47 @@ class UsuarioService {
      * @returns {Object} - Usuário atualizado
      */
     async adicionarUsuarioAoGrupo(usuarioId, grupoId) {
-        try {
-            const usuario = await this.repository.buscarPorId(usuarioId);
-            if (!usuario) {
-                throw new CustomError({
-                    statusCode: 404,
-                    errorType: 'resourceNotFound',
-                    field: 'usuario',
-                    details: [],
-                    customMessage: 'Usuário não encontrado'
-                });
-            }
-
-            // Verificar se o grupo existe
-            const Grupo = mongoose.model('grupos');
-            const grupo = await Grupo.findById(grupoId);
-            if (!grupo) {
-                throw new CustomError({
-                    statusCode: 404,
-                    errorType: 'resourceNotFound',
-                    field: 'grupo',
-                    details: [],
-                    customMessage: 'Grupo não encontrado'
-                });
-            }
-
-            // Verificar se o usuário já está no grupo
-            if (usuario.grupos && usuario.grupos.includes(grupoId)) {
-                throw new CustomError({
-                    statusCode: 400,
-                    errorType: 'validationError',
-                    field: 'grupo',
-                    details: [],
-                    customMessage: 'Usuário já pertence a este grupo'
-                });
-            }
-
-            // Adicionar o grupo ao usuário
-            const gruposAtualizados = usuario.grupos ? [...usuario.grupos, grupoId] : [grupoId];
-            
-            return await this.repository.atualizarUsuario(usuarioId, {
-                grupos: gruposAtualizados
+        const usuario = await this.repository.buscarPorId(usuarioId);
+        if (!usuario) {
+            throw new CustomError({
+                statusCode: 404,
+                errorType: 'resourceNotFound',
+                field: 'usuario',
+                details: [],
+                customMessage: 'Usuário não encontrado'
             });
-        } catch (error) {
-            console.error('Erro ao adicionar usuário ao grupo:', error);
-            throw error;
         }
+
+        // Verificar se o grupo existe
+        const Grupo = mongoose.model('grupos');
+        const grupo = await Grupo.findById(grupoId);
+        if (!grupo) {
+            throw new CustomError({
+                statusCode: 404,
+                errorType: 'resourceNotFound',
+                field: 'grupo',
+                details: [],
+                customMessage: 'Grupo não encontrado'
+            });
+        }
+
+        // Verificar se o usuário já está no grupo
+        if (usuario.grupos && usuario.grupos.includes(grupoId)) {
+            throw new CustomError({
+                statusCode: 400,
+                errorType: 'validationError',
+                field: 'grupo',
+                details: [],
+                customMessage: 'Usuário já pertence a este grupo'
+            });
+        }
+
+        // Adicionar o grupo ao usuário
+        const gruposAtualizados = usuario.grupos ? [...usuario.grupos, grupoId] : [grupoId];
+        
+        return await this.repository.atualizarUsuario(usuarioId, {
+            grupos: gruposAtualizados
+        });
     }
 
     /**
@@ -272,39 +239,34 @@ class UsuarioService {
      * @returns {Object} - Usuário atualizado
      */
     async removerUsuarioDoGrupo(usuarioId, grupoId) {
-        try {
-            const usuario = await this.repository.buscarPorId(usuarioId);
-            if (!usuario) {
-                throw new CustomError({
-                    statusCode: 404,
-                    errorType: 'resourceNotFound',
-                    field: 'usuario',
-                    details: [],
-                    customMessage: 'Usuário não encontrado'
-                });
-            }
-
-            // Verificar se o usuário está no grupo
-            if (!usuario.grupos || !usuario.grupos.includes(grupoId)) {
-                throw new CustomError({
-                    statusCode: 400,
-                    errorType: 'validationError',
-                    field: 'grupo',
-                    details: [],
-                    customMessage: 'Usuário não pertence a este grupo'
-                });
-            }
-
-            // Remover o grupo do usuário
-            const gruposAtualizados = usuario.grupos.filter(g => g.toString() !== grupoId);
-            
-            return await this.repository.atualizarUsuario(usuarioId, {
-                grupos: gruposAtualizados
+        const usuario = await this.repository.buscarPorId(usuarioId);
+        if (!usuario) {
+            throw new CustomError({
+                statusCode: 404,
+                errorType: 'resourceNotFound',
+                field: 'usuario',
+                details: [],
+                customMessage: 'Usuário não encontrado'
             });
-        } catch (error) {
-            console.error('Erro ao remover usuário do grupo:', error);
-            throw error;
         }
+
+        // Verificar se o usuário está no grupo
+        if (!usuario.grupos || !usuario.grupos.includes(grupoId)) {
+            throw new CustomError({
+                statusCode: 400,
+                errorType: 'validationError',
+                field: 'grupo',
+                details: [],
+                customMessage: 'Usuário não pertence a este grupo'
+            });
+        }
+
+        // Remover o grupo do usuário
+        const gruposAtualizados = usuario.grupos.filter(g => g.toString() !== grupoId);
+        
+        return await this.repository.atualizarUsuario(usuarioId, {
+            grupos: gruposAtualizados
+        });
     }
 
     /**
@@ -314,48 +276,43 @@ class UsuarioService {
      * @returns {Object} - Usuário atualizado
      */
     async adicionarPermissaoAoUsuario(usuarioId, permissao) {
-        try {
-            const usuario = await this.repository.buscarPorId(usuarioId);
-            if (!usuario) {
-                throw new CustomError({
-                    statusCode: 404,
-                    errorType: 'resourceNotFound',
-                    field: 'usuario',
-                    details: [],
-                    customMessage: 'Usuário não encontrado'
-                });
-            }
-
-            // Verificar se a permissão já existe
-            const permissaoExiste = usuario.permissoes && usuario.permissoes.some(p => 
-                p.rota === permissao.rota.toLowerCase() && 
-                p.dominio === (permissao.dominio || 'localhost')
-            );
-
-            if (permissaoExiste) {
-                throw new CustomError({
-                    statusCode: 400,
-                    errorType: 'validationError',
-                    field: 'permissao',
-                    details: [],
-                    customMessage: 'Esta permissão já existe para o usuário'
-                });
-            }
-
-            // Adicionar a permissão
-            const permissoesAtualizadas = usuario.permissoes ? [...usuario.permissoes] : [];
-            permissoesAtualizadas.push({
-                ...permissao,
-                rota: permissao.rota.toLowerCase()
+        const usuario = await this.repository.buscarPorId(usuarioId);
+        if (!usuario) {
+            throw new CustomError({
+                statusCode: 404,
+                errorType: 'resourceNotFound',
+                field: 'usuario',
+                details: [],
+                customMessage: 'Usuário não encontrado'
             });
-
-            return await this.repository.atualizarUsuario(usuarioId, {
-                permissoes: permissoesAtualizadas
-            });
-        } catch (error) {
-            console.error('Erro ao adicionar permissão ao usuário:', error);
-            throw error;
         }
+
+        // Verificar se a permissão já existe
+        const permissaoExiste = usuario.permissoes && usuario.permissoes.some(p => 
+            p.rota === permissao.rota.toLowerCase() && 
+            p.dominio === (permissao.dominio || 'localhost')
+        );
+
+        if (permissaoExiste) {
+            throw new CustomError({
+                statusCode: 400,
+                errorType: 'validationError',
+                field: 'permissao',
+                details: [],
+                customMessage: 'Esta permissão já existe para o usuário'
+            });
+        }
+
+        // Adicionar a permissão
+        const permissoesAtualizadas = usuario.permissoes ? [...usuario.permissoes] : [];
+        permissoesAtualizadas.push({
+            ...permissao,
+            rota: permissao.rota.toLowerCase()
+        });
+
+        return await this.repository.atualizarUsuario(usuarioId, {
+            permissoes: permissoesAtualizadas
+        });
     }
 
     /**
@@ -366,41 +323,36 @@ class UsuarioService {
      * @returns {Object} - Usuário atualizado
      */
     async removerPermissaoDoUsuario(usuarioId, rota, dominio = 'localhost') {
-        try {
-            const usuario = await this.repository.buscarPorId(usuarioId);
-            if (!usuario) {
-                throw new CustomError({
-                    statusCode: 404,
-                    errorType: 'resourceNotFound',
-                    field: 'usuario',
-                    details: [],
-                    customMessage: 'Usuário não encontrado'
-                });
-            }
-
-            // Filtrar as permissões removendo a especificada
-            const permissoesAtualizadas = usuario.permissoes ? 
-                usuario.permissoes.filter(p => 
-                    !(p.rota === rota.toLowerCase() && p.dominio === dominio)
-                ) : [];
-
-            if (permissoesAtualizadas.length === (usuario.permissoes?.length || 0)) {
-                throw new CustomError({
-                    statusCode: 404,
-                    errorType: 'resourceNotFound',
-                    field: 'permissao',
-                    details: [],
-                    customMessage: 'Permissão não encontrada para o usuário'
-                });
-            }
-
-            return await this.repository.atualizarUsuario(usuarioId, {
-                permissoes: permissoesAtualizadas
+        const usuario = await this.repository.buscarPorId(usuarioId);
+        if (!usuario) {
+            throw new CustomError({
+                statusCode: 404,
+                errorType: 'resourceNotFound',
+                field: 'usuario',
+                details: [],
+                customMessage: 'Usuário não encontrado'
             });
-        } catch (error) {
-            console.error('Erro ao remover permissão do usuário:', error);
-            throw error;
         }
+
+        // Filtrar as permissões removendo a especificada
+        const permissoesAtualizadas = usuario.permissoes ? 
+            usuario.permissoes.filter(p => 
+                !(p.rota === rota.toLowerCase() && p.dominio === dominio)
+            ) : [];
+
+        if (permissoesAtualizadas.length === (usuario.permissoes?.length || 0)) {
+            throw new CustomError({
+                statusCode: 404,
+                errorType: 'resourceNotFound',
+                field: 'permissao',
+                details: [],
+                customMessage: 'Permissão não encontrada para o usuário'
+            });
+        }
+
+        return await this.repository.atualizarUsuario(usuarioId, {
+            permissoes: permissoesAtualizadas
+        });
     }
 
     /**
@@ -409,15 +361,10 @@ class UsuarioService {
      * @returns {Object} - Permissões do usuário
      */
     async obterPermissoesUsuario(usuarioId) {
-        try {
-            const PermissionService = (await import('./PermissionService.js')).default;
-            const permissionService = new PermissionService();
-            
-            return await permissionService.getUserPermissions(usuarioId);
-        } catch (error) {
-            console.error('Erro ao obter permissões do usuário:', error);
-            throw error;
-        }
+        const PermissionService = (await import('./PermissionService.js')).default;
+        const permissionService = new PermissionService();
+        
+        return await permissionService.getUserPermissions(usuarioId);
     }
 
     /**
@@ -425,44 +372,39 @@ class UsuarioService {
      * @param {Array} gruposIds - Array de IDs dos grupos
      */
     async validarGrupos(gruposIds) {
-        try {
-            const Grupo = mongoose.model('grupos');
-            
-            for (const grupoId of gruposIds) {
-                if (!mongoose.Types.ObjectId.isValid(grupoId)) {
-                    throw new CustomError({
-                        statusCode: HttpStatusCodes.BAD_REQUEST.code,
-                        errorType: 'validationError',
-                        field: 'grupos',
-                        details: [],
-                        customMessage: `ID do grupo inválido: ${grupoId}`
-                    });
-                }
-
-                const grupo = await Grupo.findById(grupoId);
-                if (!grupo) {
-                    throw new CustomError({
-                        statusCode: HttpStatusCodes.NOT_FOUND.code,
-                        errorType: 'resourceNotFound',
-                        field: 'grupo',
-                        details: [],
-                        customMessage: `Grupo não encontrado: ${grupoId}`
-                    });
-                }
-
-                if (!grupo.ativo) {
-                    throw new CustomError({
-                        statusCode: HttpStatusCodes.BAD_REQUEST.code,
-                        errorType: 'validationError',
-                        field: 'grupos',
-                        details: [],
-                        customMessage: `Grupo está inativo: ${grupo.nome}`
-                    });
-                }
+        const Grupo = mongoose.model('grupos');
+        
+        for (const grupoId of gruposIds) {
+            if (!mongoose.Types.ObjectId.isValid(grupoId)) {
+                throw new CustomError({
+                    statusCode: HttpStatusCodes.BAD_REQUEST.code,
+                    errorType: 'validationError',
+                    field: 'grupos',
+                    details: [],
+                    customMessage: `ID do grupo inválido: ${grupoId}`
+                });
             }
-        } catch (error) {
-            console.error('Erro ao validar grupos:', error);
-            throw error;
+
+            const grupo = await Grupo.findById(grupoId);
+            if (!grupo) {
+                throw new CustomError({
+                    statusCode: HttpStatusCodes.NOT_FOUND.code,
+                    errorType: 'resourceNotFound',
+                    field: 'grupo',
+                    details: [],
+                    customMessage: `Grupo não encontrado: ${grupoId}`
+                });
+            }
+
+            if (!grupo.ativo) {
+                throw new CustomError({
+                    statusCode: HttpStatusCodes.BAD_REQUEST.code,
+                    errorType: 'validationError',
+                    field: 'grupos',
+                    details: [],
+                    customMessage: `Grupo está inativo: ${grupo.nome}`
+                });
+            }
         }
     }
 
@@ -471,53 +413,48 @@ class UsuarioService {
      * @param {Array} permissoes - Array de permissões
      */
     async validarPermissoes(permissoes) {
-        try {
-            const Rota = mongoose.model('rotas');
-            
-            for (const permissao of permissoes) {
-                // Verificar se a rota existe no sistema
-                const rota = await Rota.findOne({ 
-                    rota: permissao.rota.toLowerCase(),
-                    dominio: permissao.dominio || 'localhost'
+        const Rota = mongoose.model('rotas');
+        
+        for (const permissao of permissoes) {
+            // Verificar se a rota existe no sistema
+            const rota = await Rota.findOne({ 
+                rota: permissao.rota.toLowerCase(),
+                dominio: permissao.dominio || 'localhost'
+            });
+
+            if (!rota) {
+                throw new CustomError({
+                    statusCode: HttpStatusCodes.NOT_FOUND.code,
+                    errorType: 'resourceNotFound',
+                    field: 'permissao.rota',
+                    details: [],
+                    customMessage: `Rota não encontrada no sistema: ${permissao.rota}`
                 });
-
-                if (!rota) {
-                    throw new CustomError({
-                        statusCode: HttpStatusCodes.NOT_FOUND.code,
-                        errorType: 'resourceNotFound',
-                        field: 'permissao.rota',
-                        details: [],
-                        customMessage: `Rota não encontrada no sistema: ${permissao.rota}`
-                    });
-                }
-
-                if (!rota.ativo) {
-                    throw new CustomError({
-                        statusCode: HttpStatusCodes.BAD_REQUEST.code,
-                        errorType: 'validationError',
-                        field: 'permissao.rota',
-                        details: [],
-                        customMessage: `Rota está inativa: ${permissao.rota}`
-                    });
-                }
             }
 
-            // Verificar duplicatas na própria lista
-            const combinacoes = permissoes.map(p => `${p.rota}_${p.dominio || 'localhost'}`);
-            const setCombinacoes = new Set(combinacoes);
-
-            if (combinacoes.length !== setCombinacoes.size) {
+            if (!rota.ativo) {
                 throw new CustomError({
                     statusCode: HttpStatusCodes.BAD_REQUEST.code,
                     errorType: 'validationError',
-                    field: 'permissoes',
+                    field: 'permissao.rota',
                     details: [],
-                    customMessage: 'Permissões duplicadas encontradas na lista'
+                    customMessage: `Rota está inativa: ${permissao.rota}`
                 });
             }
-        } catch (error) {
-            console.error('Erro ao validar permissões:', error);
-            throw error;
+        }
+
+        // Verificar duplicatas na própria lista
+        const combinacoes = permissoes.map(p => `${p.rota}_${p.dominio || 'localhost'}`);
+        const setCombinacoes = new Set(combinacoes);
+
+        if (combinacoes.length !== setCombinacoes.size) {
+            throw new CustomError({
+                statusCode: HttpStatusCodes.BAD_REQUEST.code,
+                errorType: 'validationError',
+                field: 'permissoes',
+                details: [],
+                customMessage: 'Permissões duplicadas encontradas na lista'
+            });
         }
     }
 }

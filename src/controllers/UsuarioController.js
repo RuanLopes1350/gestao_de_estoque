@@ -10,6 +10,21 @@ class UsuarioController {
         this.service = new UsuarioService();
     }
 
+    // Função utilitária para validação com erro customizado
+    validateId(id, fieldName = 'id', action = 'processar') {
+        if (!id) {
+            throw new CustomError({
+                statusCode: HttpStatusCodes.BAD_REQUEST.code,
+                errorType: 'validationError',
+                field: fieldName,
+                details: [],
+                customMessage: `ID do usuário é obrigatório para ${action}.`
+            });
+        }
+        
+        UsuarioIdSchema.parse(id);
+    }
+
     async listarUsuarios(req, res) {
         console.log('Estou no listarUsuarios em UsuarioController');
 
@@ -185,90 +200,30 @@ class UsuarioController {
         console.log('Estou no deletarUsuario em UsuarioController');
 
         const { id } = req.params || {};
-        if (!id) {
-            throw new CustomError({
-                statusCode: HttpStatusCodes.BAD_REQUEST.code,
-                errorType: 'validationError',
-                field: 'id',
-                details: [],
-                customMessage: 'ID do usuário é obrigatório para deletar.'
-            });
-        }
-
-        try {
-            UsuarioIdSchema.parse(id);
-        } catch (error) {
-            throw new CustomError({
-                statusCode: HttpStatusCodes.BAD_REQUEST.code,
-                errorType: 'validationError',
-                field: 'id',
-                details: [],
-                customMessage: 'ID do usuário inválido.'
-            });
-        }
+        this.validateId(id, 'id', 'deletar');
 
         const data = await this.service.deletarUsuario(id);
         return CommonResponse.success(res, data, 200, 'Usuário excluído com sucesso.');
     }
 
     async desativarUsuario(req, res) {
-           console.log('Estou no desativarUsusario em UsuarioController');
-   
-           const { id } = req.params || {};
-           if (!id) {
-               throw new CustomError({
-                   statusCode: HttpStatusCodes.BAD_REQUEST.code,
-                   errorType: 'validationError',
-                   field: 'id',
-                   details: [],
-                   customMessage: 'ID do usuario é obrigatório para desativar.'
-               });
-           }
-   
-           try {
-               UsuarioIdSchema.parse(id);
-           } catch (error) {
-               throw new CustomError({
-                   statusCode: HttpStatusCodes.BAD_REQUEST.code,
-                   errorType: 'validationError',
-                   field: 'id',
-                   details: [],
-                   customMessage: 'ID do usuario inválido.'
-               });
-           }
-   
-           const data = await this.service.desativarUsuario(id);
-           return CommonResponse.success(res, data, 200, 'Usuario desativado com sucesso.');
+        console.log('Estou no desativarUsusario em UsuarioController');
+
+        const { id } = req.params || {};
+        this.validateId(id, 'id', 'desativar');
+
+        const data = await this.service.desativarUsuario(id);
+        return CommonResponse.success(res, data, 200, 'Usuario desativado com sucesso.');
     }
 
     async reativarUsuario(req, res) {
-           console.log('Estou no reativarUsusario em UsuarioController');
-   
-           const { id } = req.params || {};
-           if (!id) {
-               throw new CustomError({
-                   statusCode: HttpStatusCodes.BAD_REQUEST.code,
-                   errorType: 'validationError',
-                   field: 'id',
-                   details: [],
-                   customMessage: 'ID do usuario é obrigatório para reativar.'
-               });
-           }
-   
-           try {
-               UsuarioIdSchema.parse(id);
-           } catch (error) {
-               throw new CustomError({
-                   statusCode: HttpStatusCodes.BAD_REQUEST.code,
-                   errorType: 'validationError',
-                   field: 'id',
-                   details: [],
-                   customMessage: 'ID do usuario inválido.'
-               });
-           }
-   
-           const data = await this.service.reativarUsuario(id);
-           return CommonResponse.success(res, data, 200, 'Usuario reativado com sucesso.');
+        console.log('Estou no reativarUsusario em UsuarioController');
+
+        const { id } = req.params || {};
+        this.validateId(id, 'id', 'reativar');
+
+        const data = await this.service.reativarUsuario(id);
+        return CommonResponse.success(res, data, 200, 'Usuario reativado com sucesso.');
     }
 
     async criarComSenha(req, res) {

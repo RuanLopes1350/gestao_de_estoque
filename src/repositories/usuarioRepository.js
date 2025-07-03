@@ -70,16 +70,11 @@ class UsuarioRepository {
     }
 
     async buscarPorMatricula(matricula, incluirSenha = false) {
-        try {
-            const query = { matricula };
-            if (incluirSenha) {
-                return await this.model.findOne(query).select('+senha');
-            }
-            return await this.model.findOne(query);
-        } catch (error) {
-            console.error('Erro ao buscar usuário por matrícula:', error);
-            throw error;
+        const query = { matricula };
+        if (incluirSenha) {
+            return await this.model.findOne(query).select('+senha');
         }
+        return await this.model.findOne(query);
     }
 
     async cadastrarUsuario(dadosUsuario) {
