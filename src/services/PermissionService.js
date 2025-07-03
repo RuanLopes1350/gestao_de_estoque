@@ -98,58 +98,53 @@ class PermissionService {
      * @returns {Object} - Objeto com permissões organizadas
      */
     async getUserPermissions(userId) {
-        try {
-            const usuario = await this.Usuario.findById(userId)
-                .populate('grupos')
-                .lean();
+        const usuario = await this.Usuario.findById(userId)
+            .populate('grupos')
+            .lean();
 
-            if (!usuario) {
-                throw new CustomError({
-                    statusCode: 404,
-                    errorType: 'resourceNotFound',
-                    field: 'Usuário',
-                    details: [],
-                    customMessage: 'Usuário não encontrado'
-                });
-            }
-
-            const permissoesIndividuais = usuario.permissoes || [];
-            let permissoesGrupos = [];
-
-            if (usuario.grupos && usuario.grupos.length > 0) {
-                for (const grupo of usuario.grupos) {
-                    if (grupo.ativo && grupo.permissoes) {
-                        permissoesGrupos = permissoesGrupos.concat(
-                            grupo.permissoes.map(p => ({
-                                ...p,
-                                grupo: grupo.nome
-                            }))
-                        );
-                    }
-                }
-            }
-
-            const todasPermissoes = [...permissoesIndividuais, ...permissoesGrupos];
-            const permissoesUnicas = this.removerPermissoesDuplicadas(todasPermissoes);
-
-            return {
-                usuario: {
-                    id: usuario._id,
-                    nome: usuario.nome_usuario,
-                    email: usuario.email,
-                    perfil: usuario.perfil
-                },
-                grupos: usuario.grupos?.map(g => ({ id: g._id, nome: g.nome, ativo: g.ativo })) || [],
-                permissoes: {
-                    individuais: permissoesIndividuais,
-                    grupos: permissoesGrupos,
-                    efetivas: permissoesUnicas
-                }
-            };
-        } catch (error) {
-            console.error("Erro ao obter permissões do usuário:", error);
-            throw error;
+        if (!usuario) {
+            throw new CustomError({
+                statusCode: 404,
+                errorType: 'resourceNotFound',
+                field: 'Usuário',
+                details: [],
+                customMessage: 'Usuário não encontrado'
+            });
         }
+
+        const permissoesIndividuais = usuario.permissoes || [];
+        let permissoesGrupos = [];
+
+        if (usuario.grupos && usuario.grupos.length > 0) {
+            for (const grupo of usuario.grupos) {
+                if (grupo.ativo && grupo.permissoes) {
+                    permissoesGrupos = permissoesGrupos.concat(
+                        grupo.permissoes.map(p => ({
+                            ...p,
+                            grupo: grupo.nome
+                        }))
+                    );
+                }
+            }
+        }
+
+        const todasPermissoes = [...permissoesIndividuais, ...permissoesGrupos];
+        const permissoesUnicas = this.removerPermissoesDuplicadas(todasPermissoes);
+
+        return {
+            usuario: {
+                id: usuario._id,
+                nome: usuario.nome_usuario,
+                email: usuario.email,
+                perfil: usuario.perfil
+            },
+            grupos: usuario.grupos?.map(g => ({ id: g._id, nome: g.nome, ativo: g.ativo })) || [],
+            permissoes: {
+                individuais: permissoesIndividuais,
+                grupos: permissoesGrupos,
+                efetivas: permissoesUnicas
+            }
+        };
     }
 
     /**
