@@ -19,6 +19,21 @@ class MovimentacoesController {
     this.service = new MovimentacaoService();
   }
 
+  // Função utilitária para validação com erro customizado
+  validateId(id, fieldName = 'id', action = 'processar') {
+    if (!id) {
+      throw new CustomError({
+        statusCode: HttpStatusCodes.BAD_REQUEST.code,
+        errorType: 'validationError',
+        field: fieldName,
+        details: [],
+        customMessage: `ID da movimentação é obrigatório para ${action}.`
+      });
+    }
+    
+    MovimentacaoIdSchema.parse(id);
+  }
+
   async listarMovimentacoes(req, res) {
     console.log("Estou no listarMovimentacoes em MovimentacoesController");
 
@@ -187,27 +202,7 @@ class MovimentacoesController {
     console.log("Estou no deletarMovimentacao em MovimentacoesController");
 
     const { id } = req.params || {};
-    if (!id) {
-      throw new CustomError({
-        statusCode: HttpStatusCodes.BAD_REQUEST.code,
-        errorType: "validationError",
-        field: "id",
-        details: [],
-        customMessage: "ID da movimentação é obrigatório para deletar.",
-      });
-    }
-
-    try {
-      MovimentacaoIdSchema.parse(id);
-    } catch (error) {
-      throw new CustomError({
-        statusCode: HttpStatusCodes.BAD_REQUEST.code,
-        errorType: "validationError",
-        field: "id",
-        details: [],
-        customMessage: "ID da movimentação inválido.",
-      });
-    }
+    this.validateId(id, 'id', 'deletar');
 
     const data = await this.service.deletarMovimentacao(id);
     return CommonResponse.success(
@@ -297,27 +292,7 @@ class MovimentacoesController {
       console.log('Estou no desativarMovimentacao em MovimentacoesController');
       
       const { id } = req.params || {};
-      if (!id) {
-          throw new CustomError({
-              statusCode: HttpStatusCodes.BAD_REQUEST.code,
-              errorType: 'validationError',
-              field: 'id',
-              details: [],
-              customMessage: 'ID da movimentação é obrigatório para desativar.'
-          });
-      }
-
-      try {
-        MovimentacaoIdSchema.parse(id);
-      } catch (error) {
-          throw new CustomError({
-              statusCode: HttpStatusCodes.BAD_REQUEST.code,
-              errorType: 'validationError',
-              field: 'id',
-              details: [],
-              customMessage: 'ID da movimentação inválido.'
-          });
-      }
+      this.validateId(id, 'id', 'desativar');
 
       const data = await this.service.desativarMovimentacao(id);
       return CommonResponse.success(res, data, 200, 'movimentação desativada com sucesso.');
@@ -327,31 +302,11 @@ class MovimentacoesController {
     console.log('Estou no reativarMovimentacao em MovimentacoesController');
     
     const { id } = req.params || {};
-    if (!id) {
-        throw new CustomError({
-            statusCode: HttpStatusCodes.BAD_REQUEST.code,
-            errorType: 'validationError',
-            field: 'id',
-            details: [],
-            customMessage: 'ID da movimentação é obrigatório para desativar.'
-        });
-    }
-
-    try {
-      MovimentacaoIdSchema.parse(id);
-    } catch (error) {
-        throw new CustomError({
-            statusCode: HttpStatusCodes.BAD_REQUEST.code,
-            errorType: 'validationError',
-            field: 'id',
-            details: [],
-            customMessage: 'ID da movimentação inválido.'
-        });
-    }
+    this.validateId(id, 'id', 'reativar');
 
     const data = await this.service.reativarMovimentacao(id);
     return CommonResponse.success(res, data, 200, 'movimentação reativada com sucesso.');
-}
+  }
 }
 
 export default MovimentacoesController;
