@@ -6,7 +6,7 @@
  - 
  - Teste Movimentações (André Porto)
  - Teste de Endpoint Usuarios (Henrique Zorzi)
- - Swagger (Ruan Lopez)
+ - Swagger (Ruan Lopes)
  - Ajuste de Documentação (Henrique Zorzi)
- - Implementando envio de e-mail (Ruan Lopez)
+ - Implementando envio de e-mail (Ruan Lopes)
  - Apresentação (Henrique Zorzi)
