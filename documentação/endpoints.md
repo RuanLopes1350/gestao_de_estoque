@@ -20,10 +20,13 @@
   "refreshToken": "refresh_token_here",
   "usuario": {
     "id": "60d5ecb74f8e4b2b3c8d6e7f",
-    "nome": "Administrador",
+    "nome_usuario": "Administrador",
     "email": "admin@teste.com",
-    "tipoUsuario": "administrador",
-    "online": true
+    "matricula": "ADM001",
+    "perfil": "administrador",
+    "ativo": true,
+    "online": true,
+    "grupos": []
   }
 }
 ```
@@ -62,12 +65,15 @@ Authorization: Bearer your_jwt_token
 **Request Body:**
 ```json
 {
-  "nome": "Pastilha de Freio Dianteira",
+  "nome_produto": "Pastilha de Freio Dianteira",
   "categoria": "Freios",
-  "codigo": "PF001",
+  "codigo_produto": "PF001",
   "preco": 89.90,
+  "custo": 45.00,
   "estoque": 25,
-  "fornecedor": "60d5ecb74f8e4b2b3c8d6e7f",
+  "estoque_min": 5,
+  "id_fornecedor": 1,
+  "marca": "Bosch",
   "descricao": "Pastilha de freio para veículos nacionais"
 }
 ```
@@ -81,18 +87,26 @@ Authorization: Bearer your_jwt_token
   "produtos": [
     {
       "id": "60d5ecb74f8e4b2b3c8d6e7f",
-      "nome": "Pastilha de Freio Dianteira",
+      "nome_produto": "Pastilha de Freio Dianteira",
       "categoria": "Freios",
-      "codigo": "PF001",
+      "codigo_produto": "PF001",
       "preco": 89.90,
+      "custo": 45.00,
       "estoque": 25,
-      "ativo": true,
-      "fornecedor": {
-        "nome": "Auto Peças Sul",
-        "cnpj": "12.345.678/0001-90"
-      }
+      "estoque_min": 5,
+      "status": true,
+      "id_fornecedor": 1,
+      "marca": "Bosch",
+      "descricao": "Pastilha de freio para veículos nacionais",
+      "data_cadastro": "2024-01-15T10:30:00.000Z"
     }
-  ]
+  ],
+  "pagination": {
+    "total": 1,
+    "page": 1,
+    "limit": 10,
+    "pages": 1
+  }
 }
 ```
 
@@ -103,16 +117,16 @@ Authorization: Bearer your_jwt_token
 `GET http://localhost:5011/api/produtos/estoque-baixo`
 
 ### Buscar Produtos
-`GET http://localhost:5011/api/produtos/busca?nome=freio`
+`GET http://localhost:5011/api/produtos/busca?nome_produto=freio`
 
 `GET http://localhost:5011/api/produtos/busca?categoria=Freios`
 
-`GET http://localhost:5011/api/produtos/busca?codigo=PF001`
+`GET http://localhost:5011/api/produtos/busca?codigo_produto=PF001`
 
-`GET http://localhost:5011/api/produtos/busca?fornecedor=Auto Peças Sul`
+`GET http://localhost:5011/api/produtos/busca?marca=Bosch`
 
 ### Atualizar Produto
-`PATCH http://localhost:5011/api/produtos/:matricula`
+`PATCH http://localhost:5011/api/produtos/:id`
 
 ### Desativar Produto
 `PATCH http://localhost:5011/api/produtos/desativar/:id`
@@ -131,11 +145,10 @@ Authorization: Bearer your_jwt_token
 **Request Body:**
 ```json
 {
-  "nome": "João Silva",
+  "nome_usuario": "João Silva",
   "email": "joao@teste.com",
-  "senha": "123456",
   "matricula": "USR001",
-  "tipoUsuario": "funcionario"
+  "perfil": "estoquista"
 }
 ```
 
@@ -148,14 +161,23 @@ Authorization: Bearer your_jwt_token
   "usuarios": [
     {
       "id": "60d5ecb74f8e4b2b3c8d6e7f",
-      "nome": "João Silva",
+      "nome_usuario": "João Silva",
       "email": "joao@teste.com",
       "matricula": "USR001",
-      "tipoUsuario": "funcionario",
+      "perfil": "estoquista",
       "ativo": true,
-      "online": false
+      "senha_definida": false,
+      "online": false,
+      "grupos": [],
+      "data_cadastro": "2024-01-15T10:30:00.000Z"
     }
-  ]
+  ],
+  "pagination": {
+    "total": 1,
+    "page": 1,
+    "limit": 10,
+    "pages": 1
+  }
 }
 ```
 
@@ -236,22 +258,33 @@ Authorization: Bearer your_jwt_token
   "movimentacoes": [
     {
       "id": "60d5ecb74f8e4b2b3c8d6e7f",
-      "produto": {
-        "nome": "Pastilha de Freio Dianteira",
-        "codigo": "PF001"
-      },
-      "tipo": "ENTRADA",
-      "quantidade": 10,
-      "valorUnitario": 89.90,
-      "valorTotal": 899.00,
-      "observacoes": "Reposição de estoque",
-      "usuario": {
-        "nome": "João Silva",
-        "matricula": "USR001"
-      },
-      "data": "2024-01-15T10:30:00.000Z"
+      "tipo": "entrada",
+      "destino": "Estoque Principal",
+      "data_movimentacao": "2024-01-15T10:30:00.000Z",
+      "id_usuario": "60d5ecb74f8e4b2b3c8d6e7f",
+      "nome_usuario": "João Silva",
+      "status": true,
+      "produtos": [
+        {
+          "id_produto": 1,
+          "codigo_produto": "PF001",
+          "nome_produto": "Pastilha de Freio Dianteira",
+          "quantidade_produtos": 10,
+          "preco": 89.90,
+          "custo": 45.00,
+          "id_fornecedor": 1,
+          "nome_fornecedor": "Auto Peças Sul"
+        }
+      ],
+      "data_cadastro": "2024-01-15T10:30:00.000Z"
     }
-  ]
+  ],
+  "pagination": {
+    "total": 1,
+    "page": 1,
+    "limit": 10,
+    "pages": 1
+  }
 }
 ```
 
@@ -261,11 +294,20 @@ Authorization: Bearer your_jwt_token
 **Request Body:**
 ```json
 {
-  "produtoId": "60d5ecb74f8e4b2b3c8d6e7f",
-  "tipo": "ENTRADA",
-  "quantidade": 10,
-  "valorUnitario": 89.90,
-  "observacoes": "Reposição de estoque"
+  "tipo": "entrada",
+  "destino": "Estoque Principal",
+  "produtos": [
+    {
+      "id_produto": 1,
+      "codigo_produto": "PF001",
+      "nome_produto": "Pastilha de Freio Dianteira", 
+      "quantidade_produtos": 10,
+      "preco": 89.90,
+      "custo": 45.00,
+      "id_fornecedor": 1,
+      "nome_fornecedor": "Auto Peças Sul"
+    }
+  ]
 }
 ```
 
@@ -273,9 +315,11 @@ Authorization: Bearer your_jwt_token
 `GET http://localhost:5011/api/movimentacoes/:id`
 
 ### Buscar Movimentações
-`GET http://localhost:5011/api/movimentacoes/busca?produto=Pastilha`
+`GET http://localhost:5011/api/movimentacoes/busca?nome_produto=Pastilha`
 
-`GET http://localhost:5011/api/movimentacoes/busca?tipo=ENTRADA`
+`GET http://localhost:5011/api/movimentacoes/busca?tipo=entrada`
+
+`GET http://localhost:5011/api/movimentacoes/busca?nome_usuario=João`
 
 ### Filtro Avançado de Movimentações
 `GET http://localhost:5011/api/movimentacoes/filtro?dataInicio=2024-01-01&dataFim=2024-01-31&tipo=SAIDA`
@@ -285,6 +329,83 @@ Authorization: Bearer your_jwt_token
 
 ### Deletar Movimentação
 `DELETE http://localhost:5011/api/movimentacoes/:id`
+
+## GRUPOS E PERMISSÕES
+
+### Listar Grupos
+`GET http://localhost:5011/api/grupos`
+
+**Headers:**
+```
+Authorization: Bearer your_jwt_token
+```
+
+**Response (200):**
+```json
+{
+  "grupos": [
+    {
+      "id": "60d5ecb74f8e4b2b3c8d6e7f",
+      "nome_grupo": "Vendedores",
+      "descricao": "Grupo para vendedores",
+      "ativo": true,
+      "permissoes": [
+        {
+          "rota": "/api/produtos",
+          "metodos": ["GET"],
+          "dominio": "localhost"
+        }
+      ],
+      "data_cadastro": "2024-01-15T10:30:00.000Z"
+    }
+  ]
+}
+```
+
+### Criar Grupo
+`POST http://localhost:5011/api/grupos`
+
+**Request Body:**
+```json
+{
+  "nome_grupo": "Vendedores",
+  "descricao": "Grupo para equipe de vendas",
+  "permissoes": [
+    {
+      "rota": "/api/produtos",
+      "metodos": ["GET"],
+      "dominio": "localhost"
+    },
+    {
+      "rota": "/api/movimentacoes",
+      "metodos": ["POST"],
+      "dominio": "localhost"
+    }
+  ]
+}
+```
+
+### Buscar Grupo por ID
+`GET http://localhost:5011/api/grupos/:id`
+
+### Atualizar Grupo
+`PATCH http://localhost:5011/api/grupos/:id`
+
+### Deletar Grupo
+`DELETE http://localhost:5011/api/grupos/:id`
+
+### Adicionar Usuário ao Grupo
+`POST http://localhost:5011/api/grupos/:id/usuarios`
+
+**Request Body:**
+```json
+{
+  "usuario_id": "60d5ecb74f8e4b2b3c8d6e7f"
+}
+```
+
+### Remover Usuário do Grupo
+`DELETE http://localhost:5011/api/grupos/:id/usuarios/:usuario_id`
 
 ## LOGS E SESSÕES
 
@@ -302,10 +423,10 @@ Authorization: Bearer your_jwt_token
   "usuariosOnline": [
     {
       "id": "60d5ecb74f8e4b2b3c8d6e7f",
-      "nome": "João Silva",
+      "nome_usuario": "João Silva",
       "email": "joao@teste.com",
       "matricula": "USR001",
-      "tipoUsuario": "funcionario",
+      "perfil": "estoquista",
       "online": true
     }
   ],

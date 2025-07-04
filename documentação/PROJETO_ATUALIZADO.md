@@ -253,6 +253,8 @@ A metodologia adotada foi o **Scrum**, com adaptações para o contexto acadêmi
 |RF-013 |Rastrear histórico de movimentações|O sistema deve manter histórico completo de todas as movimentações|✅ Implementado|
 |RF-014 |Associar produtos a fornecedores|O sistema deve permitir vincular produtos aos seus respectivos fornecedores|✅ Implementado|
 |RF-015 |Controlar acesso por perfil|O sistema deve restringir funcionalidades baseado no perfil do usuário (Administrador, Gerente, Estoquista)|✅ Implementado|
+|RF-016 |Sistema de logs e auditoria|O sistema deve registrar todas as operações para auditoria|✅ Implementado|
+|RF-017 |Gerenciar grupos de permissões|O sistema deve permitir criar e gerenciar grupos de permissões personalizados|✅ Implementado|
 
 ## Requisitos Não Funcionais
 
