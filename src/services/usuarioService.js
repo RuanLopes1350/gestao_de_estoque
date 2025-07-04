@@ -18,7 +18,7 @@ class UsuarioService {
 
     async cadastrarUsuario(dadosUsuario) {
         console.log('Estou no cadastrarUsuario em UsuarioService');
-        
+
         if (!dadosUsuario.data_cadastro) {
             dadosUsuario.data_cadastro = new Date();
         }
@@ -113,26 +113,23 @@ class UsuarioService {
         return usuario;
     }
 
-    async deletarUsuario(id) {
+    async deletarUsuario(matricula) {
         console.log('Estou no deletarUsuario em UsuarioService');
 
-        if (!mongoose.Types.ObjectId.isValid(id)) {
+        if (!matricula) {
             throw new CustomError({
                 statusCode: HttpStatusCodes.BAD_REQUEST.code,
                 errorType: 'validationError',
-                field: 'id',
+                field: 'matricula',
                 details: [],
-                customMessage: 'ID do usuário inválido.'
+                customMessage: 'Matrícula do usuário é obrigatória.'
             });
         }
 
-        // Verificar se o usuário existe antes de tentar deletar
-        await this.buscarUsuarioPorID(id);
-
-        const data = await this.repository.deletarUsuario(id);
+        const data = await this.repository.deletarUsuario(matricula);
         return data;
     }
-    
+
 
     async desativarUsuario(id) {
         console.log('Estou no desativarUsuario em UsuarioService');
@@ -142,7 +139,7 @@ class UsuarioService {
     }
 
     async reativarUsuario(id) {
-        console.log('Estou no reativarUsuario em UsuarioService'); 
+        console.log('Estou no reativarUsuario em UsuarioService');
 
         const data = await this.repository.reativarUsuario(id);
         return data;
@@ -158,7 +155,7 @@ class UsuarioService {
         if (dadosUsuario.senha && !dadosUsuario.senha.startsWith('$2')) {
             dadosUsuario.senha = await bcrypt.hash(dadosUsuario.senha, 10);
         }
-        
+
         // Se não há senha, define que a senha não foi definida
         if (!dadosUsuario.senha) {
             dadosUsuario.senha_definida = false;
@@ -226,7 +223,7 @@ class UsuarioService {
 
         // Adicionar o grupo ao usuário
         const gruposAtualizados = usuario.grupos ? [...usuario.grupos, grupoId] : [grupoId];
-        
+
         return await this.repository.atualizarUsuario(usuarioId, {
             grupos: gruposAtualizados
         });
@@ -263,7 +260,7 @@ class UsuarioService {
 
         // Remover o grupo do usuário
         const gruposAtualizados = usuario.grupos.filter(g => g.toString() !== grupoId);
-        
+
         return await this.repository.atualizarUsuario(usuarioId, {
             grupos: gruposAtualizados
         });
@@ -288,8 +285,8 @@ class UsuarioService {
         }
 
         // Verificar se a permissão já existe
-        const permissaoExiste = usuario.permissoes && usuario.permissoes.some(p => 
-            p.rota === permissao.rota.toLowerCase() && 
+        const permissaoExiste = usuario.permissoes && usuario.permissoes.some(p =>
+            p.rota === permissao.rota.toLowerCase() &&
             p.dominio === (permissao.dominio || 'localhost')
         );
 
@@ -335,8 +332,8 @@ class UsuarioService {
         }
 
         // Filtrar as permissões removendo a especificada
-        const permissoesAtualizadas = usuario.permissoes ? 
-            usuario.permissoes.filter(p => 
+        const permissoesAtualizadas = usuario.permissoes ?
+            usuario.permissoes.filter(p =>
                 !(p.rota === rota.toLowerCase() && p.dominio === dominio)
             ) : [];
 
@@ -363,7 +360,7 @@ class UsuarioService {
     async obterPermissoesUsuario(usuarioId) {
         const PermissionService = (await import('./PermissionService.js')).default;
         const permissionService = new PermissionService();
-        
+
         return await permissionService.getUserPermissions(usuarioId);
     }
 
@@ -373,7 +370,7 @@ class UsuarioService {
      */
     async validarGrupos(gruposIds) {
         const Grupo = mongoose.model('grupos');
-        
+
         for (const grupoId of gruposIds) {
             if (!mongoose.Types.ObjectId.isValid(grupoId)) {
                 throw new CustomError({
@@ -414,10 +411,10 @@ class UsuarioService {
      */
     async validarPermissoes(permissoes) {
         const Rota = mongoose.model('rotas');
-        
+
         for (const permissao of permissoes) {
             // Verificar se a rota existe no sistema
-            const rota = await Rota.findOne({ 
+            const rota = await Rota.findOne({
                 rota: permissao.rota.toLowerCase(),
                 dominio: permissao.dominio || 'localhost'
             });

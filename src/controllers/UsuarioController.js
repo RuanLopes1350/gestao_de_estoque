@@ -21,7 +21,7 @@ class UsuarioController {
                 customMessage: `ID do usuário é obrigatório para ${action}.`
             });
         }
-        
+
         UsuarioIdSchema.parse(id);
     }
 
@@ -55,7 +55,7 @@ class UsuarioController {
         return CommonResponse.success(res, data);
     }
 
-    async buscarUsuarioPorID(req, res) { 
+    async buscarUsuarioPorID(req, res) {
         console.log('Estou no buscarUsuarioPorID em UsuarioController');
 
         const { id } = req.params || {};
@@ -87,25 +87,25 @@ class UsuarioController {
         console.log('Estou no cadastrarUsuario em UsuarioController');
 
         const parsedData = UsuarioSchema.parse(req.body);
-        
+
         // Se não há senha, será criado usuário para definir senha no primeiro login
         if (!parsedData.senha) {
             console.log('Criando usuário sem senha - será enviado código de segurança');
-            
+
             // Gerar código de segurança (6 dígitos)
             const codigoSeguranca = Math.random().toString().slice(2, 8);
-            
+
             // Definir expiração do código (24 horas)
             const dataExpiracao = new Date();
             dataExpiracao.setHours(dataExpiracao.getHours() + 24);
-            
+
             // Preparar dados do usuário sem senha
             parsedData.senha = null;
             parsedData.ativo = false; // Usuário inativo até definir senha
             parsedData.codigo_recuperacao = codigoSeguranca;
             parsedData.data_expiracao_codigo = dataExpiracao;
             parsedData.senha_definida = false;
-            
+
             const data = await this.service.cadastrarUsuario(parsedData);
 
             // Tentar enviar email de primeiro acesso
@@ -122,7 +122,7 @@ class UsuarioController {
             }, req);
 
             // Resposta baseada no resultado do envio do email
-            const responseMessage = emailResult.sentViaEmail 
+            const responseMessage = emailResult.sentViaEmail
                 ? `Usuário cadastrado com sucesso! Código de acesso enviado para ${data.email}. Código: ${codigoSeguranca}`
                 : `Usuário cadastrado com sucesso. Código de segurança: ${codigoSeguranca}`;
 
@@ -199,10 +199,18 @@ class UsuarioController {
     async deletarUsuario(req, res) {
         console.log('Estou no deletarUsuario em UsuarioController');
 
-        const { id } = req.params || {};
-        this.validateId(id, 'id', 'deletar');
+        const { matricula } = req.params; // Certifique-se de usar 'matricula'
+        if (!matricula) {
+            throw new CustomError({
+                statusCode: HttpStatusCodes.BAD_REQUEST.code,
+                errorType: 'validationError',
+                field: 'matricula',
+                details: [],
+                customMessage: 'Matrícula do usuário é obrigatória.'
+            });
+        }
 
-        const data = await this.service.deletarUsuario(id);
+        const data = await this.service.deletarUsuario(matricula);
         return CommonResponse.success(res, data, 200, 'Usuário excluído com sucesso.');
     }
 
