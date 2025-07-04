@@ -1,4 +1,5 @@
 import UsuarioService from "../services/usuarioService.js";
+import EmailService from "../services/EmailService.js";
 import { CommonResponse, CustomError, HttpStatusCodes } from "../utils/helpers/index.js";
 import { UsuarioSchema, UsuarioUpdateSchema } from "../utils/validators/schemas/zod/UsuarioSchema.js";
 import { UsuarioQuerySchema, UsuarioIdSchema, UsuarioMatriculaSchema } from "../utils/validators/schemas/zod/querys/UsuarioQuerySchema.js";
@@ -7,6 +8,21 @@ import LogMiddleware from '../middlewares/LogMiddleware.js';
 class UsuarioController {
     constructor() {
         this.service = new UsuarioService();
+    }
+
+    // Função utilitária para validação com erro customizado
+    validateId(id, fieldName = 'id', action = 'processar') {
+        if (!id) {
+            throw new CustomError({
+                statusCode: HttpStatusCodes.BAD_REQUEST.code,
+                errorType: 'validationError',
+                field: fieldName,
+                details: [],
+                customMessage: `ID do usuário é obrigatório para ${action}.`
+            });
+        }
+
+        UsuarioIdSchema.parse(id);
     }
 
     async listarUsuarios(req, res) {
@@ -39,7 +55,7 @@ class UsuarioController {
         return CommonResponse.success(res, data);
     }
 
-    async buscarUsuarioPorID(req, res) { 
+    async buscarUsuarioPorID(req, res) {
         console.log('Estou no buscarUsuarioPorID em UsuarioController');
 
         const { id } = req.params || {};
@@ -71,26 +87,29 @@ class UsuarioController {
         console.log('Estou no cadastrarUsuario em UsuarioController');
 
         const parsedData = UsuarioSchema.parse(req.body);
-        
+
         // Se não há senha, será criado usuário para definir senha no primeiro login
         if (!parsedData.senha) {
             console.log('Criando usuário sem senha - será enviado código de segurança');
-            
+
             // Gerar código de segurança (6 dígitos)
             const codigoSeguranca = Math.random().toString().slice(2, 8);
-            
+
             // Definir expiração do código (24 horas)
             const dataExpiracao = new Date();
             dataExpiracao.setHours(dataExpiracao.getHours() + 24);
-            
+
             // Preparar dados do usuário sem senha
             parsedData.senha = null;
             parsedData.ativo = false; // Usuário inativo até definir senha
             parsedData.codigo_recuperacao = codigoSeguranca;
             parsedData.data_expiracao_codigo = dataExpiracao;
             parsedData.senha_definida = false;
-            
+
             const data = await this.service.cadastrarUsuario(parsedData);
+
+            // Tentar enviar email de primeiro acesso
+            const emailResult = await EmailService.enviarCodigoCadastro(data, codigoSeguranca);
 
             // Registra evento crítico de criação de usuário sem senha
             LogMiddleware.logCriticalEvent(req.userId, 'USUARIO_CRIADO_SEM_SENHA', {
@@ -98,15 +117,27 @@ class UsuarioController {
                 matricula: data.matricula,
                 perfil: data.perfil,
                 criado_por: req.userMatricula,
-                codigo_gerado: true // Não logamos o código por segurança
+                codigo_gerado: true,
+                email_enviado: emailResult.sentViaEmail
             }, req);
+
+            // Resposta baseada no resultado do envio do email
+            const responseMessage = emailResult.sentViaEmail
+                ? `Usuário cadastrado com sucesso! Código de acesso enviado para ${data.email}. Código: ${codigoSeguranca}`
+                : `Usuário cadastrado com sucesso. Código de segurança: ${codigoSeguranca}`;
+
+            const responseInstructions = emailResult.sentViaEmail
+                ? `O usuário deve verificar o email ${data.email} para encontrar o código de acesso e a matrícula ${data.matricula}. Código também disponível aqui para referência.`
+                : `O usuário deve usar este código na endpoint '/auth/redefinir-senha/codigo' para definir sua senha. Código válido por 24 horas.`;
 
             return CommonResponse.created(
                 res,
                 {
                     ...data.toObject(),
-                    message: `Usuário cadastrado com sucesso. Código de segurança gerado: ${codigoSeguranca}`,
-                    instrucoes: "O usuário deve usar este código na endpoint '/auth/redefinir-senha/codigo' para definir sua senha. Código válido por 24 horas."
+                    message: responseMessage,
+                    instrucoes: responseInstructions,
+                    email_enviado: emailResult.sentViaEmail,
+                    motivo_email_nao_enviado: emailResult.sentViaEmail ? null : emailResult.reason
                 },
                 HttpStatusCodes.CREATED.code,
                 'Usuário cadastrado com sucesso sem senha.'
@@ -168,91 +199,39 @@ class UsuarioController {
     async deletarUsuario(req, res) {
         console.log('Estou no deletarUsuario em UsuarioController');
 
-        const { id } = req.params || {};
-        if (!id) {
+        const { matricula } = req.params; // Certifique-se de usar 'matricula'
+        if (!matricula) {
             throw new CustomError({
                 statusCode: HttpStatusCodes.BAD_REQUEST.code,
                 errorType: 'validationError',
-                field: 'id',
+                field: 'matricula',
                 details: [],
-                customMessage: 'ID do usuário é obrigatório para deletar.'
+                customMessage: 'Matrícula do usuário é obrigatória.'
             });
         }
 
-        try {
-            UsuarioIdSchema.parse(id);
-        } catch (error) {
-            throw new CustomError({
-                statusCode: HttpStatusCodes.BAD_REQUEST.code,
-                errorType: 'validationError',
-                field: 'id',
-                details: [],
-                customMessage: 'ID do usuário inválido.'
-            });
-        }
-
-        const data = await this.service.deletarUsuario(id);
+        const data = await this.service.deletarUsuario(matricula);
         return CommonResponse.success(res, data, 200, 'Usuário excluído com sucesso.');
     }
 
     async desativarUsuario(req, res) {
-           console.log('Estou no desativarUsusario em UsuarioController');
-   
-           const { id } = req.params || {};
-           if (!id) {
-               throw new CustomError({
-                   statusCode: HttpStatusCodes.BAD_REQUEST.code,
-                   errorType: 'validationError',
-                   field: 'id',
-                   details: [],
-                   customMessage: 'ID do usuario é obrigatório para desativar.'
-               });
-           }
-   
-           try {
-               UsuarioIdSchema.parse(id);
-           } catch (error) {
-               throw new CustomError({
-                   statusCode: HttpStatusCodes.BAD_REQUEST.code,
-                   errorType: 'validationError',
-                   field: 'id',
-                   details: [],
-                   customMessage: 'ID do usuario inválido.'
-               });
-           }
-   
-           const data = await this.service.desativarUsuario(id);
-           return CommonResponse.success(res, data, 200, 'Usuario desativado com sucesso.');
+        console.log('Estou no desativarUsusario em UsuarioController');
+
+        const { id } = req.params || {};
+        this.validateId(id, 'id', 'desativar');
+
+        const data = await this.service.desativarUsuario(id);
+        return CommonResponse.success(res, data, 200, 'Usuario desativado com sucesso.');
     }
 
     async reativarUsuario(req, res) {
-           console.log('Estou no reativarUsusario em UsuarioController');
-   
-           const { id } = req.params || {};
-           if (!id) {
-               throw new CustomError({
-                   statusCode: HttpStatusCodes.BAD_REQUEST.code,
-                   errorType: 'validationError',
-                   field: 'id',
-                   details: [],
-                   customMessage: 'ID do usuario é obrigatório para reativar.'
-               });
-           }
-   
-           try {
-               UsuarioIdSchema.parse(id);
-           } catch (error) {
-               throw new CustomError({
-                   statusCode: HttpStatusCodes.BAD_REQUEST.code,
-                   errorType: 'validationError',
-                   field: 'id',
-                   details: [],
-                   customMessage: 'ID do usuario inválido.'
-               });
-           }
-   
-           const data = await this.service.reativarUsuario(id);
-           return CommonResponse.success(res, data, 200, 'Usuario reativado com sucesso.');
+        console.log('Estou no reativarUsusario em UsuarioController');
+
+        const { id } = req.params || {};
+        this.validateId(id, 'id', 'reativar');
+
+        const data = await this.service.reativarUsuario(id);
+        return CommonResponse.success(res, data, 200, 'Usuario reativado com sucesso.');
     }
 
     async criarComSenha(req, res) {

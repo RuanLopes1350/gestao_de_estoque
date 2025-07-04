@@ -1,0 +1,31 @@
+services:
+  mongodb:
+    container_name: mongodb
+    image: mongo:latest
+    volumes:
+      - vol-mongodb:/data/db
+    ports:
+      - "27017:27017"
+    networks:
+      - app-network
+
+  api:
+    container_name: gestao-de-estoque-api
+    build: ./
+    depends_on:
+      - mongodb
+    environment:
+      - DB_URL=mongodb://mongodb:27017/gerenciarEstoque
+      - APP_PORT=5011
+      - NODE_ENV=production
+    ports:
+      - "5011:5011"
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge
+
+volumes:
+  vol-mongodb:

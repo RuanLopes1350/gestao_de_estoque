@@ -11,123 +11,118 @@ class MovimentacaoRepository {
   async listarMovimentacoes(req) {
     console.log("Estou no listarMovimentacoes em MovimentacaoRepository");
 
-    try {
-      const id = req.params ? req.params.id : null;
+    const id = req.params ? req.params.id : null;
 
-      if (id) {
-        if (!mongoose.Types.ObjectId.isValid(id)) {
+    if (id) {
+      if (!mongoose.Types.ObjectId.isValid(id)) {
+        throw new CustomError({
+          statusCode: 400,
+          errorType: "validationError",
+          field: "id",
+          details: [],
+          customMessage: "ID da movimentação inválido",
+        });
+      }
+
+      // Ajuste aqui para tratar possíveis erros de referência
+      try {
+        const data = await this.model
+          .findById(id)
+          .populate("id_usuario", "nome_usuario");
+
+        if (!data) {
           throw new CustomError({
-            statusCode: 400,
-            errorType: "validationError",
-            field: "id",
+            statusCode: 404,
+            errorType: "resourceNotFound",
+            field: "Movimentacao",
             details: [],
-            customMessage: "ID da movimentação inválido",
+            customMessage: messages.error.resourceNotFound("Movimentação"),
           });
         }
 
-        // Ajuste aqui para tratar possíveis erros de referência
-        try {
-          const data = await this.model
-            .findById(id)
-            .populate("id_usuario", "nome_usuario");
+        return data;
+      } catch (populateError) {
+        console.error("Erro ao popular referências:", populateError);
 
-          if (!data) {
-            throw new CustomError({
-              statusCode: 404,
-              errorType: "resourceNotFound",
-              field: "Movimentacao",
-              details: [],
-              customMessage: messages.error.resourceNotFound("Movimentação"),
-            });
-          }
-
-          return data;
-        } catch (populateError) {
-          console.error("Erro ao popular referências:", populateError);
-
-          // Tenta retornar sem o populate em caso de erro
-          const data = await this.model.findById(id);
-          if (!data) {
-            throw new CustomError({
-              statusCode: 404,
-              errorType: "resourceNotFound",
-              field: "Movimentacao",
-              details: [],
-              customMessage: messages.error.resourceNotFound("Movimentação"),
-            });
-          }
-          return data;
+        // Tenta retornar sem o populate em caso de erro
+        const data = await this.model.findById(id);
+        if (!data) {
+          throw new CustomError({
+            statusCode: 404,
+            errorType: "resourceNotFound",
+            field: "Movimentacao",
+            details: [],
+            customMessage: messages.error.resourceNotFound("Movimentação"),
+          });
         }
+        return data;
       }
+    }
 
-      // Para busca por filtros
-      const {
-        tipo,
-        data_inicio,
-        data_fim,
-        produto,
-        usuario,
-        page = 1,
-      } = req.query || {};
+    // Para busca por filtros
+    const {
+      tipo,
+      data_inicio,
+      data_fim,
+      produto,
+      usuario,
+      page = 1,
+    } = req.query || {};
 
-      const limite = Math.min(parseInt(req.query?.limite, 10) || 10, 100);
+    const limite = Math.min(parseInt(req.query?.limite, 10) || 10, 100);
 
-      const filtros = {};
+    const filtros = {};
 
-      if (tipo) {
-        filtros.tipo = tipo;
-        console.log(`Aplicando filtro por tipo: "${tipo}"`);
-      }
+    if (tipo) {
+      filtros.tipo = tipo;
+      console.log(`Aplicando filtro por tipo: "${tipo}"`);
+    }
 
-      if (data_inicio && data_fim) {
-        filtros.data_movimentacao = {
-          $gte: new Date(data_inicio),
-          $lte: new Date(data_fim),
-        };
-        console.log(
-          `Aplicando filtro por período: de ${data_inicio} até ${data_fim}`
-        );
-      }
+    if (data_inicio && data_fim) {
+      filtros.data_movimentacao = {
+        $gte: new Date(data_inicio),
+        $lte: new Date(data_fim),
+      };
+      console.log(
+        `Aplicando filtro por período: de ${data_inicio} até ${data_fim}`
+      );
+    }
 
-      // Restante do código de filtros...
+    // Restante do código de filtros...
 
+    const options = {
+      page: parseInt(page, 10),
+      limit: parseInt(limite, 10),
+      sort: { data_movimentacao: -1 },
+      // Opções de populate simplificadas para reduzir dependências
+      populate: [
+        { path: "id_usuario", select: "nome_usuario email" },
+        {
+          path: "produtos.produto_ref",
+          select: "nome_produto codigo_produto quantidade_estoque",
+        },
+      ],
+    };
+
+    console.log("Filtros aplicados:", filtros);
+
+    try {
+      const resultado = await this.model.paginate(filtros, options);
+      console.log(`Encontradas ${resultado.docs?.length || 0} movimentações`);
+      return resultado;
+    } catch (paginateError) {
+      console.error("Erro ao paginar movimentações:", paginateError);
+
+      // Fallback sem populate em caso de erro
       const options = {
         page: parseInt(page, 10),
         limit: parseInt(limite, 10),
         sort: { data_movimentacao: -1 },
-        // Opções de populate simplificadas para reduzir dependências
-        populate: [
-          { path: "id_usuario", select: "nome_usuario email" },
-          {
-            path: "produtos.produto_ref",
-            select: "nome_produto codigo_produto quantidade_estoque",
-          },
-        ],
+        populate: false,
       };
 
-      console.log("Filtros aplicados:", filtros);
-
-      try {
-        const resultado = await this.model.paginate(filtros, options);
-        console.log(`Encontradas ${resultado.docs?.length || 0} movimentações`);
-        return resultado;
-      } catch (paginateError) {
-        console.error("Erro ao paginar movimentações:", paginateError);
-
-        // Fallback sem populate em caso de erro
-        const options = {
-          page: parseInt(page, 10),
-          limit: parseInt(limite, 10),
-          sort: { data_movimentacao: -1 },
-          populate: false,
-        };
-
-        const resultado = await this.model.paginate(filtros, options);
-        return resultado;
-      }
-    } catch (error) {
-      console.error("Erro em listarMovimentacoes:", error);
-      throw error;
+      const resultado = await this.model.paginate(filtros, options);
+      return resultado;
     }
   }
 
@@ -296,68 +291,63 @@ class MovimentacaoRepository {
       "Estou no filtrarMovimentacoesAvancado em MovimentacaoRepository"
     );
 
-    try {
-      const builder = new MovimentacaoFilterBuilder();
+    const builder = new MovimentacaoFilterBuilder();
 
-      // Aplicar filtros básicos
-      if (opcoesFiltro.tipo) builder.comTipo(opcoesFiltro.tipo);
-      if (opcoesFiltro.destino) builder.comDestino(opcoesFiltro.destino);
+    // Aplicar filtros básicos
+    if (opcoesFiltro.tipo) builder.comTipo(opcoesFiltro.tipo);
+    if (opcoesFiltro.destino) builder.comDestino(opcoesFiltro.destino);
 
-      // Filtros de data
-      if (opcoesFiltro.data) {
-        builder.comData(opcoesFiltro.data);
-      } else if (opcoesFiltro.dataInicio && opcoesFiltro.dataFim) {
-        builder.comPeriodo(opcoesFiltro.dataInicio, opcoesFiltro.dataFim);
-      } else {
-        if (opcoesFiltro.dataInicio)
-          builder.comDataApos(opcoesFiltro.dataInicio);
-        if (opcoesFiltro.dataFim) builder.comDataAntes(opcoesFiltro.dataFim);
-      }
-
-      // Filtros de usuário
-      if (opcoesFiltro.idUsuario) builder.comUsuarioId(opcoesFiltro.idUsuario);
-      if (opcoesFiltro.nomeUsuario)
-        builder.comUsuarioNome(opcoesFiltro.nomeUsuario);
-
-      // Filtros de produto
-      if (opcoesFiltro.idProduto) builder.comProdutoId(opcoesFiltro.idProduto);
-      if (opcoesFiltro.codigoProduto)
-        builder.comProdutoCodigo(opcoesFiltro.codigoProduto);
-      if (opcoesFiltro.nomeProduto)
-        builder.comProdutoNome(opcoesFiltro.nomeProduto);
-
-      // Filtros de fornecedor
-      if (opcoesFiltro.idFornecedor)
-        builder.comFornecedorId(opcoesFiltro.idFornecedor);
-      if (opcoesFiltro.nomeFornecedor)
-        builder.comFornecedorNome(opcoesFiltro.nomeFornecedor);
-
-      // Filtros de quantidade
-      if (opcoesFiltro.quantidadeMin !== undefined)
-        builder.comQuantidadeMinima(opcoesFiltro.quantidadeMin);
-      if (opcoesFiltro.quantidadeMax !== undefined)
-        builder.comQuantidadeMaxima(opcoesFiltro.quantidadeMax);
-
-      // Construir os filtros
-      const filtros = builder.build();
-      console.log("Filtros aplicados:", JSON.stringify(filtros, null, 2));
-
-      // Configurar paginação
-      const { page = 1, limite = 10 } = opcoesPaginacao;
-      const options = {
-        page: parseInt(page, 10),
-        limit: Math.min(parseInt(limite, 10), 100),
-        sort: { data_movimentacao: -1 },
-        populate: ["id_usuario", "produtos.produto_ref"],
-      };
-
-      const resultado = await this.model.paginate(filtros, options);
-      console.log(`Encontradas ${resultado.docs?.length || 0} movimentações`);
-      return resultado;
-    } catch (error) {
-      console.error("Erro ao filtrar movimentações:", error);
-      throw error;
+    // Filtros de data
+    if (opcoesFiltro.data) {
+      builder.comData(opcoesFiltro.data);
+    } else if (opcoesFiltro.dataInicio && opcoesFiltro.dataFim) {
+      builder.comPeriodo(opcoesFiltro.dataInicio, opcoesFiltro.dataFim);
+    } else {
+      if (opcoesFiltro.dataInicio)
+        builder.comDataApos(opcoesFiltro.dataInicio);
+      if (opcoesFiltro.dataFim) builder.comDataAntes(opcoesFiltro.dataFim);
     }
+
+    // Filtros de usuário
+    if (opcoesFiltro.idUsuario) builder.comUsuarioId(opcoesFiltro.idUsuario);
+    if (opcoesFiltro.nomeUsuario)
+      builder.comUsuarioNome(opcoesFiltro.nomeUsuario);
+
+    // Filtros de produto
+    if (opcoesFiltro.idProduto) builder.comProdutoId(opcoesFiltro.idProduto);
+    if (opcoesFiltro.codigoProduto)
+      builder.comProdutoCodigo(opcoesFiltro.codigoProduto);
+    if (opcoesFiltro.nomeProduto)
+      builder.comProdutoNome(opcoesFiltro.nomeProduto);
+
+    // Filtros de fornecedor
+    if (opcoesFiltro.idFornecedor)
+      builder.comFornecedorId(opcoesFiltro.idFornecedor);
+    if (opcoesFiltro.nomeFornecedor)
+      builder.comFornecedorNome(opcoesFiltro.nomeFornecedor);
+
+    // Filtros de quantidade
+    if (opcoesFiltro.quantidadeMin !== undefined)
+      builder.comQuantidadeMinima(opcoesFiltro.quantidadeMin);
+    if (opcoesFiltro.quantidadeMax !== undefined)
+      builder.comQuantidadeMaxima(opcoesFiltro.quantidadeMax);
+
+    // Construir os filtros
+    const filtros = builder.build();
+    console.log("Filtros aplicados:", JSON.stringify(filtros, null, 2));
+
+    // Configurar paginação
+    const { page = 1, limite = 10 } = opcoesPaginacao;
+    const options = {
+      page: parseInt(page, 10),
+      limit: Math.min(parseInt(limite, 10), 100),
+      sort: { data_movimentacao: -1 },
+      populate: ["id_usuario", "produtos.produto_ref"],
+    };
+
+    const resultado = await this.model.paginate(filtros, options);
+    console.log(`Encontradas ${resultado.docs?.length || 0} movimentações`);
+    return resultado;
   }
 
   async desativarMovimentacao(id){

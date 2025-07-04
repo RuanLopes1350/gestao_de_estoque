@@ -249,12 +249,8 @@ class ProdutoService {
             });
         }
 
-        try {
-            const data = await this.repository.deletarProduto(id);
-            return data;
-        } catch (error) {
-            throw error;
-        }
+        const data = await this.repository.deletarProduto(id);
+        return data;
     }
 
     async listarEstoqueBaixo() {

@@ -70,16 +70,11 @@ class UsuarioRepository {
     }
 
     async buscarPorMatricula(matricula, incluirSenha = false) {
-        try {
-            const query = { matricula };
-            if (incluirSenha) {
-                return await this.model.findOne(query).select('+senha');
-            }
-            return await this.model.findOne(query);
-        } catch (error) {
-            console.error('Erro ao buscar usuário por matrícula:', error);
-            throw error;
+        const query = { matricula };
+        if (incluirSenha) {
+            return await this.model.findOne(query).select('+senha');
         }
+        return await this.model.findOne(query);
     }
 
     async cadastrarUsuario(dadosUsuario) {
@@ -160,26 +155,27 @@ class UsuarioRepository {
     async deletarUsuario(matricula) {
         console.log('Estou no deletarUsuario em UsuarioRepository');
 
-        if (!mongoose.Types.ObjectId.isValid(matricula)) {
+        if (!matricula || typeof matricula !== 'string' || matricula.trim() === '') {
             throw new CustomError({
                 statusCode: 400,
                 errorType: 'validationError',
                 field: 'matricula',
                 details: [],
-                customMessage: 'Matricula do usuário inválido'
+                customMessage: 'Matrícula do usuário inválida'
             });
         }
 
-        const usuario = await this.model.findByIdAndDelete(matricula);
+        const usuario = await this.model.findOneAndDelete({ matricula });
         if (!usuario) {
             throw new CustomError({
                 statusCode: 404,
                 errorType: 'resourceNotFound',
-                field: 'Usuario',
+                field: 'matricula',
                 details: [],
-                customMessage: messages.error.resourceNotFound('Usuario')
+                customMessage: 'Usuário não encontrado'
             });
         }
+
         return usuario;
     }
     
