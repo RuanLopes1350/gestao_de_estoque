@@ -7,4 +7,4 @@ COPY package.json package-lock.json ./
 COPY . .
 #RUN cp .env.example .env
 
-ENTRYPOINT ["npm", "start"]
+ENTRYPOINT ["npm", "start"] 

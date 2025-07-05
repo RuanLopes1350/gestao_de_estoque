@@ -2,11 +2,11 @@
 services:
   mongodb:
     container_name: mongodb
-    image: mongo:8
+    image: mongo:8 
     volumes:
       - vol-mongodb:/data/db
     ports:
-      - 27017:27017
+      - 5011:5011
   api-exemplo:
     container_name: gestao-de-estoque
     build: ./
