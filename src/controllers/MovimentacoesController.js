@@ -174,8 +174,11 @@ class MovimentacoesController {
     console.log("Dados recebidos:", JSON.stringify(req.body, null, 2));
     console.log("ID da movimentação:", req.params.id);
 
-    const parsedData = await MovimentacaoSchema.parseAsync(req.body);
-    const data = await this.service.cadastrarMovimentacao(parsedData);
+    const { id } = req.params || {};
+    this.validateId(id, 'id', 'atualizar');
+
+    const parsedData = await MovimentacaoUpdateSchema.parseAsync(req.body);
+    const data = await this.service.atualizarMovimentacao(id, parsedData);
 
     // Registra evento crítico de movimentação de estoque
     LogMiddleware.logCriticalEvent(
@@ -190,11 +193,11 @@ class MovimentacoesController {
       req
     );
 
-    return CommonResponse.created(
+    return CommonResponse.success(
       res,
       data,
-      HttpStatusCodes.CREATED.code,
-      "Movimentação registrada com sucesso."
+      HttpStatusCodes.OK.code,
+      "Movimentação atualizada com sucesso."
     );
   }
 

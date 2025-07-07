@@ -333,6 +333,44 @@ Authorization: Bearer your_jwt_token
 ### Atualizar Movimentação
 `PATCH http://localhost:5011/api/movimentacoes/:id`
 
+### Desativar Movimentação
+`PATCH http://localhost:5011/api/movimentacoes/desativar/:id`
+
+**Response (200):**
+```json
+{
+  "error": false,
+  "code": 200,
+  "message": "movimentação desativada com sucesso.",
+  "data": {
+    "_id": "686c0e800599e7cc9ebcf0af",
+    "tipo": "entrada",
+    "destino": "Estoque Central",
+    "status": false,
+    "data_ultima_atualizacao": "2025-07-07T18:15:35.013Z"
+  }
+}
+```
+
+### Reativar Movimentação
+`PATCH http://localhost:5011/api/movimentacoes/reativar/:id`
+
+**Response (200):**
+```json
+{
+  "error": false,
+  "code": 200,
+  "message": "movimentação reativada com sucesso.",
+  "data": {
+    "_id": "686c0e800599e7cc9ebcf0af",
+    "tipo": "entrada",
+    "destino": "Estoque Central",
+    "status": true,
+    "data_ultima_atualizacao": "2025-07-07T18:22:02.741Z"
+  }
+}
+```
+
 ### Deletar Movimentação
 `DELETE http://localhost:5011/api/movimentacoes/:id`
 

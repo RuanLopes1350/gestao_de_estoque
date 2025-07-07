@@ -40,12 +40,7 @@ router
         asyncWrapper(movimentacoesController.buscarMovimentacaoPorID.bind(movimentacoesController))
     )
     
-    .patch(
-        '/:id',
-        LogMiddleware.log('ATUALIZACAO_MOVIMENTACAO'),
-        asyncWrapper(movimentacoesController.atualizarMovimentacao.bind(movimentacoesController))
-    )
-    
+    // Rotas específicas ANTES das rotas genéricas com parâmetros
     .patch(
         '/desativar/:id',
         LogMiddleware.log('DESATIVACAO_MOVIMENTACAO'),
@@ -56,6 +51,13 @@ router
         '/reativar/:id',
         LogMiddleware.log('REATIVACAO_MOVIMENTACAO'),
         asyncWrapper(movimentacoesController.reativarMovimentacao.bind(movimentacoesController))
+    )
+    
+    // Rota genérica por último
+    .patch(
+        '/:id',
+        LogMiddleware.log('ATUALIZACAO_MOVIMENTACAO'),
+        asyncWrapper(movimentacoesController.atualizarMovimentacao.bind(movimentacoesController))
     );
 
 
