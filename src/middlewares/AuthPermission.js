@@ -52,13 +52,15 @@ class AuthPermission {
 
       /**
        * 3. Determina a rota e o domínio da requisição
-       * Remove barras iniciais e finais, remove query strings e pega a primeira parte da URL
+       * Usa originalUrl para obter a URL completa e extrai a rota após /api/
        */
-      const urlPath = req.url.split('?')[0]; // Remove query string
+      const urlPath = req.originalUrl.split('?')[0]; // Remove query string
       const pathSegments = urlPath.split('/').filter(Boolean); // Remove elementos vazios
       
-      // A primeira parte da URL após o domínio é considerada a rota
-      const rotaReq = pathSegments[0] ? pathSegments[0].toLowerCase() : '';
+      // Para URLs como /api/produtos, pega 'produtos' (segundo segmento)
+      const rotaReq = pathSegments.length > 1 && pathSegments[0] === 'api' 
+        ? pathSegments[1].toLowerCase() 
+        : pathSegments[0] ? pathSegments[0].toLowerCase() : '';
       const dominioReq = 'localhost'; // Domínio configurado para desenvolvimento
 
       // 4. Busca a rota atual no banco de dados
