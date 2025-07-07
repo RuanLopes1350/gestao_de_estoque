@@ -185,9 +185,9 @@ class MovimentacoesController {
       req.userId,
       "ESTOQUE_MOVIMENTO",
       {
-        produto: parsedData.produto,
-        quantidade: parsedData.quantidade,
-        tipo_movimentacao: parsedData.tipo_movimentacao,
+        produtos: parsedData.produtos,
+        tipo: parsedData.tipo,
+        destino: parsedData.destino,
         movimentacao_id: data._id,
       },
       req
