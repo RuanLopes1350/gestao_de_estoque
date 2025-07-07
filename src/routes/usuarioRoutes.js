@@ -26,7 +26,7 @@ router
     
     // Rotas específicas antes das rotas com parâmetros
     .get(
-        "busca",
+        "/busca/:matricula",
         LogMiddleware.log('BUSCA_USUARIO_MATRICULA'),
         asyncWrapper(usuarioController.buscarUsuarioPorMatricula.bind(usuarioController))
     )

@@ -98,7 +98,7 @@ class UsuarioService {
             });
         }
 
-        const usuario = await this.repository.buscarUsuarioPorMatricula(matricula);
+        const usuario = await this.repository.buscarPorMatricula(matricula);
 
         if (!usuario) {
             throw new CustomError({
