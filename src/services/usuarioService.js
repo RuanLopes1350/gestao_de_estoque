@@ -70,7 +70,7 @@ class UsuarioService {
             });
         }
 
-        const data = await this.repository.buscarUsuarioPorID(id);
+        const data = await this.repository.buscarPorId(id);
 
         if (!data) {
             throw new CustomError({

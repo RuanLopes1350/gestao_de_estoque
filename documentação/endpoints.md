@@ -181,8 +181,11 @@ Authorization: Bearer your_jwt_token
 }
 ```
 
-### Buscar Usuário
-`GET http://localhost:5011/api/usuarios/:parametro`
+### Buscar Usuário por ID
+`GET http://localhost:5011/api/usuarios/:id`
+
+**Exemplo:**
+`GET http://localhost:5011/api/usuarios/686c08cb0deaf53dca07ea68`
 
 ### Buscar por Matrícula
 `GET http://localhost:5011/api/usuarios/busca/:matricula`

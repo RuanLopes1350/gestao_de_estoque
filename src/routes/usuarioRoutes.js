@@ -34,7 +34,7 @@ router
     
     // Rotas com parâmetros por último
     .get(
-        "/:matricula",
+        "/:id",
         LogMiddleware.log('CONSULTA_USUARIO'),
         asyncWrapper(usuarioController.buscarUsuarioPorID.bind(usuarioController))
     )
