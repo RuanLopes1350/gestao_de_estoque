@@ -60,11 +60,7 @@ export const MovimentacaoSchema = z.object({
     .min(3, {
       message: "Destino deve ter no mínimo 3 caracteres",
     }),
-  data_movimentacao: z
-    .union([z.date(), z.string().datetime()])
-    .transform((val) => (typeof val === "string" ? new Date(val) : val))
-    .optional()
-    .default(() => new Date()),
+  data_movimentacao: z.date().optional().default(() => new Date()),
   id_produto: z.string().refine(isValidObjectId, {
     message: "ID do produto inválido",
   }),
