@@ -45,6 +45,16 @@ const rotasPadrao = [
         excluir: true
     },
     {
+        rota: 'movimentacoes',
+        dominio: 'localhost',
+        ativo: true,
+        buscar: true,
+        enviar: true,
+        substituir: true,
+        modificar: true,
+        excluir: true
+    },
+    {
         rota: 'auth',
         dominio: 'localhost',
         ativo: true,
