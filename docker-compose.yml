@@ -10,7 +10,7 @@ services:
       - app-network
 
   api:
-    container_name: gestao-de-estoque-api
+    container_name: gestao-de-estoque
     build: ./
     depends_on:
       - mongodb
