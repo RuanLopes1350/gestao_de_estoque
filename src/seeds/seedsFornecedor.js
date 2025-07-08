@@ -12,7 +12,7 @@ async function seedFornecedor() {
             {
                 nome_fornecedor: 'Distribuidora Central Ltda',
                 cnpj: '12345678901234',
-                telefone: '(11) 1234-5678',
+                telefone: '1112345678',
                 email: 'contato@distribuidoracentral.com.br',
                 endereco: [{
                     logradouro: 'Av. Paulista, 1000',
@@ -25,7 +25,7 @@ async function seedFornecedor() {
             {
                 nome_fornecedor: 'Mercado Atacado Brasil',
                 cnpj: '98765432109876',
-                telefone: '(21) 9876-5432',
+                telefone: '2198765432',
                 email: 'vendas@atacadobrasil.com.br',
                 endereco: [{
                     logradouro: 'Rua das Mercadorias, 500',

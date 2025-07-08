@@ -70,7 +70,7 @@ class UsuarioService {
             });
         }
 
-        const data = await this.repository.buscarUsuarioPorID(id);
+        const data = await this.repository.buscarPorId(id);
 
         if (!data) {
             throw new CustomError({
@@ -98,7 +98,7 @@ class UsuarioService {
             });
         }
 
-        const usuario = await this.repository.buscarUsuarioPorMatricula(matricula);
+        const usuario = await this.repository.buscarPorMatricula(matricula);
 
         if (!usuario) {
             throw new CustomError({

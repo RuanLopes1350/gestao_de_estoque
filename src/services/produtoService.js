@@ -2,6 +2,7 @@ import ProdutoRepository from '../repositories/produtoRepository.js';
 import mongoose from 'mongoose';
 import { CustomError, HttpStatusCodes } from '../utils/helpers/index.js';
 import Produto from '../models/Produto.js';
+import { CategoriaHelper } from '../utils/categoriaHelper.js';
 
 class ProdutoService { 
     constructor() {
@@ -88,6 +89,11 @@ class ProdutoService {
             dadosProduto.status = true;
         }
 
+        // Calcular categoria automaticamente baseado no preço
+        if (dadosProduto.preco !== undefined) {
+            dadosProduto.categoria = CategoriaHelper.calcularCategoriaPorValor(dadosProduto.preco);
+        }
+
         const data = await this.repository.cadastrarProduto(dadosProduto);
         return data;
     }
@@ -103,6 +109,11 @@ class ProdutoService {
                 details: [],
                 customMessage: 'ID do produto inválido.'
             });
+        }
+
+        // Recalcular categoria se preço for alterado
+        if (dadosAtualizacao.preco !== undefined) {
+            dadosAtualizacao.categoria = CategoriaHelper.calcularCategoriaPorValor(dadosAtualizacao.preco);
         }
 
         const produtoAtualizado = await this.repository.atualizarProduto(id, dadosAtualizacao);

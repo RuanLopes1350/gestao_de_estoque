@@ -3,17 +3,21 @@ A tabela a seguir contém a relação dos Requisitos Funcionais elicitados, com 
 
 | IDENTIFICADOR | NOME | DESCRIÇÃO |
 :---|:---|:---|
-|RF-001 |O sistema deve permitir cadastro, edição e exclusão de peças|###################|
-|RF-002 |O sistema deve categorizar automaticamente as peças por valor|• Categoria A: R$1.001,00 até R$10.000,00 - Categoria B: R$500,00 até R$1.000,00 - Categoria C: R$0,00 até R$499,00|
-|RF-003 |O sistema deve registrar entrada e saída de peças do estoque|###################|
-|RF-004 |O sistema deve gerar alertas quando o estoque atingir níveis críticos|###################|
-|RF-005 |O sistema deve integrar-se com o sistema de PDV para registrar vendas|###################|
-|RF-006 |O sistema deve integrar-se com o sistema de notas fiscais para emissão de NF-e|###################|
-|RF-007 |O sistema deve atualizar o estoque automaticamente após cada venda|###################|
-|RF-008 |O sistema deve gerar relatórios de estoque atual|###################|
-|RF-009 |O sistema deve gerar relatórios de movimentação (entradas/saídas)|###################|
-|RF-010 |O sistema deve gerar relatórios de vendas por categoria de valor|###################|
-|RF-011 |O sistema deve gerar relatórios de vendas por Peça|###################|
+|RF-001 |O sistema deve permitir cadastro, edição e exclusão de peças|Sistema completo de CRUD para produtos com validações|
+|RF-002 |O sistema deve permitir categorização manual de peças|Sistema permite definir categoria manualmente no cadastro|
+|RF-003 |O sistema deve registrar entrada e saída de peças do estoque|Sistema de movimentações com múltiplos produtos por movimento|
+|RF-004 |O sistema deve gerar alertas quando o estoque atingir níveis críticos|Endpoint para consultar produtos com estoque baixo|
+|RF-005 |O sistema deve integrar-se com o sistema de PDV para registrar vendas|**NÃO IMPLEMENTADO** - Fora do escopo atual|
+|RF-006 |O sistema deve integrar-se com o sistema de notas fiscais para emissão de NF-e|**NÃO IMPLEMENTADO** - Fora do escopo atual|
+|RF-007 |O sistema deve atualizar o estoque automaticamente após cada venda|**NÃO IMPLEMENTADO** - Fora do escopo atual|
+|RF-008 |O sistema deve gerar relatórios de estoque atual|Sistema de listagem e busca de produtos implementado|
+|RF-009 |O sistema deve gerar relatórios de movimentação (entradas/saídas)|Sistema de consulta de movimentações com filtros|
+|RF-010 |O sistema deve gerar relatórios de vendas por categoria de valor|**NÃO IMPLEMENTADO** - Não há categorização automática|
+|RF-011 |O sistema deve gerar relatórios de vendas por Peça|**NÃO IMPLEMENTADO** - Não há integração com PDV|
+|RF-012 |O sistema deve permitir gerenciamento de usuários|Sistema completo de usuários com perfis e permissões|
+|RF-013 |O sistema deve permitir gerenciamento de fornecedores|Sistema completo de CRUD para fornecedores|
+|RF-014 |O sistema deve implementar sistema de grupos e permissões|Sistema avançado de grupos com permissões granulares|
+|RF-015 |O sistema deve implementar auditoria e logs|Sistema completo de logs para todas as operações|
 
 
 ## REQUISITOS NÃO FUNCIONAIS

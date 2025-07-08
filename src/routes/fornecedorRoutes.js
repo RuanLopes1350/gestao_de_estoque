@@ -25,7 +25,7 @@ router
     asyncWrapper(fornecedorController.criar.bind(fornecedorController))
   )
   
-  .put(
+  .patch(
     "/:id",
     LogMiddleware.log("ATUALIZACAO_FORNECEDOR"),
     asyncWrapper(fornecedorController.atualizar.bind(fornecedorController))
