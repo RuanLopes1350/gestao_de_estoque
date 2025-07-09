@@ -17,13 +17,12 @@ services:
     environment:
       - DB_URL=mongodb://mongodb:27017/gerenciarEstoque
       - APP_PORT=5011
-      - NODE_ENV=production
     ports:
       - "5011:5011"
     networks:
       - app-network
 
-networks:
+networks: 
   app-network:
     driver: bridge
 

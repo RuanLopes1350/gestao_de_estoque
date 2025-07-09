@@ -19,6 +19,7 @@ import fornecedorSchemas from "./schemas/fornecedor.js";
 import movimentacaoSchemas from "./schemas/movimentacao.js";
 import authSchemas from "./schemas/auth.js";
 import grupoSchemas from "./schemas/grupo.js";
+import logsSchemas from "./schemas/logs.js";
 
 dotenv.config();
 
@@ -60,7 +61,7 @@ class SwaggerConfig {
             },
             servers: [
                 {
-                    url: process.env.API_URL || 'http://localhost:3000',
+                    url: process.env.SYSTEM_URL || `http://localhost:${process.env.APP_PORT || 5011}`,
                     description: 'Servidor da API'
                 }
             ],
@@ -80,7 +81,8 @@ class SwaggerConfig {
                     ...fornecedorSchemas,
                     ...movimentacaoSchemas,
                     ...authSchemas,
-                    ...grupoSchemas
+                    ...grupoSchemas,
+                    ...logsSchemas
                 }
             },
             paths: {
