@@ -1,0 +1,15 @@
+{
+    "keep": {
+        "days": true,
+        "amount": 30
+    },
+    "auditLog": "/home/andre/Documentos/projeto/fabrica/gestao-de-estoque/logs/.54fda757d84e0c4d60937f0fcf1b013651d87fd9-audit.json",
+    "files": [
+        {
+            "date": 1751934363058,
+            "name": "/home/andre/Documentos/projeto/fabrica/gestao-de-estoque/logs/combined-2025-07-07.log",
+            "hash": "16972a083ab6dba1cc9b82a0199a0ede371bd650c9379eb598de9df8a42f22c1"
+        }
+    ],
+    "hashType": "sha256"
+}

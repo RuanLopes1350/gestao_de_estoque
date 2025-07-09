@@ -5,7 +5,7 @@ import { FornecedorIdSchema } from "../../utils/validators/schemas/zod/querys/Fo
 
 jest.mock("../../services/fornecedorService.js");
 jest.mock(
-  "../../utils/validators/schemas/zod/FornecedorQuerySchema.js",
+  "../../utils/validators/schemas/zod/querys/FornecedorQuerySchema.js",
   () => ({
     FornecedorIdSchema: {
       parse: jest.fn(),

@@ -1,0 +1,7 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Modelo de Fornecedor deve falhar ao criar um fornecedor sem CNPJ 1`] = `"fornecedores validation failed: cnpj: Path \`cnpj\` is required."`;
+
+exports[`Modelo de Fornecedor deve falhar ao criar um fornecedor sem nome 1`] = `"fornecedores validation failed: nome_fornecedor: Path \`nome_fornecedor\` is required."`;
+
+exports[`Modelo de Fornecedor deve falhar se algum campo do endereço estiver ausente 1`] = `"fornecedores validation failed: endereco.0.cep: Path \`cep\` is required."`;

@@ -1,4 +1,4 @@
-import { FornecedorSchema } from "../../utils/validators/FornecedorSchema.js";
+import { FornecedorSchema } from "../../utils/validators/schemas/zod/FornecedorSchema.js";
 
 describe("FornecedorSchema", () => {
   const validFornecedor = {
