@@ -4,6 +4,7 @@ export default {
   },
   testPathIgnorePatterns: [
     "/node_modules/",
-    "/tests-exemplo/"
+    "/tests-exemplo/",
+    "/src/seeds/"
   ]
 };
