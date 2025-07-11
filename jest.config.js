@@ -4,7 +4,10 @@ export default {
   },
   testPathIgnorePatterns: [
     "/node_modules/",
-    "/tests-exemplo/",
-    "/src/seeds/"
-  ]
+    "/tests-exemplo/"
+  ],
+  testEnvironment: "node",
+  moduleNameMapper: {
+    '^(\\.{1,2}/.*)\\.js$': '$1',
+  }
 };
