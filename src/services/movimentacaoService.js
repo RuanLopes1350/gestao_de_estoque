@@ -226,11 +226,8 @@ class MovimentacaoService {
           }
 
           // Atualizar estoque do produto
-          console.log("quantidade disponível", produto.quantidade_estoque);
-          console.log("quantidade solicitada", produtoMov.quantidade_produtos);
           await this.produtoService.atualizarProduto(produto._id, {
-            quantidade_estoque:
-              produto.quantidade_estoque - produtoMov.quantidade_produtos,
+            estoque: produto.estoque - produtoMov.quantidade_produtos,
           });
         } catch (error) {
           if (error.statusCode !== HttpStatusCodes.BAD_REQUEST.code) {
@@ -262,13 +259,9 @@ class MovimentacaoService {
             });
           }
 
-          console.log("produto", produto);
-          console.log("quantidade solicitada", produtoMov.quantidade_produtos);
-
           // Atualizar estoque do produto
           await this.produtoService.atualizarProduto(produto._id, {
-            quantidade_estoque:
-              produto.quantidade_estoque + produtoMov.quantidade_produtos,
+            estoque: produto.estoque + produtoMov.quantidade_produtos,
             data_ultima_entrada: new Date(),
           });
         } catch (error) {
