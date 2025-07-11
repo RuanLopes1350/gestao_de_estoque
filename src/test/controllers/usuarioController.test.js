@@ -1,10 +1,14 @@
-import UsuarioController from '../../controllers/UsuarioController.js';
-import UsuarioService from '../../services/usuarioService.js';
-import { CommonResponse, CustomError, HttpStatusCodes } from '../../utils/helpers/index.js';
-import { UsuarioSchema, UsuarioUpdateSchema } from '../../utils/validators/schemas/zod/UsuarioSchema.js';
-import { UsuarioQuerySchema, UsuarioIdSchema, UsuarioMatriculaSchema } from '../../utils/validators/schemas/zod/querys/UsuarioQuerySchema.js';
+jest.mock('../../services/LogService.js', () => {
+  return {
+    __esModule: true,
+    default: jest.fn().mockImplementation(() => ({
+      registrarLog: jest.fn(),
+    })),
+  };
+});
 
-// Mocks das dependências
+
+// Demais mocks de dependências
 jest.mock('../../services/usuarioService.js');
 jest.mock('../../utils/validators/schemas/zod/UsuarioSchema.js', () => ({
   UsuarioSchema: { parse: jest.fn() },
@@ -33,6 +37,14 @@ jest.mock('../../utils/helpers/index.js', () => {
     }
   };
 });
+
+// Agora importa os módulos após mocks
+import UsuarioController from '../../controllers/UsuarioController.js';
+import UsuarioService from '../../services/usuarioService.js';
+import { CommonResponse, HttpStatusCodes } from '../../utils/helpers/index.js';
+import { UsuarioSchema, UsuarioUpdateSchema } from '../../utils/validators/schemas/zod/UsuarioSchema.js';
+import { UsuarioQuerySchema, UsuarioIdSchema, UsuarioMatriculaSchema } from '../../utils/validators/schemas/zod/querys/UsuarioQuerySchema.js';
+import mongoose from 'mongoose';
 
 describe('UsuarioController', () => {
   let usuarioController;
@@ -109,30 +121,8 @@ describe('UsuarioController', () => {
       expect(CommonResponse.error).toHaveBeenCalledWith(res, err);
     });
   });
-/*
+
   describe('buscarUsuarioPorID', () => {
-    it('deve retornar usuário por ID', async () => {
-      req.params = { id: '123' };
-      const usuario = { _id: '123', nome: 'Fulano' };
-      mockService.buscarUsuarioPorID.mockResolvedValue(usuario);
-
-      await usuarioController.buscarUsuarioPorID(req, res);
-
-      expect(UsuarioIdSchema.parse).toHaveBeenCalledWith('123');
-      expect(CommonResponse.success).toHaveBeenCalledWith(res, usuario, 200, 'Usuário encontrado com sucesso.');
-    });
-
-    it('deve tratar erro se usuário não for encontrado', async () => {
-      req.params = { id: '123' };
-      const err = new Error('Não encontrado');
-      mockService.buscarUsuarioPorID.mockRejectedValue(err);
-
-      await usuarioController.buscarUsuarioPorID(req, res);
-
-      expect(CommonResponse.error).toHaveBeenCalledWith(res, err);
-    });
-  });*/
-   describe('buscarUsuarioPorID', () => {
     it('deve retornar usuário por ID', async () => {
       const fakeId = new mongoose.Types.ObjectId().toHexString();
       req.params = { id: fakeId };
@@ -193,7 +183,7 @@ describe('UsuarioController', () => {
       expect(CommonResponse.created).toHaveBeenCalledWith(
         res,
         mockUsuario,
-        201,
+        HttpStatusCodes.CREATED.code,
         'Usuário cadastrado com sucesso.'
       );
     });
@@ -246,21 +236,7 @@ describe('UsuarioController', () => {
       await expect(usuarioController.deletarUsuario(req, res)).rejects.toBeDefined();
     });
   });
-  
-/*
-  describe('desativarUsuario', () => {
-    it('deve desativar usuário com sucesso', async () => {
-      req.params = { id: '123' };
-      UsuarioIdSchema.parse.mockReturnValue('123');
-      const usuarioDesativado = { _id: '123', ativo: false };
 
-      mockService.desativarUsuario.mockResolvedValue(usuarioDesativado);
-
-      await usuarioController.desativarUsuario(req, res);
-
-      expect(CommonResponse.success).toHaveBeenCalledWith(res, usuarioDesativado, 200, 'Usuario desativado com sucesso.');
-    });
-  });*/
   describe('desativarUsuario', () => {
     it('deve desativar usuário com sucesso', async () => {
       const fakeId = new mongoose.Types.ObjectId().toHexString();
@@ -276,32 +252,18 @@ describe('UsuarioController', () => {
     });
   });
 
-/*
   describe('reativarUsuario', () => {
     it('deve reativar usuário com sucesso', async () => {
-      req.params = { id: '123' };
-      UsuarioIdSchema.parse.mockReturnValue('123');
-      const usuarioReativado = { _id: '123', ativo: true };
+      const fakeId = new mongoose.Types.ObjectId().toHexString();
+      req.params = { id: fakeId };
+      UsuarioIdSchema.parse.mockReturnValue(fakeId);
 
+      const usuarioReativado = { _id: fakeId, ativo: true };
       mockService.reativarUsuario.mockResolvedValue(usuarioReativado);
 
       await usuarioController.reativarUsuario(req, res);
 
       expect(CommonResponse.success).toHaveBeenCalledWith(res, usuarioReativado, 200, 'Usuario reativado com sucesso.');
-    });
-  });*/
-  describe('reativarUsuario', () => {
-    it('deve reativar usuário com sucesso', async () => {
-  const fakeId = new mongoose.Types.ObjectId().toHexString();
-  req.params = { id: fakeId };
-  UsuarioIdSchema.parse.mockReturnValue(fakeId);
-
-  const usuarioReativado = { _id: fakeId, ativo: true };
-  mockService.reativarUsuario.mockResolvedValue(usuarioReativado);
-
-  await usuarioController.reativarUsuario(req, res);
-
-  expect(CommonResponse.success).toHaveBeenCalledWith(res, usuarioReativado, 200, 'Usuario reativado com sucesso.');
     });
   });
 });
