@@ -47,14 +47,13 @@ describe('Usuario Model', () => {
 
     it('should fail to create user without required fields', async () => {
       const usuario = new Usuario({
-        nome_usuario: 'João Silva'
-        // missing email and matricula
+        // Nenhum campo obrigatório fornecido
       });
-
       await expect(usuario.save()).rejects.toThrow();
     });
 
     it('should validate email uniqueness', async () => {
+      await Usuario.init(); // Garante que o índice de unicidade foi criado
       const userData1 = {
         nome_usuario: 'João Silva',
         email: 'joao@teste.com',
@@ -74,6 +73,7 @@ describe('Usuario Model', () => {
     });
 
     it('should validate matricula uniqueness', async () => {
+      await Usuario.init(); // Garante que o índice de unicidade foi criado
       const userData1 = {
         nome_usuario: 'João Silva',
         email: 'joao@teste.com',
