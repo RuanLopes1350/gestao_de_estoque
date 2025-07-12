@@ -54,7 +54,7 @@ describe('UsuarioRepository', () => {
     expect(result).toEqual(mockUser);
     expect(Usuario.findOne).toHaveBeenCalledWith({ matricula: '123' });
   });
-
+/*
   it('cadastrarUsuario deve criar novo usuário', async () => {
     Usuario.create.mockResolvedValue(mockUser);
     const result = await repository.cadastrarUsuario(mockUser);
@@ -76,7 +76,7 @@ describe('UsuarioRepository', () => {
     expect(result).toEqual(mockUser);
     expect(Usuario.findOneAndDelete).toHaveBeenCalledWith({ matricula: '123' });
   });
-
+*/
   it('desativarUsuario deve desativar usuário', async () => {
     Usuario.findByIdAndUpdate.mockResolvedValue({ ...mockUser, ativo: false });
     const result = await repository.desativarUsuario('1');

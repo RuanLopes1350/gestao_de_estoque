@@ -34,10 +34,10 @@ describe('Modelo de Usuário', () => {
             matricula: '1234567',
             senha: 'password',
             email: 'testuser@example.com',
-            cargo: 'Desenvolvedor',
-            status: true,
-            accessToken: 'access-token',
-            refreshToken: 'refresh-token',
+            perfil: 'estoquista',
+            ativo: true,
+            accesstoken: 'access-token',
+            refreshtoken: 'refresh-token',
             data_cadastro: new Date(),
             data_atualizacao: new Date(),
             data_ultimo_login: new Date(),
@@ -46,18 +46,17 @@ describe('Modelo de Usuário', () => {
         const user = new Usuario(userData);
         await user.save();
 
-        const savedUser = await Usuario.findById(user._id).select('-senha');
+        const savedUser = await Usuario.findById(user._id).select('+accesstoken +refreshtoken -senha');
         expect(savedUser.nome_usuario).toBe(userData.nome_usuario);
         expect(savedUser.matricula).toBe(userData.matricula);
         expect(savedUser.senha).toBeUndefined(); // Verifica se a senha não está presente
         expect(savedUser.email).toBe(userData.email);
-        expect(savedUser.cargo).toBe(userData.cargo);
-        expect(savedUser.status).toBe(userData.status);
-        expect(savedUser.accessToken).toBe(userData.accessToken);
-        expect(savedUser.refreshToken).toBe(userData.refreshToken);
+        expect(savedUser.perfil).toBe(userData.perfil);
+        expect(savedUser.ativo).toBe(userData.ativo);
+        expect(savedUser.accesstoken).toBe(userData.accesstoken);
+        expect(savedUser.refreshtoken).toBe(userData.refreshtoken);
         expect(savedUser.data_cadastro).toEqual(userData.data_cadastro);
-        expect(savedUser.data_atualizacao).toEqual(userData.data_atualizacao);
-        expect(savedUser.data_ultimo_login).toEqual(userData.data_ultimo_login);
+        expect(savedUser.data_ultima_atualizacao).toEqual(userData.data_atualizacao);
     });
 
     it('deve falhar ao criar um usuário sem nome', async () => {
@@ -65,10 +64,10 @@ describe('Modelo de Usuário', () => {
             matricula: '1234567',
             senha: 'password',
             email: 'testuser@example.com',
-            cargo: 'Desenvolvedor',
-            status: true,
-            accessToken: 'access-token',
-            refreshToken: 'refresh-token',
+            perfil: 'estoquista',
+            ativo: true,
+            accesstoken: 'access-token',
+            refreshtoken: 'refresh-token',
             data_cadastro: new Date(),
             data_atualizacao: new Date(),
             data_ultimo_login: new Date(),
@@ -83,10 +82,10 @@ describe('Modelo de Usuário', () => {
             nome_usuario: 'Test User',
             senha: 'password',
             email: 'testuser@example.com',
-            cargo: 'Desenvolvedor',
-            status: true,
-            accessToken: 'access-token',
-            refreshToken: 'refresh-token',
+            perfil: 'estoquista',
+            ativo: true,
+            accesstoken: 'access-token',
+            refreshtoken: 'refresh-token',
             data_cadastro: new Date(),
             data_atualizacao: new Date(),
             data_ultimo_login: new Date(),
@@ -94,5 +93,23 @@ describe('Modelo de Usuário', () => {
 
         const user = new Usuario(userData);
         await expect(user.save()).rejects.toThrowErrorMatchingSnapshot();
-    })
+    });
+
+    it('deve falhar ao criar usuário com email inválido', async () => {
+        const userData = {
+            nome_usuario: 'Test User',
+            matricula: '1234567',
+            senha: 'password',
+            email: 'email-invalido',
+            perfil: 'estoquista',
+            ativo: true,
+            accesstoken: 'access-token',
+            refreshtoken: 'refresh-token',
+            data_cadastro: new Date(),
+            data_atualizacao: new Date(),
+            data_ultimo_login: new Date(),
+        };
+        const user = new Usuario(userData);
+        await expect(user.save()).rejects.toThrow();
+    });
 })

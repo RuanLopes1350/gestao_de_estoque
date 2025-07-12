@@ -1,14 +1,11 @@
-jest.mock('../../services/LogService.js', () => {
-  return {
-    __esModule: true,
-    default: jest.fn().mockImplementation(() => ({
-      registrarLog: jest.fn(),
-    })),
-  };
-});
+// Mocks das dependências
+jest.mock('../../services/LogService.js', () => ({
+  __esModule: true,
+  default: jest.fn().mockImplementation(() => ({
+    registrarLog: jest.fn(),
+  })),
+}));
 
-
-// Demais mocks de dependências
 jest.mock('../../services/usuarioService.js');
 jest.mock('../../utils/validators/schemas/zod/UsuarioSchema.js', () => ({
   UsuarioSchema: { parse: jest.fn() },
@@ -28,7 +25,10 @@ jest.mock('../../utils/helpers/index.js', () => {
       error: jest.fn(),
       created: jest.fn()
     },
-    CustomError: jest.fn(opts => opts),
+    CustomError: jest.fn(opts => {
+      const err = new Error(opts.customMessage || 'Erro');
+      return Object.assign(err, opts);
+    }),
     HttpStatusCodes: {
       OK: { code: 200 },
       CREATED: { code: 201 },
@@ -38,7 +38,6 @@ jest.mock('../../utils/helpers/index.js', () => {
   };
 });
 
-// Agora importa os módulos após mocks
 import UsuarioController from '../../controllers/UsuarioController.js';
 import UsuarioService from '../../services/usuarioService.js';
 import { CommonResponse, HttpStatusCodes } from '../../utils/helpers/index.js';
@@ -127,7 +126,6 @@ describe('UsuarioController', () => {
       const fakeId = new mongoose.Types.ObjectId().toHexString();
       req.params = { id: fakeId };
       const usuario = { _id: fakeId, nome: 'Fulano' };
-
       mockService.buscarUsuarioPorID.mockResolvedValue(usuario);
 
       await usuarioController.buscarUsuarioPorID(req, res);
@@ -160,7 +158,8 @@ describe('UsuarioController', () => {
 
     it('deve retornar erro se matrícula não for passada', async () => {
       req.params = {};
-      await expect(usuarioController.buscarUsuarioPorMatricula(req, res)).rejects.toBeDefined();
+      await usuarioController.buscarUsuarioPorMatricula(req, res);
+      expect(CommonResponse.error).toHaveBeenCalled();
     });
   });
 
@@ -216,7 +215,8 @@ describe('UsuarioController', () => {
 
     it('deve retornar erro se ID não for fornecido', async () => {
       req.params = {};
-      await expect(usuarioController.atualizarUsuario(req, res)).rejects.toBeDefined();
+      await usuarioController.atualizarUsuario(req, res);
+      expect(CommonResponse.error).toHaveBeenCalled();
     });
   });
 
@@ -233,7 +233,8 @@ describe('UsuarioController', () => {
 
     it('deve lançar erro se matrícula não for passada', async () => {
       req.params = {};
-      await expect(usuarioController.deletarUsuario(req, res)).rejects.toBeDefined();
+      await usuarioController.deletarUsuario(req, res);
+      expect(CommonResponse.error).toHaveBeenCalled();
     });
   });
 
