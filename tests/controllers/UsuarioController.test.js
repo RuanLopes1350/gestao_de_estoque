@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, jest } from '@jest/globals';
+    import { beforeEach, describe, expect, it, jest } from '@jest/globals';
 
 // Configurar os mocks
 jest.mock('../../src/services/usuarioService.js', () => {

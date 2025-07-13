@@ -198,6 +198,62 @@ describe('UsuarioRepository', () => {
         });
     });
 
+    describe('listarUsuarios - additional filter tests', () => {
+        it('deve aplicar filtro por nome_usuario', async () => {
+            const req = { query: { nome_usuario: 'João' } };
+            const mockResult = { docs: [], totalDocs: 0 };
+            Usuario.paginate.mockResolvedValue(mockResult);
+
+            await usuarioRepository.listarUsuarios(req);
+
+            expect(Usuario.paginate).toHaveBeenCalledWith(
+                expect.objectContaining({
+                    nome_usuario: { $regex: 'João', $options: 'i' }
+                }),
+                expect.any(Object)
+            );
+        });
+
+        it('deve aplicar filtro por matricula', async () => {
+            const req = { query: { matricula: '12345' } };
+            const mockResult = { docs: [], totalDocs: 0 };
+            Usuario.paginate.mockResolvedValue(mockResult);
+
+            await usuarioRepository.listarUsuarios(req);
+
+            expect(Usuario.paginate).toHaveBeenCalledWith(
+                expect.objectContaining({
+                    matricula: { $regex: '12345', $options: 'i' }
+                }),
+                expect.any(Object)
+            );
+        });
+
+        it('deve aplicar filtro por cargo', async () => {
+            const req = { query: { cargo: 'admin' } };
+            const mockResult = { docs: [], totalDocs: 0 };
+            Usuario.paginate.mockResolvedValue(mockResult);
+
+            await usuarioRepository.listarUsuarios(req);
+
+            expect(Usuario.paginate).toHaveBeenCalledWith(
+                expect.objectContaining({
+                    cargo: { $regex: 'admin', $options: 'i' }
+                }),
+                expect.any(Object)
+            );
+        });
+
+        it('deve lançar erro quando usuário não for encontrado por ID', async () => {
+            const req = { params: { id: '507f1f77bcf86cd799439011' } };
+            Usuario.findById.mockResolvedValue(null);
+
+            await expect(usuarioRepository.listarUsuarios(req))
+                .rejects
+                .toThrow('Usuario não encontrado(a).');
+        });
+    });
+
     describe('buscarPorId', () => {
         it('should return user by ID', async () => {
             const userId = '507f1f77bcf86cd799439011';
@@ -242,6 +298,20 @@ describe('UsuarioRepository', () => {
             const result = await usuarioRepository.buscarPorMatricula(matricula);
             expect(result).toBeNull();
         });
+
+        it('deve buscar usuário com senha incluída', async () => {
+            const matricula = '12345';
+            const mockUser = { nome_usuario: 'João', senha: 'hashedpassword' };
+            const mockSelect = jest.fn().mockResolvedValue(mockUser);
+            const mockFindOne = jest.fn().mockReturnValue({ select: mockSelect });
+            Usuario.findOne = mockFindOne;
+
+            const result = await usuarioRepository.buscarPorMatricula(matricula, true);
+
+            expect(mockFindOne).toHaveBeenCalledWith({ matricula });
+            expect(mockSelect).toHaveBeenCalledWith('+senha');
+            expect(result).toBe(mockUser);
+        });
     });
 
     describe('cadastrarUsuario', () => {
@@ -249,10 +319,13 @@ describe('UsuarioRepository', () => {
             const userData = { nome_usuario: 'Test User', matricula: '12345' };
             const mockCreatedUser = { _id: '1', ...userData };
 
+            // Mock the findOne to return null (no existing user)
+            Usuario.findOne.mockResolvedValue(null);
             Usuario.create.mockResolvedValue(mockCreatedUser);
 
             const result = await usuarioRepository.cadastrarUsuario(userData);
 
+            expect(Usuario.findOne).toHaveBeenCalledWith({ matricula: '12345' });
             expect(Usuario.create).toHaveBeenCalledWith(userData);
             expect(result).toEqual(mockCreatedUser);
         });
@@ -308,6 +381,17 @@ describe('UsuarioRepository', () => {
             Usuario.findByIdAndUpdate.mockResolvedValue(null);
 
             await expect(usuarioRepository.atualizarUsuario(validObjectId, updateData)).rejects.toThrow(CustomError);
+        });
+
+        it('deve lançar erro quando usuário não for encontrado para atualização', async () => {
+            const matricula = '12345';
+            const dados = { nome_usuario: 'João Updated' };
+            
+            Usuario.findByIdAndUpdate.mockResolvedValue(null);
+
+            await expect(usuarioRepository.atualizarUsuario(matricula, dados))
+                .rejects
+                .toThrow('Usuário não encontrado');
         });
     });
 
