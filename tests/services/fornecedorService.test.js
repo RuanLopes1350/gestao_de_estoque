@@ -109,6 +109,16 @@ describe('FornecedorService', () => {
             expect(mockRepository.listar).toHaveBeenCalledWith(mockReq);
             expect(result).toEqual(mockFornecedores);
         });
+
+        it('deve propagar erro do repository', async () => {
+            const error = new Error('Erro ao listar fornecedores');
+            const mockReq = { query: {} };
+
+            mockRepository.listar.mockRejectedValue(error);
+
+            await expect(fornecedorService.listar(mockReq))
+                .rejects.toThrow('Erro ao listar fornecedores');
+        });
     });
 
     describe('buscarPorId', () => {
@@ -152,6 +162,16 @@ describe('FornecedorService', () => {
             expect(mockRepository.atualizar).toHaveBeenCalledWith('123', dadosAtualizacao);
             expect(result).toEqual(mockFornecedor);
         });
+
+        it('deve propagar erro do repository', async () => {
+            const error = new Error('Erro ao atualizar fornecedor');
+            const dadosAtualizacao = { nome: 'Fornecedor Atualizado' };
+
+            mockRepository.atualizar.mockRejectedValue(error);
+
+            await expect(fornecedorService.atualizar('123', dadosAtualizacao))
+                .rejects.toThrow('Erro ao atualizar fornecedor');
+        });
     });
 
     describe('deletar', () => {
@@ -174,6 +194,16 @@ describe('FornecedorService', () => {
             await expect(fornecedorService.deletar('invalid-id'))
                 .rejects.toThrow('ID do fornecedor inválido.');
         });
+
+        it('deve propagar erro do repository', async () => {
+            const error = new Error('Erro ao deletar fornecedor');
+            
+            mongoose.Types.ObjectId.isValid.mockReturnValue(true);
+            mockRepository.deletar.mockRejectedValue(error);
+
+            await expect(fornecedorService.deletar('123'))
+                .rejects.toThrow('Erro ao deletar fornecedor');
+        });
     });
 
     describe('desativarFornecedor', () => {
@@ -189,6 +219,23 @@ describe('FornecedorService', () => {
             expect(mockRepository.desativarFornecedor).toHaveBeenCalledWith('123');
             expect(result).toEqual(mockResponse);
         });
+
+        it('deve lançar erro quando ID for inválido', async () => {
+            mongoose.Types.ObjectId.isValid.mockReturnValue(false);
+
+            await expect(fornecedorService.desativarFornecedor('invalid-id'))
+                .rejects.toThrow('ID do forecedor inválido.');
+        });
+
+        it('deve propagar erro do repository', async () => {
+            const error = new Error('Erro ao desativar fornecedor');
+            
+            mongoose.Types.ObjectId.isValid.mockReturnValue(true);
+            mockRepository.desativarFornecedor.mockRejectedValue(error);
+
+            await expect(fornecedorService.desativarFornecedor('123'))
+                .rejects.toThrow('Erro ao desativar fornecedor');
+        });
     });
 
     describe('reativarFornecedor', () => {
@@ -203,6 +250,23 @@ describe('FornecedorService', () => {
 
             expect(mockRepository.reativarFornecedor).toHaveBeenCalledWith('123');
             expect(result).toEqual(mockResponse);
+        });
+
+        it('deve lançar erro quando ID for inválido', async () => {
+            mongoose.Types.ObjectId.isValid.mockReturnValue(false);
+
+            await expect(fornecedorService.reativarFornecedor('invalid-id'))
+                .rejects.toThrow('ID do forecedor inválido.');
+        });
+
+        it('deve propagar erro do repository', async () => {
+            const error = new Error('Erro ao reativar fornecedor');
+            
+            mongoose.Types.ObjectId.isValid.mockReturnValue(true);
+            mockRepository.reativarFornecedor.mockRejectedValue(error);
+
+            await expect(fornecedorService.reativarFornecedor('123'))
+                .rejects.toThrow('Erro ao reativar fornecedor');
         });
     });
 });

@@ -6,6 +6,10 @@ jest.mock('../../src/services/AuthService.js', () => ({
         autenticar: jest.fn(),
         logout: jest.fn(),
         refreshToken: jest.fn(),
+        revoke: jest.fn(),
+        recuperarSenha: jest.fn(),
+        redefinirSenhaComToken: jest.fn(),
+        redefinirSenhaComCodigo: jest.fn(),
         alterarSenha: jest.fn(),
         solicitarRecuperacao: jest.fn(),
         verificarCodigoRecuperacao: jest.fn(),
@@ -139,6 +143,194 @@ describe('AuthController', () => {
             expect(mockRes.status).toHaveBeenCalledWith(200);
             expect(mockRes.json).toHaveBeenCalledWith({
                 message: 'Logout realizado com sucesso'
+            });
+        });
+    });
+
+    describe('refresh', () => {
+        it('deve renovar token com sucesso', async () => {
+            const mockTokens = {
+                accessToken: 'new-access-token',
+                refreshToken: 'new-refresh-token'
+            };
+
+            mockReq.body = { refreshToken: 'valid-refresh-token' };
+            authController.service.refreshToken.mockResolvedValue(mockTokens);
+
+            await authController.refresh(mockReq, mockRes);
+
+            expect(authController.service.refreshToken).toHaveBeenCalledWith('valid-refresh-token');
+            expect(mockRes.status).toHaveBeenCalledWith(200);
+            expect(mockRes.json).toHaveBeenCalledWith({
+                message: 'Token atualizado com sucesso',
+                ...mockTokens
+            });
+        });
+
+        it('deve retornar erro quando refreshToken não for fornecido', async () => {
+            mockReq.body = {};
+
+            await authController.refresh(mockReq, mockRes);
+
+            expect(mockRes.status).toHaveBeenCalledWith(400);
+            expect(mockRes.json).toHaveBeenCalledWith({
+                message: 'Token de atualização não fornecido',
+                type: 'validationError'
+            });
+        });
+    });
+
+    describe('revoke', () => {
+        it('deve revogar token com sucesso', async () => {
+            mockReq.body = { matricula: 'MAT456' };
+            mockReq.userId = 'user123';
+            mockReq.userMatricula = 'MAT123';
+            authController.service.revoke.mockResolvedValue();
+
+            await authController.revoke(mockReq, mockRes);
+
+            expect(authController.service.revoke).toHaveBeenCalledWith('MAT456');
+            expect(LogMiddleware.logCriticalEvent).toHaveBeenCalledWith(
+                'user123',
+                'TOKEN_REVOKE',
+                {
+                    matricula_revogada: 'MAT456',
+                    revogado_por: 'MAT123'
+                },
+                mockReq
+            );
+            expect(mockRes.status).toHaveBeenCalledWith(200);
+            expect(mockRes.json).toHaveBeenCalledWith({
+                message: 'Token revogado com sucesso'
+            });
+        });
+
+        it('deve retornar erro quando corpo da requisição estiver ausente', async () => {
+            mockReq.body = null;
+
+            await authController.revoke(mockReq, mockRes);
+
+            expect(mockRes.status).toHaveBeenCalledWith(400);
+            expect(mockRes.json).toHaveBeenCalledWith({
+                message: 'Corpo da requisição ausente',
+                type: 'validationError'
+            });
+        });
+
+        it('deve retornar erro quando matrícula não for fornecida', async () => {
+            mockReq.body = {};
+
+            await authController.revoke(mockReq, mockRes);
+
+            expect(mockRes.status).toHaveBeenCalledWith(400);
+            expect(mockRes.json).toHaveBeenCalledWith({
+                message: 'Matrícula não fornecida',
+                type: 'validationError'
+            });
+        });
+    });
+
+    describe('solicitarRecuperacaoSenha', () => {
+        it('deve solicitar recuperação de senha com sucesso', async () => {
+            const mockResultado = { message: 'Email de recuperação enviado' };
+            mockReq.body = { email: 'test@example.com' };
+            authController.service.recuperarSenha.mockResolvedValue(mockResultado);
+
+            await authController.solicitarRecuperacaoSenha(mockReq, mockRes);
+
+            expect(authController.service.recuperarSenha).toHaveBeenCalledWith('test@example.com');
+            expect(mockRes.status).toHaveBeenCalledWith(200);
+            expect(mockRes.json).toHaveBeenCalledWith(mockResultado);
+        });
+
+        it('deve retornar erro quando email não for fornecido', async () => {
+            mockReq.body = {};
+
+            await authController.solicitarRecuperacaoSenha(mockReq, mockRes);
+
+            expect(mockRes.status).toHaveBeenCalledWith(400);
+            expect(mockRes.json).toHaveBeenCalledWith({
+                message: 'Email é obrigatório',
+                type: 'validationError'
+            });
+        });
+    });
+
+    describe('redefinirSenhaComToken', () => {
+        it('deve redefinir senha com token com sucesso', async () => {
+            const mockResultado = { message: 'Senha redefinida com sucesso' };
+            mockReq.query = { token: 'valid-token' };
+            mockReq.body = { senha: 'nova-senha' };
+            authController.service.redefinirSenhaComToken.mockResolvedValue(mockResultado);
+
+            await authController.redefinirSenhaComToken(mockReq, mockRes);
+
+            expect(authController.service.redefinirSenhaComToken).toHaveBeenCalledWith('valid-token', 'nova-senha');
+            expect(mockRes.status).toHaveBeenCalledWith(200);
+            expect(mockRes.json).toHaveBeenCalledWith(mockResultado);
+        });
+
+        it('deve retornar erro quando token não for fornecido', async () => {
+            mockReq.query = {};
+            mockReq.body = { senha: 'nova-senha' };
+
+            await authController.redefinirSenhaComToken(mockReq, mockRes);
+
+            expect(mockRes.status).toHaveBeenCalledWith(400);
+            expect(mockRes.json).toHaveBeenCalledWith({
+                message: 'Token e senha são obrigatórios',
+                type: 'validationError'
+            });
+        });
+
+        it('deve retornar erro quando senha não for fornecida', async () => {
+            mockReq.query = { token: 'valid-token' };
+            mockReq.body = {};
+
+            await authController.redefinirSenhaComToken(mockReq, mockRes);
+
+            expect(mockRes.status).toHaveBeenCalledWith(400);
+            expect(mockRes.json).toHaveBeenCalledWith({
+                message: 'Token e senha são obrigatórios',
+                type: 'validationError'
+            });
+        });
+    });
+
+    describe('redefinirSenhaComCodigo', () => {
+        it('deve redefinir senha com código com sucesso', async () => {
+            const mockResultado = { message: 'Senha redefinida com sucesso' };
+            mockReq.body = { codigo: '123456', senha: 'nova-senha' };
+            authController.service.redefinirSenhaComCodigo.mockResolvedValue(mockResultado);
+
+            await authController.redefinirSenhaComCodigo(mockReq, mockRes);
+
+            expect(authController.service.redefinirSenhaComCodigo).toHaveBeenCalledWith('123456', 'nova-senha');
+            expect(mockRes.status).toHaveBeenCalledWith(200);
+            expect(mockRes.json).toHaveBeenCalledWith(mockResultado);
+        });
+
+        it('deve retornar erro quando código não for fornecido', async () => {
+            mockReq.body = { senha: 'nova-senha' };
+
+            await authController.redefinirSenhaComCodigo(mockReq, mockRes);
+
+            expect(mockRes.status).toHaveBeenCalledWith(400);
+            expect(mockRes.json).toHaveBeenCalledWith({
+                message: 'Código e senha são obrigatórios',
+                type: 'validationError'
+            });
+        });
+
+        it('deve retornar erro quando senha não for fornecida', async () => {
+            mockReq.body = { codigo: '123456' };
+
+            await authController.redefinirSenhaComCodigo(mockReq, mockRes);
+
+            expect(mockRes.status).toHaveBeenCalledWith(400);
+            expect(mockRes.json).toHaveBeenCalledWith({
+                message: 'Código e senha são obrigatórios',
+                type: 'validationError'
             });
         });
     });

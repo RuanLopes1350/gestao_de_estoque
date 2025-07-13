@@ -1,302 +1,475 @@
-import { beforeAll, afterAll, beforeEach, describe, expect, it, jest } from '@jest/globals';
-import { MongoMemoryServer } from 'mongodb-memory-server';
-import mongoose from 'mongoose';
 import ProdutoController from '../../src/controllers/ProdutoController.js';
 import ProdutoService from '../../src/services/produtoService.js';
-import { CustomError } from '../../src/utils/helpers/index.js';
+import { CommonResponse, CustomError, HttpStatusCodes } from '../../src/utils/helpers/index.js';
+import { ProdutoQuerySchema, ProdutoIdSchema } from '../../src/utils/validators/schemas/zod/querys/ProdutoQuerySchema.js';
+import { ProdutoSchema, ProdutoUpdateSchema } from '../../src/utils/validators/schemas/zod/ProdutoSchema.js';
 
-// Mock the console.log to avoid cluttering test output
-jest.spyOn(console, 'log').mockImplementation(() => {});
+// Mocks
+jest.mock('../../src/services/produtoService.js');
+jest.mock('../../src/utils/helpers/index.js', () => ({
+    CommonResponse: {
+        success: jest.fn(),
+        error: jest.fn(),
+        created: jest.fn()
+    },
+    CustomError: jest.fn().mockImplementation((args) => {
+        const error = new Error(args.customMessage || 'Custom error');
+        error.statusCode = args.statusCode;
+        error.errorType = args.errorType;
+        error.field = args.field;
+        return error;
+    }),
+    HttpStatusCodes: {
+        BAD_REQUEST: { code: 400 },
+        CREATED: { code: 201 },
+        NOT_FOUND: { code: 404 }
+    }
+}));
+
+jest.mock('../../src/utils/validators/schemas/zod/querys/ProdutoQuerySchema.js', () => ({
+    ProdutoQuerySchema: {
+        parseAsync: jest.fn()
+    },
+    ProdutoIdSchema: {
+        parse: jest.fn()
+    }
+}));
+
+jest.mock('../../src/utils/validators/schemas/zod/ProdutoSchema.js', () => ({
+    ProdutoSchema: {
+        parse: jest.fn()
+    },
+    ProdutoUpdateSchema: {
+        parseAsync: jest.fn()
+    }
+}));
 
 describe('ProdutoController', () => {
-  let mongoServer;
-  let produtoController;
-  let mockReq;
-  let mockRes;
+    let controller;
+    let mockService;
+    let mockReq;
+    let mockRes;
 
-  beforeAll(async () => {
-    mongoServer = await MongoMemoryServer.create();
-    const mongoUri = mongoServer.getUri();
-    await mongoose.connect(mongoUri);
-  });
+    beforeEach(() => {
+        controller = new ProdutoController();
+        mockService = new ProdutoService();
+        controller.service = mockService;
 
-  afterAll(async () => {
-    await mongoose.connection.dropDatabase();
-    await mongoose.connection.close();
-    await mongoServer.stop();
-  });
+        mockReq = {
+            params: {},
+            query: {},
+            body: {}
+        };
 
-  beforeEach(() => {
-    produtoController = new ProdutoController();
-    
-    // Mock response object
-    mockRes = {
-      status: jest.fn().mockReturnThis(),
-      json: jest.fn(),
-      send: jest.fn()
-    };
+        mockRes = {
+            json: jest.fn(),
+            status: jest.fn().mockReturnThis()
+        };
 
-    // Mock request object
-    mockReq = {
-      params: {},
-      query: {},
-      body: {}
-    };
-  });
-
-  describe('Constructor', () => {
-    it('should initialize with ProdutoService', () => {
-      expect(produtoController.service).toBeInstanceOf(ProdutoService);
-    });
-  });
-
-  describe('listarProdutos', () => {
-    it('should list products successfully with default pagination', async () => {
-      const mockProducts = {
-        docs: [
-          { _id: '1', nome_produto: 'Produto 1' },
-          { _id: '2', nome_produto: 'Produto 2' }
-        ],
-        totalDocs: 2,
-        page: 1
-      };
-
-      jest.spyOn(produtoController.service, 'listarProdutos').mockResolvedValue(mockProducts);
-
-      await produtoController.listarProdutos(mockReq, mockRes);
-
-      expect(produtoController.service.listarProdutos).toHaveBeenCalledWith(mockReq);
-      expect(mockReq.query.page).toBe(1);
-      expect(mockReq.query.limite).toBe(10);
+        // Reset mocks
+        jest.clearAllMocks();
     });
 
-    it('should handle empty product list', async () => {
-      const mockEmptyResult = {
-        docs: [],
-        totalDocs: 0,
-        page: 1
-      };
+    describe('listarProdutos', () => {
+        it('deve listar produtos com sucesso', async () => {
+            const mockData = {
+                docs: [
+                    { id: '1', nome: 'Produto 1' },
+                    { id: '2', nome: 'Produto 2' }
+                ]
+            };
 
-      jest.spyOn(produtoController.service, 'listarProdutos').mockResolvedValue(mockEmptyResult);
+            mockService.listarProdutos.mockResolvedValue(mockData);
+            mockReq.query = { page: 1, limite: 10 };
 
-      await produtoController.listarProdutos(mockReq, mockRes);
+            await controller.listarProdutos(mockReq, mockRes);
 
-      expect(produtoController.service.listarProdutos).toHaveBeenCalledWith(mockReq);
+            expect(mockService.listarProdutos).toHaveBeenCalledWith(mockReq);
+            expect(CommonResponse.success).toHaveBeenCalledWith(mockRes, mockData);
+        });
+
+        it('deve validar ID quando fornecido nos params', async () => {
+            const mockData = { docs: [{ id: '1', nome: 'Produto 1' }] };
+            mockReq.params = { id: '507f1f77bcf86cd799439011' };
+            mockService.listarProdutos.mockResolvedValue(mockData);
+
+            await controller.listarProdutos(mockReq, mockRes);
+
+            expect(ProdutoIdSchema.parse).toHaveBeenCalledWith('507f1f77bcf86cd799439011');
+            expect(CommonResponse.success).toHaveBeenCalledWith(mockRes, mockData);
+        });
+
+        it('deve retornar erro 404 quando nenhum produto for encontrado', async () => {
+            const mockData = { docs: [] };
+            mockService.listarProdutos.mockResolvedValue(mockData);
+
+            await controller.listarProdutos(mockReq, mockRes);
+
+            expect(CommonResponse.error).toHaveBeenCalledWith(
+                mockRes,
+                404,
+                'resourceNotFound',
+                'Produto',
+                [],
+                'Nenhum produto encontrado com os critérios informados.'
+            );
+        });
+
+        it('deve validar query params quando presentes', async () => {
+            const mockData = { docs: [{ id: '1', nome: 'Produto 1' }] };
+            mockReq.query = { nome: 'Produto', page: 1, limite: 10 };
+            mockService.listarProdutos.mockResolvedValue(mockData);
+            ProdutoQuerySchema.parseAsync.mockResolvedValue(mockReq.query);
+
+            await controller.listarProdutos(mockReq, mockRes);
+
+            expect(ProdutoQuerySchema.parseAsync).toHaveBeenCalledWith(mockReq.query);
+        });
+
+        it('deve definir valores padrão para page e limite', async () => {
+            const mockData = { docs: [{ id: '1', nome: 'Produto 1' }] };
+            mockReq.query = {};
+            mockService.listarProdutos.mockResolvedValue(mockData);
+
+            await controller.listarProdutos(mockReq, mockRes);
+
+            expect(mockReq.query.page).toBe(1);
+            expect(mockReq.query.limite).toBe(10);
+        });
     });
 
-    it('should handle product listing with ID parameter', async () => {
-      mockReq.params.id = '507f1f77bcf86cd799439011';
-      const mockProduct = { _id: '507f1f77bcf86cd799439011', nome_produto: 'Produto Teste' };
+    describe('buscarProdutoPorID', () => {
+        it('deve buscar produto por ID com sucesso', async () => {
+            const mockData = { id: '1', nome: 'Produto 1' };
+            mockReq.params = { id: '507f1f77bcf86cd799439011' };
+            mockService.buscarProdutoPorID.mockResolvedValue(mockData);
 
-      jest.spyOn(produtoController.service, 'listarProdutos').mockResolvedValue(mockProduct);
+            await controller.buscarProdutoPorID(mockReq, mockRes);
 
-      await produtoController.listarProdutos(mockReq, mockRes);
-
-      expect(produtoController.service.listarProdutos).toHaveBeenCalledWith(mockReq);
+            expect(ProdutoIdSchema.parse).toHaveBeenCalledWith('507f1f77bcf86cd799439011');
+            expect(mockService.buscarProdutoPorID).toHaveBeenCalledWith('507f1f77bcf86cd799439011');
+            expect(CommonResponse.success).toHaveBeenCalledWith(
+                mockRes, 
+                mockData, 
+                200, 
+                'Produto encontrado com sucesso.'
+            );
+        });
     });
 
-    it('should throw error for invalid ID format', async () => {
-      mockReq.params.id = 'invalid-id';
+    describe('buscarProdutos', () => {
+        it('deve buscar produtos por nome', async () => {
+            const mockData = { docs: [{ id: '1', nome: 'Produto Test' }] };
+            mockReq.query = { nome: 'Test', page: 1, limite: 10 };
+            mockService.buscarProdutosPorNome.mockResolvedValue(mockData);
 
-      await expect(
-        produtoController.listarProdutos(mockReq, mockRes)
-      ).rejects.toThrow();
-    });
-  });
+            await controller.buscarProdutos(mockReq, mockRes);
 
-  describe('buscarProdutoPorID', () => {
-    it('should find product by valid ID', async () => {
-      const validId = '507f1f77bcf86cd799439011';
-      mockReq.params.id = validId;
-      const mockProduct = { _id: validId, nome_produto: 'Produto Teste' };
+            expect(mockService.buscarProdutosPorNome).toHaveBeenCalledWith('Test', 1, 10);
+            expect(CommonResponse.success).toHaveBeenCalledWith(
+                mockRes, 
+                mockData, 
+                200, 
+                'Produtos encontrados com sucesso.'
+            );
+        });
 
-      jest.spyOn(produtoController.service, 'buscarProdutoPorID').mockResolvedValue(mockProduct);
+        it('deve buscar produtos por categoria', async () => {
+            const mockData = { docs: [{ id: '1', categoria: 'Eletrônicos' }] };
+            mockReq.query = { categoria: 'Eletrônicos', page: 1, limite: 10 };
+            mockService.buscarProdutosPorCategoria.mockResolvedValue(mockData);
 
-      await produtoController.buscarProdutoPorID(mockReq, mockRes);
+            await controller.buscarProdutos(mockReq, mockRes);
 
-      expect(produtoController.service.buscarProdutoPorID).toHaveBeenCalledWith(validId);
-    });
+            expect(mockService.buscarProdutosPorCategoria).toHaveBeenCalledWith('Eletrônicos', 1, 10);
+        });
 
-    it('should throw error for invalid ID format', async () => {
-      mockReq.params.id = 'invalid-id';
+        it('deve buscar produtos por código', async () => {
+            const mockData = { docs: [{ id: '1', codigo: '12345' }] };
+            mockReq.query = { codigo: '12345', page: 1, limite: 10 };
+            mockService.buscarProdutosPorCodigo.mockResolvedValue(mockData);
 
-      await expect(
-        produtoController.buscarProdutoPorID(mockReq, mockRes)
-      ).rejects.toThrow();
-    });
-  });
+            await controller.buscarProdutos(mockReq, mockRes);
 
-  describe('buscarProdutos', () => {
-    it('should search products by name', async () => {
-      mockReq.query = { nome: 'Notebook', page: '1', limite: '10' };
-      const mockProducts = {
-        docs: [{ _id: '1', nome_produto: 'Notebook Dell' }],
-        totalDocs: 1
-      };
+            expect(mockService.buscarProdutosPorCodigo).toHaveBeenCalledWith('12345', 1, 10);
+        });
 
-      jest.spyOn(produtoController.service, 'buscarProdutosPorNome').mockResolvedValue(mockProducts);
+        it('deve buscar produtos por fornecedor', async () => {
+            const mockData = { docs: [{ id: '1', fornecedor: 'Fornecedor X' }] };
+            mockReq.query = { fornecedor: 'Fornecedor X', page: 1, limite: 10 };
+            mockService.buscarProdutosPorFornecedor.mockResolvedValue(mockData);
 
-      await produtoController.buscarProdutos(mockReq, mockRes);
+            await controller.buscarProdutos(mockReq, mockRes);
 
-      expect(produtoController.service.buscarProdutosPorNome).toHaveBeenCalledWith('Notebook', 1, 10);
-    });
+            expect(mockService.buscarProdutosPorFornecedor).toHaveBeenCalledWith('Fornecedor X', 1, 10, true);
+        });
 
-    it('should search products by categoria', async () => {
-      mockReq.query = { categoria: 'Eletrônicos', page: '1', limite: '10' };
-      const mockProducts = {
-        docs: [{ _id: '1', categoria: 'Eletrônicos' }],
-        totalDocs: 1
-      };
+        it('deve lançar erro quando nenhum parâmetro de busca for fornecido', async () => {
+            mockReq.query = { page: 1, limite: 10 };
 
-      jest.spyOn(produtoController.service, 'buscarProdutosPorCategoria').mockResolvedValue(mockProducts);
+            await expect(controller.buscarProdutos(mockReq, mockRes)).rejects.toThrow();
+            expect(CustomError).toHaveBeenCalledWith({
+                statusCode: 400,
+                errorType: 'validationError',
+                field: 'query',
+                details: [],
+                customMessage: 'É necessário informar ao menos um parâmetro de busca: nome, categoria, codigo ou fornecedor.'
+            });
+        });
 
-      await produtoController.buscarProdutos(mockReq, mockRes);
+        it('deve retornar erro 404 quando nenhum produto for encontrado', async () => {
+            const mockData = { docs: [] };
+            mockReq.query = { nome: 'ProdutoInexistente', page: 1, limite: 10 };
+            mockService.buscarProdutosPorNome.mockResolvedValue(mockData);
 
-      expect(produtoController.service.buscarProdutosPorCategoria).toHaveBeenCalledWith('Eletrônicos', 1, 10);
-    });
+            await controller.buscarProdutos(mockReq, mockRes);
 
-    it('should search products by codigo', async () => {
-      mockReq.query = { codigo: 'PROD001', page: '1', limite: '10' };
-      const mockProducts = {
-        docs: [{ _id: '1', codigo_produto: 'PROD001' }],
-        totalDocs: 1
-      };
+            expect(CommonResponse.error).toHaveBeenCalledWith(
+                mockRes,
+                404,
+                'resourceNotFound',
+                'Produto',
+                [],
+                'Nenhum produto encontrado com o(a) nome: ProdutoInexistente'
+            );
+        });
 
-      jest.spyOn(produtoController.service, 'buscarProdutosPorCodigo').mockResolvedValue(mockProducts);
+        it('deve limitar o número máximo de itens por página', async () => {
+            const mockData = { docs: [{ id: '1', nome: 'Produto 1' }] };
+            mockReq.query = { nome: 'Test', page: 1, limite: 200 };
+            mockService.buscarProdutosPorNome.mockResolvedValue(mockData);
 
-      await produtoController.buscarProdutos(mockReq, mockRes);
+            await controller.buscarProdutos(mockReq, mockRes);
 
-      expect(produtoController.service.buscarProdutosPorCodigo).toHaveBeenCalledWith('PROD001', 1, 10);
-    });
-
-    it('should search products by fornecedor', async () => {
-      mockReq.query = { fornecedor: 'Dell', page: '1', limite: '10' };
-      const mockProducts = {
-        docs: [{ _id: '1', id_fornecedor: 1 }],
-        totalDocs: 1
-      };
-
-      jest.spyOn(produtoController.service, 'buscarProdutosPorFornecedor').mockResolvedValue(mockProducts);
-
-      await produtoController.buscarProdutos(mockReq, mockRes);
-
-      expect(produtoController.service.buscarProdutosPorFornecedor).toHaveBeenCalledWith('Dell', 1, 10, true);
-    });
-
-    it('should throw error when no search parameter is provided', async () => {
-      mockReq.query = { page: '1', limite: '10' };
-
-      await expect(
-        produtoController.buscarProdutos(mockReq, mockRes)
-      ).rejects.toThrow(CustomError);
+            expect(mockService.buscarProdutosPorNome).toHaveBeenCalledWith('Test', 1, 100);
+        });
     });
 
-    it('should handle empty search results', async () => {
-      mockReq.query = { nome: 'NonExistentProduct', page: '1', limite: '10' };
-      const mockEmptyResult = {
-        docs: [],
-        totalDocs: 0
-      };
+    describe('cadastrarProduto', () => {
+        it('deve cadastrar produto com sucesso', async () => {
+            const mockProdutoData = { nome: 'Novo Produto', preco: 100 };
+            const mockCreatedProduto = { id: '1', ...mockProdutoData };
+            
+            mockReq.body = mockProdutoData;
+            ProdutoSchema.parse.mockReturnValue(mockProdutoData);
+            mockService.cadastrarProduto.mockResolvedValue(mockCreatedProduto);
 
-      jest.spyOn(produtoController.service, 'buscarProdutosPorNome').mockResolvedValue(mockEmptyResult);
+            await controller.cadastrarProduto(mockReq, mockRes);
 
-      await produtoController.buscarProdutos(mockReq, mockRes);
-
-      expect(produtoController.service.buscarProdutosPorNome).toHaveBeenCalledWith('NonExistentProduct', 1, 10);
+            expect(ProdutoSchema.parse).toHaveBeenCalledWith(mockProdutoData);
+            expect(mockService.cadastrarProduto).toHaveBeenCalledWith(mockProdutoData);
+            expect(CommonResponse.created).toHaveBeenCalledWith(
+                mockRes,
+                mockCreatedProduto,
+                201,
+                'Produto cadastrado com sucesso.'
+            );
+        });
     });
 
-    it('should use default pagination values', async () => {
-      mockReq.query = { nome: 'Notebook' };
-      const mockProducts = {
-        docs: [{ _id: '1', nome_produto: 'Notebook Dell' }],
-        totalDocs: 1
-      };
+    describe('atualizarProduto', () => {
+        it('deve atualizar produto com sucesso', async () => {
+            const mockId = '507f1f77bcf86cd799439011';
+            const mockUpdateData = { nome: 'Produto Atualizado' };
+            const mockUpdatedProduto = { id: mockId, ...mockUpdateData };
 
-      jest.spyOn(produtoController.service, 'buscarProdutosPorNome').mockResolvedValue(mockProducts);
+            mockReq.params = { id: mockId };
+            mockReq.body = mockUpdateData;
+            ProdutoUpdateSchema.parseAsync.mockResolvedValue(mockUpdateData);
+            mockService.atualizarProduto.mockResolvedValue(mockUpdatedProduto);
 
-      await produtoController.buscarProdutos(mockReq, mockRes);
+            await controller.atualizarProduto(mockReq, mockRes);
 
-      expect(produtoController.service.buscarProdutosPorNome).toHaveBeenCalledWith('Notebook', 1, 10);
+            expect(ProdutoIdSchema.parse).toHaveBeenCalledWith(mockId);
+            expect(ProdutoUpdateSchema.parseAsync).toHaveBeenCalledWith(mockUpdateData);
+            expect(mockService.atualizarProduto).toHaveBeenCalledWith(mockId, mockUpdateData);
+            expect(CommonResponse.success).toHaveBeenCalledWith(
+                mockRes,
+                mockUpdatedProduto,
+                200,
+                'Produto atualizado com sucesso.'
+            );
+        });
+
+        it('deve lançar erro quando ID não for fornecido', async () => {
+            mockReq.params = {};
+            mockReq.body = { nome: 'Produto Atualizado' };
+
+            await expect(controller.atualizarProduto(mockReq, mockRes)).rejects.toThrow();
+            expect(CustomError).toHaveBeenCalledWith({
+                statusCode: 400,
+                errorType: 'validationError',
+                field: 'id',
+                details: [],
+                customMessage: 'ID do produto é obrigatório.'
+            });
+        });
+
+        it('deve lançar erro quando nenhum dado for fornecido para atualização', async () => {
+            mockReq.params = { id: '507f1f77bcf86cd799439011' };
+            mockReq.body = {};
+
+            await expect(controller.atualizarProduto(mockReq, mockRes)).rejects.toThrow();
+            expect(CustomError).toHaveBeenCalledWith({
+                statusCode: 400,
+                errorType: 'validationError',
+                field: 'body',
+                details: [],
+                customMessage: 'Nenhum dado fornecido para atualização.'
+            });
+        });
     });
 
-    it('should respect pagination limits', async () => {
-      mockReq.query = { nome: 'Notebook', page: '2', limite: '150' }; // limite exceeds max
-      const mockProducts = {
-        docs: [{ _id: '1', nome_produto: 'Notebook Dell' }],
-        totalDocs: 1
-      };
+    describe('deletarProduto', () => {
+        it('deve deletar produto com sucesso', async () => {
+            const mockId = '507f1f77bcf86cd799439011';
+            const mockDeleteResult = { message: 'Produto deletado' };
 
-      jest.spyOn(produtoController.service, 'buscarProdutosPorNome').mockResolvedValue(mockProducts);
+            mockReq.params = { id: mockId };
+            mockService.deletarProduto.mockResolvedValue(mockDeleteResult);
 
-      await produtoController.buscarProdutos(mockReq, mockRes);
+            await controller.deletarProduto(mockReq, mockRes);
 
-      expect(produtoController.service.buscarProdutosPorNome).toHaveBeenCalledWith('Notebook', 2, 100); // limited to 100
-    });
-  });
+            expect(ProdutoIdSchema.parse).toHaveBeenCalledWith(mockId);
+            expect(mockService.deletarProduto).toHaveBeenCalledWith(mockId);
+            expect(CommonResponse.success).toHaveBeenCalledWith(
+                mockRes,
+                mockDeleteResult,
+                200,
+                'Produto excluído com sucesso.'
+            );
+        });
 
-  describe('cadastrarProduto', () => {
-    it('should create product with valid data', async () => {
-      const validProductData = {
-        nome_produto: 'Notebook Dell',
-        preco: 2500.00,
-        custo: 2000.00,
-        categoria: 'Eletrônicos',
-        estoque: 10,
-        estoque_min: 2,
-        id_fornecedor: 1,
-        codigo_produto: 'DELL001'
-      };
+        it('deve lançar erro quando ID não for fornecido', async () => {
+            mockReq.params = {};
 
-      mockReq.body = validProductData;
-      const mockCreatedProduct = { _id: '1', ...validProductData };
-
-      jest.spyOn(produtoController.service, 'cadastrarProduto').mockResolvedValue(mockCreatedProduct);
-
-      await produtoController.cadastrarProduto(mockReq, mockRes);
-
-      expect(produtoController.service.cadastrarProduto).toHaveBeenCalledWith(validProductData);
-    });
-  });
-
-  describe('atualizarProduto', () => {
-    it('should update product with valid data', async () => {
-      const validId = '507f1f77bcf86cd799439011';
-      mockReq.params.id = validId;
-      mockReq.body = { preco: 2600.00 };
-      
-      const mockUpdatedProduct = { _id: validId, preco: 2600.00 };
-
-      jest.spyOn(produtoController.service, 'atualizarProduto').mockResolvedValue(mockUpdatedProduct);
-
-      await produtoController.atualizarProduto(mockReq, mockRes);
-
-      expect(produtoController.service.atualizarProduto).toHaveBeenCalledWith(validId, { preco: 2600.00 });
+            await expect(controller.deletarProduto(mockReq, mockRes)).rejects.toThrow();
+            expect(CustomError).toHaveBeenCalledWith({
+                statusCode: 400,
+                errorType: 'validationError',
+                field: 'id',
+                details: [],
+                customMessage: 'ID do produto é obrigatório para deletar.'
+            });
+        });
     });
 
-    it('should throw error when ID is not provided', async () => {
-      mockReq.body = { preco: 2600.00 };
+    describe('listarEstoqueBaixo', () => {
+        it('deve listar produtos com estoque baixo', async () => {
+            const mockData = [
+                { id: '1', nome: 'Produto 1', estoque: 5 },
+                { id: '2', nome: 'Produto 2', estoque: 3 }
+            ];
 
-      await expect(
-        produtoController.atualizarProduto(mockReq, mockRes)
-      ).rejects.toThrow(CustomError);
+            mockService.listarEstoqueBaixo.mockResolvedValue(mockData);
+
+            await controller.listarEstoqueBaixo(mockReq, mockRes);
+
+            expect(mockService.listarEstoqueBaixo).toHaveBeenCalled();
+            expect(CommonResponse.success).toHaveBeenCalledWith(
+                mockRes,
+                mockData,
+                200,
+                'Lista de produtos com estoque baixo.'
+            );
+        });
+
+        it('deve retornar erro 404 quando não houver produtos com estoque baixo', async () => {
+            mockService.listarEstoqueBaixo.mockResolvedValue([]);
+
+            await controller.listarEstoqueBaixo(mockReq, mockRes);
+
+            expect(CommonResponse.error).toHaveBeenCalledWith(
+                mockRes,
+                404,
+                'resourceNotFound',
+                'Produto',
+                [],
+                'Nenhum produto com estoque baixo encontrado.'
+            );
+        });
+
+        it('deve retornar erro 404 quando o resultado for null', async () => {
+            mockService.listarEstoqueBaixo.mockResolvedValue(null);
+
+            await controller.listarEstoqueBaixo(mockReq, mockRes);
+
+            expect(CommonResponse.error).toHaveBeenCalledWith(
+                mockRes,
+                404,
+                'resourceNotFound',
+                'Produto',
+                [],
+                'Nenhum produto com estoque baixo encontrado.'
+            );
+        });
     });
 
-    it('should throw error when no update data is provided', async () => {
-      mockReq.params.id = '507f1f77bcf86cd799439011';
-      mockReq.body = {};
+    describe('desativarProduto', () => {
+        it('deve desativar produto com sucesso', async () => {
+            const mockId = '507f1f77bcf86cd799439011';
+            const mockResult = { id: mockId, ativo: false };
 
-      await expect(
-        produtoController.atualizarProduto(mockReq, mockRes)
-      ).rejects.toThrow(CustomError);
+            mockReq.params = { id: mockId };
+            mockService.desativarProduto.mockResolvedValue(mockResult);
+
+            await controller.desativarProduto(mockReq, mockRes);
+
+            expect(ProdutoIdSchema.parse).toHaveBeenCalledWith(mockId);
+            expect(mockService.desativarProduto).toHaveBeenCalledWith(mockId);
+            expect(CommonResponse.success).toHaveBeenCalledWith(
+                mockRes,
+                mockResult,
+                200,
+                'Produto desativado com sucesso.'
+            );
+        });
+
+        it('deve lançar erro quando ID não for fornecido', async () => {
+            mockReq.params = {};
+
+            await expect(controller.desativarProduto(mockReq, mockRes)).rejects.toThrow();
+            expect(CustomError).toHaveBeenCalledWith({
+                statusCode: 400,
+                errorType: 'validationError',
+                field: 'id',
+                details: [],
+                customMessage: 'ID do produto é obrigatório para desativar.'
+            });
+        });
     });
 
-    it('should throw error for invalid ID format', async () => {
-      mockReq.params.id = 'invalid-id';
-      mockReq.body = { preco: 2600.00 };
+    describe('reativarProduto', () => {
+        it('deve reativar produto com sucesso', async () => {
+            const mockId = '507f1f77bcf86cd799439011';
+            const mockResult = { id: mockId, ativo: true };
 
-      await expect(
-        produtoController.atualizarProduto(mockReq, mockRes)
-      ).rejects.toThrow();
+            mockReq.params = { id: mockId };
+            mockService.reativarProduto.mockResolvedValue(mockResult);
+
+            await controller.reativarProduto(mockReq, mockRes);
+
+            expect(ProdutoIdSchema.parse).toHaveBeenCalledWith(mockId);
+            expect(mockService.reativarProduto).toHaveBeenCalledWith(mockId);
+            expect(CommonResponse.success).toHaveBeenCalledWith(
+                mockRes,
+                mockResult,
+                200,
+                'Produto reativado com sucesso.'
+            );
+        });
+
+        it('deve lançar erro quando ID não for fornecido', async () => {
+            mockReq.params = {};
+
+            await expect(controller.reativarProduto(mockReq, mockRes)).rejects.toThrow();
+            expect(CustomError).toHaveBeenCalledWith({
+                statusCode: 400,
+                errorType: 'validationError',
+                field: 'id',
+                details: [],
+                customMessage: 'ID do produto é obrigatório para reativar.'
+            });
+        });
     });
-  });
 });

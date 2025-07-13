@@ -8,6 +8,7 @@ jest.mock('../../src/services/grupoService.js', () => {
         criar: jest.fn(),
         atualizar: jest.fn(),
         deletar: jest.fn(),
+        alterarStatus: jest.fn(),
         adicionarPermissao: jest.fn(),
         removerPermissao: jest.fn(),
         adicionarUsuario: jest.fn(),
@@ -257,6 +258,186 @@ describe('GrupoController', () => {
             expect(GrupoUpdateSchema.parse).toHaveBeenCalledWith(mockReq.body);
             expect(grupoController.service.atualizar).toHaveBeenCalledWith('123', validatedData);
             expect(result).toBe('success response');
+        });
+    });
+
+    describe('deletar', () => {
+        it('deve deletar grupo com sucesso', async () => {
+            const mockGrupo = { id: '123', nome: 'Grupo para deletar' };
+            mockReq.params = { id: '123' };
+            
+            grupoController.service.buscarPorId.mockResolvedValue(mockGrupo);
+            grupoController.service.deletar.mockResolvedValue();
+            CommonResponse.success.mockReturnValue('success response');
+
+            const result = await grupoController.deletar(mockReq, mockRes);
+
+            expect(grupoController.service.buscarPorId).toHaveBeenCalledWith('123');
+            expect(grupoController.service.deletar).toHaveBeenCalledWith('123');
+            expect(LogMiddleware.logCriticalEvent).toHaveBeenCalledWith(
+                mockReq.userId, 
+                'GRUPO_DELETADO', 
+                expect.objectContaining({
+                    grupo_deletado: '123',
+                    nome: mockGrupo.nome,
+                    deletado_por: mockReq.userMatricula
+                }), 
+                mockReq
+            );
+            expect(result).toBe('success response');
+        });
+
+        it('deve lançar erro quando ID não é fornecido', async () => {
+            mockReq.params = {}; // sem ID
+
+            await expect(grupoController.deletar(mockReq, mockRes))
+                .rejects.toThrow('ID do grupo é obrigatório.');
+        });
+    });
+
+    describe('ativar', () => {
+        it('deve ativar grupo com sucesso', async () => {
+            const mockGrupo = { id: '123', nome: 'Grupo', status: true };
+            mockReq.params = { id: '123' };
+            
+            grupoController.service.alterarStatus.mockResolvedValue(mockGrupo);
+            CommonResponse.success.mockReturnValue('success response');
+
+            const result = await grupoController.ativar(mockReq, mockRes);
+
+            expect(grupoController.service.alterarStatus).toHaveBeenCalledWith('123', true);
+            expect(LogMiddleware.logCriticalEvent).toHaveBeenCalledWith(
+                mockReq.userId, 
+                'GRUPO_ATIVADO', 
+                expect.objectContaining({
+                    grupo_ativado: '123',
+                    nome: mockGrupo.nome,
+                    ativado_por: mockReq.userMatricula
+                }), 
+                mockReq
+            );
+            expect(result).toBe('success response');
+        });
+
+        it('deve lançar erro quando ID não é fornecido', async () => {
+            mockReq.params = {}; // sem ID
+
+            await expect(grupoController.ativar(mockReq, mockRes))
+                .rejects.toThrow('ID do grupo é obrigatório.');
+        });
+    });
+
+    describe('desativar', () => {
+        it('deve desativar grupo com sucesso', async () => {
+            const mockGrupo = { id: '123', nome: 'Grupo', status: false };
+            mockReq.params = { id: '123' };
+            
+            grupoController.service.alterarStatus.mockResolvedValue(mockGrupo);
+            CommonResponse.success.mockReturnValue('success response');
+
+            const result = await grupoController.desativar(mockReq, mockRes);
+
+            expect(grupoController.service.alterarStatus).toHaveBeenCalledWith('123', false);
+            expect(LogMiddleware.logCriticalEvent).toHaveBeenCalledWith(
+                mockReq.userId, 
+                'GRUPO_DESATIVADO', 
+                expect.objectContaining({
+                    grupo_desativado: '123',
+                    nome: mockGrupo.nome,
+                    desativado_por: mockReq.userMatricula
+                }), 
+                mockReq
+            );
+            expect(result).toBe('success response');
+        });
+
+        it('deve lançar erro quando ID não é fornecido', async () => {
+            mockReq.params = {}; // sem ID
+
+            await expect(grupoController.desativar(mockReq, mockRes))
+                .rejects.toThrow('ID do grupo é obrigatório.');
+        });
+    });
+
+    describe('adicionarPermissao', () => {
+        it('deve adicionar permissão com sucesso', async () => {
+            const mockPermissao = { rota: 'produtos', dominio: 'localhost' };
+            const mockGrupo = { id: '123', nome: 'Grupo Teste', permissoes: [mockPermissao] };
+            
+            mockReq.params = { id: '123' };
+            mockReq.body = mockPermissao;
+            
+            grupoController.service.adicionarPermissao.mockResolvedValue(mockGrupo);
+            CommonResponse.success.mockReturnValue('success response');
+
+            const result = await grupoController.adicionarPermissao(mockReq, mockRes);
+
+            expect(grupoController.service.adicionarPermissao).toHaveBeenCalledWith('123', mockPermissao);
+            expect(LogMiddleware.logCriticalEvent).toHaveBeenCalledWith(
+                mockReq.userId, 
+                'PERMISSAO_ADICIONADA', 
+                expect.objectContaining({
+                    grupo_id: '123',
+                    grupo_nome: mockGrupo.nome,
+                    permissao_adicionada: mockPermissao,
+                    adicionado_por: mockReq.userMatricula
+                }), 
+                mockReq
+            );
+            expect(result).toBe('success response');
+        });
+
+        it('deve lançar erro quando ID não é fornecido', async () => {
+            mockReq.params = {}; // sem ID
+
+            await expect(grupoController.adicionarPermissao(mockReq, mockRes))
+                .rejects.toThrow('ID do grupo é obrigatório.');
+        });
+    });
+
+    describe('removerPermissao', () => {
+        it('deve remover permissão com sucesso', async () => {
+            const mockGrupo = { id: '123', nome: 'Grupo Teste', permissoes: [] };
+            
+            mockReq.params = { id: '123' };
+            mockReq.body = { rota: 'produtos', dominio: 'localhost' };
+            
+            grupoController.service.removerPermissao.mockResolvedValue(mockGrupo);
+            CommonResponse.success.mockReturnValue('success response');
+
+            const result = await grupoController.removerPermissao(mockReq, mockRes);
+
+            expect(grupoController.service.removerPermissao).toHaveBeenCalledWith('123', 'produtos', 'localhost');
+            expect(LogMiddleware.logCriticalEvent).toHaveBeenCalledWith(
+                mockReq.userId, 
+                'PERMISSAO_REMOVIDA', 
+                expect.objectContaining({
+                    grupo_id: '123',
+                    grupo_nome: mockGrupo.nome,
+                    permissao_removida: {
+                        rota: 'produtos',
+                        dominio: 'localhost'
+                    },
+                    removido_por: mockReq.userMatricula
+                }), 
+                mockReq
+            );
+            expect(result).toBe('success response');
+        });
+
+        it('deve lançar erro quando ID não é fornecido', async () => {
+            mockReq.params = {}; // sem ID
+
+            await expect(grupoController.removerPermissao(mockReq, mockRes))
+                .rejects.toThrow('ID do grupo é obrigatório.');
+        });
+
+        it('deve lançar erro quando rota não é fornecida', async () => {
+            mockReq.params = { id: '123' };
+            mockReq.body = {}; // sem rota
+
+            await expect(grupoController.removerPermissao(mockReq, mockRes))
+                .rejects.toThrow('Nome da rota é obrigatório.');
         });
     });
 });

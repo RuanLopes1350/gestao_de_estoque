@@ -8,6 +8,8 @@ jest.mock('../../src/services/fornecedorService.js', () => {
         buscarPorId: jest.fn(),
         atualizar: jest.fn(),
         deletar: jest.fn(),
+        desativarFornecedor: jest.fn(),
+        reativarFornecedor: jest.fn(),
     }));
 });
 
@@ -36,11 +38,28 @@ jest.mock('../../src/utils/helpers/HttpStatusCodes.js', () => ({
     }
 }));
 
+jest.mock('../../src/utils/helpers/CustomError.js', () => {
+    return {
+        __esModule: true,
+        default: class MockCustomError extends Error {
+            constructor({ statusCode, errorType, field, details, customMessage }) {
+                super(customMessage || 'Custom error');
+                this.statusCode = statusCode;
+                this.errorType = errorType;
+                this.field = field;
+                this.details = details;
+                this.customMessage = customMessage;
+            }
+        }
+    };
+});
+
 import FornecedorController from '../../src/controllers/FornecedorController.js';
 import FornecedorService from '../../src/services/fornecedorService.js';
 import CommonResponse from '../../src/utils/helpers/CommonResponse.js';
 import HttpStatusCodes from '../../src/utils/helpers/HttpStatusCodes.js';
 import { FornecedorIdSchema } from '../../src/utils/validators/schemas/zod/querys/FornecedorQuerySchema.js';
+import CustomError from '../../src/utils/helpers/CustomError.js';
 
 describe('FornecedorController', () => {
     let fornecedorController;
@@ -185,6 +204,66 @@ describe('FornecedorController', () => {
                 "Fornecedor eliminado com sucesso."
             );
             expect(result).toBe('success response');
+        });
+    });
+
+    describe('desativarFornecedor', () => {
+        it('deve desativar fornecedor com sucesso', async () => {
+            const mockFornecedor = { id: 'fornecedor123', status: false };
+            
+            mockReq.params = { id: 'fornecedor123' };
+            FornecedorIdSchema.parse.mockReturnValue('fornecedor123');
+            fornecedorController.service.desativarFornecedor.mockResolvedValue(mockFornecedor);
+            CommonResponse.success.mockReturnValue('success response');
+
+            const result = await fornecedorController.desativarFornecedor(mockReq, mockRes);
+
+            expect(FornecedorIdSchema.parse).toHaveBeenCalledWith('fornecedor123');
+            expect(fornecedorController.service.desativarFornecedor).toHaveBeenCalledWith('fornecedor123');
+            expect(CommonResponse.success).toHaveBeenCalledWith(
+                mockRes,
+                mockFornecedor,
+                200,
+                "fornecedor desativado com sucesso."
+            );
+            expect(result).toBe('success response');
+        });
+
+        it('deve lançar erro quando ID não é fornecido', async () => {
+            mockReq.params = {}; // sem ID
+
+            await expect(fornecedorController.desativarFornecedor(mockReq, mockRes))
+                .rejects.toThrow('ID do fornecedor é obrigatório para desativar.');
+        });
+    });
+
+    describe('reativarFornecedor', () => {
+        it('deve reativar fornecedor com sucesso', async () => {
+            const mockFornecedor = { id: 'fornecedor123', status: true };
+            
+            mockReq.params = { id: 'fornecedor123' };
+            FornecedorIdSchema.parse.mockReturnValue('fornecedor123');
+            fornecedorController.service.reativarFornecedor.mockResolvedValue(mockFornecedor);
+            CommonResponse.success.mockReturnValue('success response');
+
+            const result = await fornecedorController.reativarFornecedor(mockReq, mockRes);
+
+            expect(FornecedorIdSchema.parse).toHaveBeenCalledWith('fornecedor123');
+            expect(fornecedorController.service.reativarFornecedor).toHaveBeenCalledWith('fornecedor123');
+            expect(CommonResponse.success).toHaveBeenCalledWith(
+                mockRes,
+                mockFornecedor,
+                200,
+                "fornecedor reativado com sucesso."
+            );
+            expect(result).toBe('success response');
+        });
+
+        it('deve lançar erro quando ID não é fornecido', async () => {
+            mockReq.params = {}; // sem ID
+
+            await expect(fornecedorController.reativarFornecedor(mockReq, mockRes))
+                .rejects.toThrow('ID do fornecedor é obrigatório para reativar.');
         });
     });
 });
