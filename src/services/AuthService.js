@@ -19,7 +19,9 @@ export class AuthService {
     }
 
     async autenticar(matricula, senha) {
+        console.log('🔍 [AuthService] Iniciando autenticação para matrícula:', matricula);
         const usuario = await this.usuarioRepository.buscarPorMatricula(matricula, '+senha +senha_definida');
+        console.log('🔍 [AuthService] Usuário encontrado com ID:', usuario?._id?.toString());
 
         if (!usuario) {
             throw new CustomError({
@@ -57,8 +59,10 @@ export class AuthService {
         }
 
         // Gerar tokens
+        console.log('🔍 [AuthService] Gerando tokens para usuário ID:', usuario._id?.toString());
         const accessToken = this._gerarAccessToken(usuario);
         const refreshToken = this._gerarRefreshToken(usuario);
+        console.log('🔍 [AuthService] Token gerado:', accessToken.substring(0, 50) + '...');
 
         // Armazenar tokens no usuário e marcar como online
         await this.usuarioRepository.armazenarTokens(usuario._id, accessToken, refreshToken);

@@ -10,6 +10,7 @@
     "dev": "nodemon server.js",
     "seed": "node src/seeds/seeds.js",
     "seed:permissions": "node src/seeds/seedPermissions.js",
+    "update-admin": "node update-admin-permissions.js",
     "test": "jest --coverage --detectOpenHandles --silent",
     "test:unit": "jest --selectProjects unit --coverage --detectOpenHandles",
     "test:integration": "jest --selectProjects integration --coverage --detectOpenHandles",

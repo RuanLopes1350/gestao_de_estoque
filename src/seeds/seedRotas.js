@@ -58,41 +58,41 @@ const rotasPadrao = [
         rota: 'auth',
         dominio: 'localhost',
         ativo: true,
-        buscar: false,
-        enviar: true, // Para login, logout, etc
-        substituir: false,
+        buscar: true,    // Para endpoints que precisam de GET
+        enviar: true,    // Para login, logout, etc
+        substituir: true, // Para permitir operações completas
         modificar: true, // Para alteração de senha
-        excluir: false
+        excluir: true    // Para permitir revogação de tokens
     },
     {
         rota: 'logs',
         dominio: 'localhost',
         ativo: true,
-        buscar: true,
-        enviar: false,
-        substituir: false,
-        modificar: false,
-        excluir: false
+        buscar: true,    // Para visualizar logs
+        enviar: true,    // Para criar logs se necessário
+        substituir: true, // Para operações completas
+        modificar: true, // Para modificar logs se necessário
+        excluir: true    // Para limpar logs antigos
     },
     {
         rota: 'relatorios',
         dominio: 'localhost',
         ativo: true,
-        buscar: true,
-        enviar: false,
-        substituir: false,
-        modificar: false,
-        excluir: false
+        buscar: true,    // Para visualizar relatórios
+        enviar: true,    // Para gerar relatórios
+        substituir: true, // Para operações completas
+        modificar: true, // Para modificar relatórios
+        excluir: true    // Para excluir relatórios
     },
     {
         rota: 'dashboard',
         dominio: 'localhost',
         ativo: true,
-        buscar: true,
-        enviar: false,
-        substituir: false,
-        modificar: false,
-        excluir: false
+        buscar: true,    // Para visualizar dashboard
+        enviar: true,    // Para criar widgets do dashboard
+        substituir: true, // Para operações completas
+        modificar: true, // Para modificar dashboard
+        excluir: true    // Para excluir widgets
     }
 ];
 

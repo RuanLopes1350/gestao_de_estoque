@@ -26,18 +26,18 @@ async function seedUsuario() {
         // Hash da senha do administrador
         const senhaHash = await bcrypt.hash('Admin@123', 10);
         
-        // Adiciona um usuário administrador fixo com grupo
+        // Adiciona um usuário administrador fixo com grupo e permissões completas
         usuarios.push({
-            nome_usuario: 'Administrador',
+            nome_usuario: 'Administrador Master',
             email: 'admin@sistema.com',
-            matricula: 'ADM0001',
+            matricula: 'ADM0001', // admin0001 equivalente
             senha: senhaHash,
             senha_definida: true,
             perfil: 'administrador',
             ativo: true,
             online: false,
             grupos: grupoAdmin ? [grupoAdmin._id] : [],
-            permissoes: [], // Admin tem tudo via grupo
+            permissoes: [], // Admin tem TODAS as permissões via grupo Administradores
             data_cadastro: new Date(),
             data_ultima_atualizacao: new Date()
         });
@@ -86,15 +86,47 @@ async function seedUsuario() {
         
         for (const usuario of result) {
             const gruposNomes = [];
+            let totalPermissoes = 0;
+            
             for (const grupoId of usuario.grupos) {
                 const grupo = await Grupo.findById(grupoId);
-                if (grupo) gruposNomes.push(grupo.nome);
+                if (grupo) {
+                    gruposNomes.push(grupo.nome);
+                    totalPermissoes += grupo.permissoes.length;
+                    
+                    // Log especial para o usuário administrador
+                    if (usuario.matricula === 'ADM0001' && grupo.nome === 'Administradores') {
+                        console.log(`\n🔑 USUÁRIO ADMINISTRADOR ABSOLUTO:`);
+                        console.log(`   👤 ${usuario.nome_usuario} (${usuario.perfil})`);
+                        console.log(`   📧 ${usuario.email}`);
+                        console.log(`   🎫 Matrícula: ${usuario.matricula}`);
+                        console.log(`   👥 Grupo: ${grupo.nome}`);
+                        console.log(`   🔓 Total de permissões: ${grupo.permissoes.length} rotas`);
+                        console.log(`   📋 Rotas com ACESSO ABSOLUTO (GET,POST,PUT,PATCH,DELETE):`);
+                        
+                        grupo.permissoes.forEach((perm, index) => {
+                            const metodos = [];
+                            if (perm.buscar) metodos.push('GET');
+                            if (perm.enviar) metodos.push('POST');
+                            if (perm.substituir) metodos.push('PUT');
+                            if (perm.modificar) metodos.push('PATCH');
+                            if (perm.excluir) metodos.push('DELETE');
+                            console.log(`      ${index + 1}. /${perm.rota} → [${metodos.join(', ')}]`);
+                        });
+                        console.log(`   ✅ USUÁRIO ADM0001 TEM ACESSO COMPLETO A TODAS AS ROTAS!\n`);
+                        continue;
+                    }
+                }
             }
             
-            console.log(`   👤 ${usuario.nome_usuario} (${usuario.perfil})`);
-            console.log(`      📧 ${usuario.email}`);
-            console.log(`      👥 Grupos: ${gruposNomes.join(', ') || 'Nenhum'}`);
-            console.log(`      🔐 Permissões individuais: ${usuario.permissoes.length}`);
+            // Log normal para outros usuários
+            if (usuario.matricula !== 'ADM0001') {
+                console.log(`   👤 ${usuario.nome_usuario} (${usuario.perfil})`);
+                console.log(`      📧 ${usuario.email}`);
+                console.log(`      👥 Grupos: ${gruposNomes.join(', ') || 'Nenhum'}`);
+                console.log(`      🔐 Permissões do grupo: ${totalPermissoes}`);
+                console.log(`      🔐 Permissões individuais: ${usuario.permissoes.length}`);
+            }
         }
         
         return result;

@@ -6,78 +6,188 @@ import getGlobalFakeMapping from './globalFakeMapping.js';
 const gruposPadrao = [
     {
         nome: 'Administradores',
-        descricao: 'Grupo com acesso completo ao sistema',
+        descricao: 'Grupo com acesso completo ao sistema - TODAS as permissões',
         ativo: true,
         permissoes: [
             {
                 rota: 'produtos',
                 dominio: 'localhost',
                 ativo: true,
-                buscar: true,
-                enviar: true,
-                substituir: true,
-                modificar: true,
-                excluir: true
+                buscar: true,    // GET
+                enviar: true,    // POST
+                substituir: true, // PUT
+                modificar: true,  // PATCH
+                excluir: true     // DELETE
             },
             {
                 rota: 'fornecedores',
                 dominio: 'localhost',
                 ativo: true,
-                buscar: true,
-                enviar: true,
-                substituir: true,
-                modificar: true,
-                excluir: true
+                buscar: true,    // GET
+                enviar: true,    // POST
+                substituir: true, // PUT
+                modificar: true,  // PATCH
+                excluir: true     // DELETE
             },
             {
                 rota: 'usuarios',
                 dominio: 'localhost',
                 ativo: true,
-                buscar: true,
-                enviar: true,
-                substituir: true,
-                modificar: true,
-                excluir: true
+                buscar: true,    // GET
+                enviar: true,    // POST
+                substituir: true, // PUT
+                modificar: true,  // PATCH
+                excluir: true     // DELETE
             },
             {
                 rota: 'grupos',
                 dominio: 'localhost',
                 ativo: true,
-                buscar: true,
-                enviar: true,
-                substituir: true,
-                modificar: true,
-                excluir: true
+                buscar: true,    // GET
+                enviar: true,    // POST
+                substituir: true, // PUT
+                modificar: true,  // PATCH
+                excluir: true     // DELETE
+            },
+            {
+                rota: 'movimentacoes',
+                dominio: 'localhost',
+                ativo: true,
+                buscar: true,    // GET
+                enviar: true,    // POST
+                substituir: true, // PUT
+                modificar: true,  // PATCH
+                excluir: true     // DELETE
+            },
+            {
+                rota: 'auth',
+                dominio: 'localhost',
+                ativo: true,
+                buscar: true,    // GET
+                enviar: true,    // POST
+                substituir: true, // PUT
+                modificar: true,  // PATCH
+                excluir: true     // DELETE
             },
             {
                 rota: 'logs',
                 dominio: 'localhost',
                 ativo: true,
-                buscar: true,
-                enviar: false,
-                substituir: false,
-                modificar: false,
-                excluir: false
+                buscar: true,    // GET
+                enviar: true,    // POST
+                substituir: true, // PUT
+                modificar: true,  // PATCH
+                excluir: true     // DELETE
             },
             {
                 rota: 'relatorios',
                 dominio: 'localhost',
                 ativo: true,
-                buscar: true,
-                enviar: false,
-                substituir: false,
-                modificar: false,
-                excluir: false
+                buscar: true,    // GET
+                enviar: true,    // POST
+                substituir: true, // PUT
+                modificar: true,  // PATCH
+                excluir: true     // DELETE
             },
             {
                 rota: 'dashboard',
                 dominio: 'localhost',
                 ativo: true,
-                buscar: true,
-                enviar: false,
-                substituir: false,
-                modificar: false,
-                excluir: false
+                buscar: true,    // GET
+                enviar: true,    // POST
+                substituir: true, // PUT
+                modificar: true,  // PATCH
+                excluir: true     // DELETE
+            },
+            {
+                rota: 'permissoes',
+                dominio: 'localhost',
+                ativo: true,
+                buscar: true,    // GET
+                enviar: true,    // POST
+                substituir: true, // PUT
+                modificar: true,  // PATCH
+                excluir: true     // DELETE
+            },
+            {
+                rota: 'api-docs',
+                dominio: 'localhost',
+                ativo: true,
+                buscar: true,    // GET
+                enviar: true,    // POST
+                substituir: true, // PUT
+                modificar: true,  // PATCH
+                excluir: true     // DELETE
+            },
+            {
+                rota: 'swagger',
+                dominio: 'localhost',
+                ativo: true,
+                buscar: true,    // GET
+                enviar: true,    // POST
+                substituir: true, // PUT
+                modificar: true,  // PATCH
+                excluir: true     // DELETE
+            },
+            {
+                rota: 'perfis',
+                dominio: 'localhost',
+                ativo: true,
+                buscar: true,    // GET
+                enviar: true,    // POST
+                substituir: true, // PUT
+                modificar: true,  // PATCH
+                excluir: true     // DELETE
+            },
+            {
+                rota: 'configuracoes',
+                dominio: 'localhost',
+                ativo: true,
+                buscar: true,    // GET
+                enviar: true,    // POST
+                substituir: true, // PUT
+                modificar: true,  // PATCH
+                excluir: true     // DELETE
+            },
+            {
+                rota: 'backups',
+                dominio: 'localhost',
+                ativo: true,
+                buscar: true,    // GET
+                enviar: true,    // POST
+                substituir: true, // PUT
+                modificar: true,  // PATCH
+                excluir: true     // DELETE
+            },
+            {
+                rota: 'uploads',
+                dominio: 'localhost',
+                ativo: true,
+                buscar: true,    // GET
+                enviar: true,    // POST
+                substituir: true, // PUT
+                modificar: true,  // PATCH
+                excluir: true     // DELETE
+            },
+            {
+                rota: 'exports',
+                dominio: 'localhost',
+                ativo: true,
+                buscar: true,    // GET
+                enviar: true,    // POST
+                substituir: true, // PUT
+                modificar: true,  // PATCH
+                excluir: true     // DELETE
+            },
+            {
+                rota: 'imports',
+                dominio: 'localhost',
+                ativo: true,
+                buscar: true,    // GET
+                enviar: true,    // POST
+                substituir: true, // PUT
+                modificar: true,  // PATCH
+                excluir: true     // DELETE
             }
         ]
     },
@@ -263,10 +373,62 @@ async function seedGrupos() {
             return gruposExistentesData;
         }
 
+        // Buscar TODAS as rotas existentes no banco para o grupo Administradores
+        const todasAsRotas = await import('../models/Rotas.js').then(module => module.default);
+        const rotasExistentes = await todasAsRotas.find({});
+        
+        console.log(`📋 Encontradas ${rotasExistentes.length} rotas no sistema para permissões completas`);
+
+        // Criar permissões COMPLETAS para TODAS as rotas encontradas
+        const permissoesCompletas = rotasExistentes.map(rota => ({
+            rota: rota.rota,
+            dominio: rota.dominio || 'localhost',
+            ativo: true,
+            buscar: true,    // GET
+            enviar: true,    // POST  
+            substituir: true, // PUT
+            modificar: true,  // PATCH
+            excluir: true     // DELETE
+        }));
+
+        // Garantir que rotas essenciais estejam incluídas (caso não existam ainda no banco)
+        const rotasEssenciais = [
+            'produtos', 'fornecedores', 'usuarios', 'grupos', 
+            'movimentacoes', 'auth', 'logs', 'relatorios', 'dashboard',
+            'permissoes', 'api-docs', 'perfis', 'configuracoes', 'backups',
+            'uploads', 'exports', 'imports', 'swagger', 'health', 'metrics'
+        ];
+
+        rotasEssenciais.forEach(nomeRota => {
+            const jaExiste = permissoesCompletas.find(p => p.rota === nomeRota);
+            if (!jaExiste) {
+                permissoesCompletas.push({
+                    rota: nomeRota,
+                    dominio: 'localhost',
+                    ativo: true,
+                    buscar: true,    // GET
+                    enviar: true,    // POST
+                    substituir: true, // PUT
+                    modificar: true,  // PATCH
+                    excluir: true     // DELETE
+                });
+            }
+        });
+
+        // Atualizar o grupo Administradores com TODAS as permissões
+        const gruposAtualizados = [...gruposPadrao];
+        const indexAdmin = gruposAtualizados.findIndex(g => g.nome === 'Administradores');
+        
+        if (indexAdmin !== -1) {
+            gruposAtualizados[indexAdmin].permissoes = permissoesCompletas;
+            gruposAtualizados[indexAdmin].descricao = `Grupo com acesso ABSOLUTO - ${permissoesCompletas.length} rotas com TODAS as permissões (GET, POST, PUT, PATCH, DELETE)`;
+            console.log(`🔓 Grupo Administradores configurado com ${permissoesCompletas.length} permissões completas`);
+        }
+
         const fakeMapping = getGlobalFakeMapping();
         
-        // Combinar grupos padrão com grupos dinâmicos
-        const todosGrupos = [...gruposPadrao];
+        // Combinar grupos atualizados com grupos dinâmicos
+        const todosGrupos = [...gruposAtualizados];
         
         // Adicionar alguns grupos dinâmicos usando o fakeMapping
         const gruposDinamicos = gerarGruposDinamicos(fakeMapping, 2);
@@ -277,6 +439,13 @@ async function seedGrupos() {
         
         console.log(`✅ ${gruposInseridos.length} grupos criados com sucesso!`);
         console.log('👥 Grupos criados:', gruposInseridos.map(g => g.nome).join(', '));
+
+        // Log específico para o grupo Administradores
+        const grupoAdminCriado = gruposInseridos.find(g => g.nome === 'Administradores');
+        if (grupoAdminCriado) {
+            console.log(`🔑 Grupo Administradores criado com ${grupoAdminCriado.permissoes.length} permissões COMPLETAS`);
+            console.log('📋 Rotas com acesso absoluto:', grupoAdminCriado.permissoes.map(p => p.rota).join(', '));
+        }
 
         // Exibir resumo das permissões
         console.log('\n📋 Resumo das permissões por grupo:');
