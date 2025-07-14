@@ -58,6 +58,12 @@ router
         '/:id',
         LogMiddleware.log('ATUALIZACAO_MOVIMENTACAO'),
         asyncWrapper(movimentacoesController.atualizarMovimentacao.bind(movimentacoesController))
+    )
+    
+    .delete(
+        '/:id',
+        LogMiddleware.log('EXCLUSAO_MOVIMENTACAO'),
+        asyncWrapper(movimentacoesController.deletarMovimentacao.bind(movimentacoesController))
     );
 
 

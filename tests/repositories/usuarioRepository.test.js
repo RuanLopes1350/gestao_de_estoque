@@ -330,17 +330,7 @@ describe('UsuarioRepository', () => {
             expect(result).toEqual(mockCreatedUser);
         });
 
-        it.skip('should handle duplicate key error', async () => {
-            const userData = { nome_usuario: 'Test User', matricula: '12345' };
-            const duplicateError = {
-                code: 11000,
-                keyValue: { matricula: '12345' }
-            };
 
-            Usuario.create.mockRejectedValue(duplicateError);
-
-            await expect(usuarioRepository.cadastrarUsuario(userData)).rejects.toThrow();
-        });
     });
 
     describe('atualizarUsuario', () => {

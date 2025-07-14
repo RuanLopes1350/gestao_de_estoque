@@ -1,4 +1,6 @@
-FROM node:22-alpine
+FROM node:22
+
+EXPOSE 5011
 
 WORKDIR /node-app
 
