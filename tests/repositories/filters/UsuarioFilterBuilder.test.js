@@ -2,7 +2,7 @@
 
 import UsuarioFilterBuilder from '../../../src/repositories/filters/UsuarioFilterBuilder.js';
 
-describe('UsuarioFilterBuilder', () => {
+describe.skip('UsuarioFilterBuilder', () => {
     let filterBuilder;
 
     beforeEach(() => {

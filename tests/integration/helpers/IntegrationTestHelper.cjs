@@ -117,7 +117,45 @@ class IntegrationTestHelper {
                 nome: { type: String, required: true, unique: true },
                 descricao: { type: String },
                 ativo: { type: Boolean, default: true },
-                permissoes: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Permissao' }],
+                permissoes: [
+                    {
+                        rota: { 
+                            type: String, 
+                            required: true,
+                            index: true,
+                            trim: true,
+                            lowercase: true
+                        },
+                        dominio: { 
+                            type: String,
+                            default: 'localhost'
+                        },
+                        ativo: { 
+                            type: Boolean, 
+                            default: true 
+                        },
+                        buscar: { 
+                            type: Boolean, 
+                            default: false 
+                        },
+                        enviar: { 
+                            type: Boolean, 
+                            default: false 
+                        },
+                        substituir: { 
+                            type: Boolean, 
+                            default: false 
+                        },
+                        modificar: { 
+                            type: Boolean, 
+                            default: false 
+                        },
+                        excluir: { 
+                            type: Boolean, 
+                            default: false 
+                        },
+                    }
+                ],
                 data_criacao: { type: Date, default: Date.now },
                 data_atualizacao: { type: Date, default: Date.now }
             });
@@ -130,11 +168,27 @@ class IntegrationTestHelper {
                 return;
             }
             
+            // Criar permissões completas para o grupo admin
+            const adminPermissions = [
+                { rota: 'produtos', dominio: 'localhost', ativo: true, buscar: true, enviar: true, substituir: true, modificar: true, excluir: true },
+                { rota: 'fornecedores', dominio: 'localhost', ativo: true, buscar: true, enviar: true, substituir: true, modificar: true, excluir: true },
+                { rota: 'usuarios', dominio: 'localhost', ativo: true, buscar: true, enviar: true, substituir: true, modificar: true, excluir: true },
+                { rota: 'grupos', dominio: 'localhost', ativo: true, buscar: true, enviar: true, substituir: true, modificar: true, excluir: true },
+                { rota: 'movimentacoes', dominio: 'localhost', ativo: true, buscar: true, enviar: true, substituir: true, modificar: true, excluir: true },
+                { rota: 'auth', dominio: 'localhost', ativo: true, buscar: false, enviar: true, substituir: false, modificar: true, excluir: false },
+                { rota: 'logs', dominio: 'localhost', ativo: true, buscar: true, enviar: false, substituir: false, modificar: false, excluir: false }
+            ];
+            
             const grupos = [
-                { nome: 'admin', descricao: 'Administradores do sistema', ativo: true },
-                { nome: 'vendedor', descricao: 'Vendedores', ativo: true },
-                { nome: 'estoquista', descricao: 'Responsáveis pelo estoque', ativo: true },
-                { nome: 'auditor', descricao: 'Auditores do sistema', ativo: true }
+                { 
+                    nome: 'admin', 
+                    descricao: 'Administradores do sistema', 
+                    ativo: true,
+                    permissoes: adminPermissions
+                },
+                { nome: 'vendedor', descricao: 'Vendedores', ativo: true, permissoes: [] },
+                { nome: 'estoquista', descricao: 'Responsáveis pelo estoque', ativo: true, permissoes: [] },
+                { nome: 'auditor', descricao: 'Auditores do sistema', ativo: true, permissoes: [] }
             ];
             
             await Grupo.insertMany(grupos);
@@ -159,8 +213,46 @@ class IntegrationTestHelper {
                 senha_definida: { type: Boolean, default: false },
                 telefone: String,
                 ativo: { type: Boolean, default: true },
-                id_grupo: { type: mongoose.Schema.Types.ObjectId, ref: 'Grupo' },
-                permissoes_individuais: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Permissao' }],
+                grupos: [{ type: mongoose.Schema.Types.ObjectId, ref: 'grupos' }],
+                permissoes: [
+                    {
+                        rota: { 
+                            type: String, 
+                            required: true,
+                            index: true,
+                            trim: true,
+                            lowercase: true
+                        },
+                        dominio: { 
+                            type: String,
+                            default: 'localhost'
+                        },
+                        ativo: { 
+                            type: Boolean, 
+                            default: true 
+                        },
+                        buscar: { 
+                            type: Boolean, 
+                            default: false 
+                        },
+                        enviar: { 
+                            type: Boolean, 
+                            default: false 
+                        },
+                        substituir: { 
+                            type: Boolean, 
+                            default: false 
+                        },
+                        modificar: { 
+                            type: Boolean, 
+                            default: false 
+                        },
+                        excluir: { 
+                            type: Boolean, 
+                            default: false 
+                        },
+                    }
+                ],
                 data_criacao: { type: Date, default: Date.now },
                 data_atualizacao: { type: Date, default: Date.now }
             });
@@ -190,7 +282,7 @@ class IntegrationTestHelper {
                     senha_definida: true,
                     telefone: '(11) 99999-9999',
                     ativo: true,
-                    id_grupo: grupoAdmin._id
+                    grupos: [grupoAdmin._id]
                 },
                 {
                     nome_usuario: 'Usuario Teste',
@@ -200,7 +292,7 @@ class IntegrationTestHelper {
                     senha_definida: true,
                     telefone: '(11) 88888-8888',
                     ativo: true,
-                    id_grupo: grupoAdmin._id
+                    grupos: [grupoAdmin._id]
                 }
             ];
             
@@ -219,12 +311,25 @@ class IntegrationTestHelper {
 
     async teardownDatabase() {
         try {
+            // Fechar todas as conexões do mongoose
             if (mongoose.connection.readyState !== 0) {
+                await mongoose.connection.close();
                 await mongoose.disconnect();
             }
+            
+            // Parar o servidor MongoDB em memória
             if (this.mongoServer) {
                 await this.mongoServer.stop();
                 this.mongoServer = null;
+            }
+            
+            // Limpar cache de models do mongoose
+            mongoose.models = {};
+            mongoose.modelSchemas = {};
+            
+            // Forçar garbage collection se possível
+            if (global.gc) {
+                global.gc();
             }
         } catch (error) {
             console.error('❌ Erro no teardown:', error);
@@ -627,16 +732,15 @@ class IntegrationTestHelper {
             const fornecedor = await this.createTestFornecedor(token);
             
             const produtoData = {
-                nome: 'Produto Teste',
+                nome_produto: 'Produto Teste',
                 descricao: 'Produto criado para testes',
                 preco: 99.99,
+                custo: 50.00,
+                estoque: 100,
+                estoque_min: 10,
                 categoria: 'Categoria Teste',
-                fornecedor: fornecedor._id,
-                estoque: {
-                    quantidade: 100,
-                    minimo: 10,
-                    maximo: 1000
-                }
+                id_fornecedor: fornecedor._id || fornecedor.id || 1,
+                codigo_produto: 'PROD-TEST-HELPER'
             };
             
             const response = await request(getApp())

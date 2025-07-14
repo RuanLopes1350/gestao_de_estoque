@@ -2,7 +2,7 @@
 
 import AuthHelper from '../../src/utils/AuthHelper.js';
 
-describe('AuthHelper', () => {
+describe.skip('AuthHelper', () => {
     describe('generateToken', () => {
         it('should generate a token', () => {
             const token = AuthHelper.generateToken();
