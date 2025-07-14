@@ -2,8 +2,16 @@ import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+// Compatibilidade com Jest/testes
+let __filename, __dirname;
+try {
+    __filename = fileURLToPath(import.meta.url);
+    __dirname = path.dirname(__filename);
+} catch (e) {
+    // Em ambiente de teste, usar valores padrão
+    __filename = 'LogService.js';
+    __dirname = process.cwd();
+}
 
 class LogService {
     constructor() {

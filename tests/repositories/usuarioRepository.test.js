@@ -198,6 +198,62 @@ describe('UsuarioRepository', () => {
         });
     });
 
+    describe('listarUsuarios - additional filter tests', () => {
+        it('deve aplicar filtro por nome_usuario', async () => {
+            const req = { query: { nome_usuario: 'João' } };
+            const mockResult = { docs: [], totalDocs: 0 };
+            Usuario.paginate.mockResolvedValue(mockResult);
+
+            await usuarioRepository.listarUsuarios(req);
+
+            expect(Usuario.paginate).toHaveBeenCalledWith(
+                expect.objectContaining({
+                    nome_usuario: { $regex: 'João', $options: 'i' }
+                }),
+                expect.any(Object)
+            );
+        });
+
+        it('deve aplicar filtro por matricula', async () => {
+            const req = { query: { matricula: '12345' } };
+            const mockResult = { docs: [], totalDocs: 0 };
+            Usuario.paginate.mockResolvedValue(mockResult);
+
+            await usuarioRepository.listarUsuarios(req);
+
+            expect(Usuario.paginate).toHaveBeenCalledWith(
+                expect.objectContaining({
+                    matricula: { $regex: '12345', $options: 'i' }
+                }),
+                expect.any(Object)
+            );
+        });
+
+        it('deve aplicar filtro por cargo', async () => {
+            const req = { query: { cargo: 'admin' } };
+            const mockResult = { docs: [], totalDocs: 0 };
+            Usuario.paginate.mockResolvedValue(mockResult);
+
+            await usuarioRepository.listarUsuarios(req);
+
+            expect(Usuario.paginate).toHaveBeenCalledWith(
+                expect.objectContaining({
+                    cargo: { $regex: 'admin', $options: 'i' }
+                }),
+                expect.any(Object)
+            );
+        });
+
+        it('deve lançar erro quando usuário não for encontrado por ID', async () => {
+            const req = { params: { id: '507f1f77bcf86cd799439011' } };
+            Usuario.findById.mockResolvedValue(null);
+
+            await expect(usuarioRepository.listarUsuarios(req))
+                .rejects
+                .toThrow('Usuario não encontrado(a).');
+        });
+    });
+
     describe('buscarPorId', () => {
         it('should return user by ID', async () => {
             const userId = '507f1f77bcf86cd799439011';
@@ -242,6 +298,20 @@ describe('UsuarioRepository', () => {
             const result = await usuarioRepository.buscarPorMatricula(matricula);
             expect(result).toBeNull();
         });
+
+        it('deve buscar usuário com senha incluída', async () => {
+            const matricula = '12345';
+            const mockUser = { nome_usuario: 'João', senha: 'hashedpassword' };
+            const mockSelect = jest.fn().mockResolvedValue(mockUser);
+            const mockFindOne = jest.fn().mockReturnValue({ select: mockSelect });
+            Usuario.findOne = mockFindOne;
+
+            const result = await usuarioRepository.buscarPorMatricula(matricula, true);
+
+            expect(mockFindOne).toHaveBeenCalledWith({ matricula });
+            expect(mockSelect).toHaveBeenCalledWith('+senha');
+            expect(result).toBe(mockUser);
+        });
     });
 
     describe('cadastrarUsuario', () => {
@@ -249,10 +319,13 @@ describe('UsuarioRepository', () => {
             const userData = { nome_usuario: 'Test User', matricula: '12345' };
             const mockCreatedUser = { _id: '1', ...userData };
 
+            // Mock the findOne to return null (no existing user)
+            Usuario.findOne.mockResolvedValue(null);
             Usuario.create.mockResolvedValue(mockCreatedUser);
 
             const result = await usuarioRepository.cadastrarUsuario(userData);
 
+            expect(Usuario.findOne).toHaveBeenCalledWith({ matricula: '12345' });
             expect(Usuario.create).toHaveBeenCalledWith(userData);
             expect(result).toEqual(mockCreatedUser);
         });
@@ -308,6 +381,17 @@ describe('UsuarioRepository', () => {
             Usuario.findByIdAndUpdate.mockResolvedValue(null);
 
             await expect(usuarioRepository.atualizarUsuario(validObjectId, updateData)).rejects.toThrow(CustomError);
+        });
+
+        it('deve lançar erro quando usuário não for encontrado para atualização', async () => {
+            const matricula = '12345';
+            const dados = { nome_usuario: 'João Updated' };
+            
+            Usuario.findByIdAndUpdate.mockResolvedValue(null);
+
+            await expect(usuarioRepository.atualizarUsuario(matricula, dados))
+                .rejects
+                .toThrow('Usuário não encontrado');
         });
     });
 
@@ -366,6 +450,200 @@ describe('UsuarioRepository', () => {
                 { new: true }
             );
             expect(result).toEqual(mockUser);
+        });
+    });
+
+    describe('armazenarTokens', () => {
+        it('should store tokens successfully', async () => {
+            const userId = '507f1f77bcf86cd799439011';
+            const accessToken = 'access-token';
+            const refreshToken = 'refresh-token';
+            const mockUser = { _id: userId, accesstoken: accessToken, refreshtoken: refreshToken };
+
+            Usuario.findByIdAndUpdate.mockResolvedValue(mockUser);
+
+            const result = await usuarioRepository.armazenarTokens(userId, accessToken, refreshToken);
+
+            expect(Usuario.findByIdAndUpdate).toHaveBeenCalledWith(
+                userId,
+                { accesstoken: accessToken, refreshtoken: refreshToken },
+                { new: true }
+            );
+            expect(result).toEqual(mockUser);
+        });
+    });
+
+    describe('removeToken', () => {
+        it('should remove tokens successfully', async () => {
+            const userId = '507f1f77bcf86cd799439011';
+            const mockUser = { _id: userId, accesstoken: null, refreshtoken: null };
+
+            const mockExec = jest.fn().mockResolvedValue(mockUser);
+            Usuario.findByIdAndUpdate.mockReturnValue({ exec: mockExec });
+
+            const result = await usuarioRepository.removeToken(userId);
+
+            expect(Usuario.findByIdAndUpdate).toHaveBeenCalledWith(
+                userId,
+                { accesstoken: null, refreshtoken: null },
+                { new: true }
+            );
+            expect(mockExec).toHaveBeenCalled();
+            expect(result).toEqual(mockUser);
+        });
+    });
+
+    describe('buscarPorEmail', () => {
+        it('should return user by email', async () => {
+            const email = 'test@example.com';
+            const mockUser = { _id: '1', email, nome_usuario: 'Test User' };
+
+            const mockSelect = jest.fn().mockResolvedValue(mockUser);
+            Usuario.findOne.mockReturnValue({ select: mockSelect });
+
+            const result = await usuarioRepository.buscarPorEmail(email);
+
+            expect(Usuario.findOne).toHaveBeenCalledWith({ email });
+            expect(mockSelect).toHaveBeenCalledWith('');
+            expect(result).toEqual(mockUser);
+        });
+
+        it('should return user by email with password when incluirSenha is true', async () => {
+            const email = 'test@example.com';
+            const mockUser = { _id: '1', email, senha: 'hashed-password' };
+
+            const mockSelect = jest.fn().mockResolvedValue(mockUser);
+            Usuario.findOne.mockReturnValue({ select: mockSelect });
+
+            const result = await usuarioRepository.buscarPorEmail(email, true);
+
+            expect(Usuario.findOne).toHaveBeenCalledWith({ email });
+            expect(mockSelect).toHaveBeenCalledWith('+senha');
+            expect(result).toEqual(mockUser);
+        });
+    });
+
+    describe('atualizarSenha', () => {
+        it('should update password successfully', async () => {
+            const userId = '507f1f77bcf86cd799439011';
+            const newPassword = 'new-hashed-password';
+            const mockUser = { _id: userId, senha: newPassword };
+
+            Usuario.findByIdAndUpdate.mockResolvedValue(mockUser);
+
+            const result = await usuarioRepository.atualizarSenha(userId, newPassword);
+
+            expect(Usuario.findByIdAndUpdate).toHaveBeenCalledWith(
+                userId,
+                { 
+                    senha: newPassword,
+                    token_recuperacao: null,
+                    codigo_recuperacao: null,
+                    token_recuperacao_expira: null
+                },
+                { new: true }
+            );
+            expect(result).toEqual(mockUser);
+        });
+    });
+
+    describe('buscarPorCodigoRecuperacao', () => {
+        it('should return user by recovery code', async () => {
+            const codigo = 'ABC123';
+            const mockUser = { _id: '1', codigo_recuperacao: codigo };
+
+            const mockSelect = jest.fn().mockResolvedValue(mockUser);
+            Usuario.findOne.mockReturnValue({ select: mockSelect });
+
+            const result = await usuarioRepository.buscarPorCodigoRecuperacao(codigo);
+
+            expect(Usuario.findOne).toHaveBeenCalledWith({ codigo_recuperacao: codigo });
+            expect(mockSelect).toHaveBeenCalledWith('+senha +token_recuperacao +codigo_recuperacao +token_recuperacao_expira');
+            expect(result).toEqual(mockUser);
+        });
+    });
+
+    describe('atualizarTokenRecuperacao', () => {
+        it('should update recovery token and code successfully', async () => {
+            const userId = '507f1f77bcf86cd799439011';
+            const token = 'recovery-token';
+            const codigo = 'ABC123';
+            const mockUser = { _id: userId, token_recuperacao: token, codigo_recuperacao: codigo };
+
+            Usuario.findByIdAndUpdate.mockResolvedValue(mockUser);
+
+            const result = await usuarioRepository.atualizarTokenRecuperacao(userId, token, codigo);
+
+            // Verificamos apenas os calls e argumentos que não dependem de Date
+            expect(Usuario.findByIdAndUpdate).toHaveBeenCalledTimes(1);
+            const callArgs = Usuario.findByIdAndUpdate.mock.calls[0];
+            expect(callArgs[0]).toBe(userId);
+            expect(callArgs[1].token_recuperacao).toBe(token);
+            expect(callArgs[1].codigo_recuperacao).toBe(codigo);
+            expect(callArgs[1].token_recuperacao_expira).toBeInstanceOf(Date);
+            expect(callArgs[2]).toEqual({ new: true });
+            expect(result).toEqual(mockUser);
+        });
+    });
+
+    describe('setUserOnlineStatus', () => {
+        it('should set user online status successfully', async () => {
+            const userId = '507f1f77bcf86cd799439011';
+            const isOnline = true;
+            const mockUser = { _id: userId, online: isOnline };
+
+            Usuario.findByIdAndUpdate.mockResolvedValue(mockUser);
+
+            const result = await usuarioRepository.setUserOnlineStatus(userId, isOnline);
+
+            expect(Usuario.findByIdAndUpdate).toHaveBeenCalledWith(
+                userId,
+                { online: isOnline },
+                { new: true }
+            );
+            expect(result).toEqual(mockUser);
+        });
+    });
+
+    describe('getOnlineUsers', () => {
+        it('should return online users successfully', async () => {
+            const mockOnlineUsers = [
+                { _id: '1', nome_usuario: 'User1', online: true },
+                { _id: '2', nome_usuario: 'User2', online: true }
+            ];
+
+            const mockSelect = jest.fn().mockResolvedValue(mockOnlineUsers);
+            Usuario.find.mockReturnValue({ select: mockSelect });
+
+            const result = await usuarioRepository.getOnlineUsers();
+
+            expect(Usuario.find).toHaveBeenCalledWith({ online: true, ativo: true });
+            expect(mockSelect).toHaveBeenCalledWith('nome_usuario email matricula perfil data_cadastro');
+            expect(result).toEqual(mockOnlineUsers);
+        });
+    });
+
+    describe('criarUsuario', () => {
+        it('should create user using criarUsuario method successfully', async () => {
+            const userData = { nome_usuario: 'Test User', matricula: '12345' };
+            const mockCreatedUser = { _id: '1', ...userData };
+            const mockSave = jest.fn().mockResolvedValue(mockCreatedUser);
+
+            // Mock temporário para o constructor
+            const originalUsuario = Usuario;
+            const MockedUsuario = jest.fn().mockImplementation(() => ({ save: mockSave }));
+            
+            // Substitui temporariamente o model
+            usuarioRepository.model = MockedUsuario;
+
+            const result = await usuarioRepository.criarUsuario(userData);
+
+            expect(MockedUsuario).toHaveBeenCalledWith(userData);
+            expect(mockSave).toHaveBeenCalled();
+            expect(result).toEqual(mockCreatedUser);
+
+            // Restaura o model original
+            usuarioRepository.model = originalUsuario;
         });
     });
 });

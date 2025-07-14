@@ -68,6 +68,10 @@ describe('Usuario Model', () => {
       };
 
       await new Usuario(userData1).save();
+      
+      // Garantir que os índices únicos estão configurados
+      await Usuario.collection.createIndex({ email: 1 }, { unique: true });
+      
       const usuario2 = new Usuario(userData2);
 
       await expect(usuario2.save()).rejects.toThrow();
@@ -87,6 +91,10 @@ describe('Usuario Model', () => {
       };
 
       await new Usuario(userData1).save();
+      
+      // Garantir que os índices únicos estão configurados
+      await Usuario.collection.createIndex({ matricula: 1 }, { unique: true });
+      
       const usuario2 = new Usuario(userData2);
 
       await expect(usuario2.save()).rejects.toThrow();

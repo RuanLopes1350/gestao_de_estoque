@@ -1,5 +1,6 @@
 import mongoose from "mongoose";
 import FornecedorRepository from "../repositories/fornecedorRepository.js";
+import { CustomError, HttpStatusCodes } from "../utils/helpers/index.js";
 
 class FornecedorService {
   constructor() {
