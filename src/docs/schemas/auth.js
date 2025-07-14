@@ -7,14 +7,14 @@ const authSchemas = {
             matricula: {
                 type: 'string',
                 description: 'Matrícula do usuário',
-                example: '12345',
+                example: 'ADM0001',
                 minLength: 1
             },
             senha: {
                 type: 'string',
                 format: 'password',
                 description: 'Senha do usuário',
-                example: 'minhasenha123',
+                example: 'Admin@123',
                 minLength: 6
             }
         }
