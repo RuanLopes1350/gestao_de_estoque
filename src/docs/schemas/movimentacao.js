@@ -125,25 +125,25 @@ const movimentacaoSchemas = {
             tipo: {
                 type: 'string',
                 enum: ['entrada', 'saida'],
-                description: 'Tipo da movimentação',
-                example: 'entrada'
+                description: 'Tipo da movimentação'
             },
             destino: {
                 type: 'string',
                 description: 'Destino da movimentação',
-                example: 'Estoque Principal',
                 minLength: 3
             },
             data_movimentacao: {
                 type: 'string',
                 format: 'date-time',
-                description: 'Data e hora da movimentação (opcional, padrão: agora)',
-                example: '2024-01-15T10:30:00.000Z'
+                description: 'Data e hora da movimentação (opcional, padrão: agora)'
+            },
+            id_produto: {
+                type: 'string',
+                description: 'ID de referência do produto principal'
             },
             nome_usuario: {
                 type: 'string',
-                description: 'Nome do usuário responsável',
-                example: 'João Silva'
+                description: 'Nome do usuário responsável'
             },
             produtos: {
                 type: 'array',
@@ -151,59 +151,70 @@ const movimentacaoSchemas = {
                 minItems: 1,
                 items: {
                     type: 'object',
-                    required: ['produto_ref', 'id_produto', 'codigo_produto', 'nome_produto', 'quantidade_produtos', 'preco', 'custo'],
+                    required: ['produto_ref', 'id_produto', 'codigo_produto', 'nome_produto', 'quantidade_produtos', 'preco', 'custo', 'id_fornecedor', 'nome_fornecedor'],
                     properties: {
                         produto_ref: {
                             type: 'string',
-                            description: 'Referência ObjectId do produto',
-                            example: '60d5ecb54b24a12a5c8e4f1a'
+                            description: 'Referência ObjectId do produto'
                         },
                         id_produto: {
                             type: 'number',
-                            description: 'ID numérico do produto',
-                            example: 1001
+                            description: 'ID numérico do produto'
                         },
                         codigo_produto: {
                             type: 'string',
-                            description: 'Código do produto',
-                            example: 'PF001'
+                            description: 'Código do produto'
                         },
                         nome_produto: {
                             type: 'string',
-                            description: 'Nome do produto',
-                            example: 'Pastilha de Freio Dianteira'
+                            description: 'Nome do produto'
                         },
                         quantidade_produtos: {
                             type: 'number',
                             description: 'Quantidade movimentada',
-                            example: 10,
                             minimum: 1
                         },
                         preco: {
                             type: 'number',
                             description: 'Preço unitário do produto',
-                            example: 89.90,
                             minimum: 0
                         },
                         custo: {
                             type: 'number',
                             description: 'Custo unitário do produto',
-                            example: 45.00,
                             minimum: 0
                         },
                         id_fornecedor: {
                             type: 'number',
-                            description: 'ID do fornecedor',
-                            example: 123
+                            description: 'ID do fornecedor'
                         },
                         nome_fornecedor: {
                             type: 'string',
-                            description: 'Nome do fornecedor',
-                            example: 'Auto Peças Sul Ltda'
+                            description: 'Nome do fornecedor'
                         }
                     }
                 }
             }
+        },
+        example: {
+            "tipo": "entrada",
+            "destino": "Depósito Central",
+            "data_movimentacao": "2025-06-14T01:23:07.364Z",
+            "id_produto": "64b6f9e5a4b7c2d1f8a12345",
+            "nome_usuario": "João da Silva",
+            "produtos": [
+                {
+                    "produto_ref": "6872773c8c0ec82fae6bf6da",
+                    "id_produto": 1,
+                    "codigo_produto": "DIS-6267",
+                    "nome_produto": "Ergonômico Algodão Cadeira",
+                    "quantidade_produtos": 10,
+                    "preco": 5499.99,
+                    "custo": 3849.993,
+                    "id_fornecedor": 187,
+                    "nome_fornecedor": "Distribuidora Central Ltda"
+                }
+            ]
         }
     },
 

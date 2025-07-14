@@ -166,77 +166,25 @@ const movimentacoesRoutes = {
                             $ref: "#/components/schemas/MovimentacaoCreateRequest"
                         },
                         examples: {
-                            "entrada_simples": {
-                                summary: "Movimentação de entrada simples",
+                            "exemplo_entrada": {
+                                summary: "Movimentação de entrada",
                                 value: {
-                                    tipo: "entrada",
-                                    destino: "Estoque Principal",
-                                    nome_usuario: "João Silva",
-                                    produtos: [
+                                    "tipo": "entrada",
+                                    "destino": "Depósito Central",
+                                    "data_movimentacao": "2025-06-14T01:23:07.364Z",
+                                    "id_produto": "64b6f9e5a4b7c2d1f8a12345",
+                                    "nome_usuario": "João da Silva",
+                                    "produtos": [
                                         {
-                                            produto_ref: "60d5ecb54b24a12a5c8e4f1a",
-                                            id_produto: 1001,
-                                            codigo_produto: "PF001",
-                                            nome_produto: "Pastilha de Freio Dianteira",
-                                            quantidade_produtos: 10,
-                                            preco: 89.90,
-                                            custo: 45.00,
-                                            id_fornecedor: 123,
-                                            nome_fornecedor: "Auto Peças Sul Ltda"
-                                        }
-                                    ]
-                                }
-                            },
-                            "saida_multiplos_produtos": {
-                                summary: "Saída com múltiplos produtos",
-                                value: {
-                                    tipo: "saida",
-                                    destino: "Venda - Cliente ABC",
-                                    nome_usuario: "Maria Santos",
-                                    produtos: [
-                                        {
-                                            produto_ref: "60d5ecb54b24a12a5c8e4f1a",
-                                            id_produto: 1001,
-                                            codigo_produto: "PF001",
-                                            nome_produto: "Pastilha de Freio Dianteira",
-                                            quantidade_produtos: 2,
-                                            preco: 89.90,
-                                            custo: 45.00,
-                                            id_fornecedor: 123,
-                                            nome_fornecedor: "Auto Peças Sul Ltda"
-                                        },
-                                        {
-                                            produto_ref: "60d5ecb54b24a12a5c8e4f1b",
-                                            id_produto: 1002,
-                                            codigo_produto: "FO001",
-                                            nome_produto: "Filtro de Óleo",
-                                            quantidade_produtos: 1,
-                                            preco: 25.90,
-                                            custo: 12.00,
-                                            id_fornecedor: 124,
-                                            nome_fornecedor: "Filtros Brasil Ltda"
-                                        }
-                                    ]
-                                }
-                            },
-                            "entrada_com_data": {
-                                summary: "Entrada com data específica",
-                                value: {
-                                    tipo: "entrada",
-                                    destino: "Estoque Principal",
-                                    data_movimentacao: "2024-01-15T10:30:00.000Z",
-                                    nome_usuario: "João Silva",
-                                    produtos: [
-                                        {
-                                            produto_ref: "60d5ecb54b24a12a5c8e4f1a",
-                                            id_produto: 1001,
-                                            codigo_produto: "PF001",
-                                            nome_produto: "Pastilha de Freio Dianteira",
-                                            quantidade_produtos: 50,
-                                            preco: 89.90,
-                                            custo: 45.00,
-                                            id_fornecedor: 123,
-                                            nome_fornecedor: "Auto Peças Sul Ltda"
+                                            "produto_ref": "6872773c8c0ec82fae6bf6da",
+                                            "id_produto": 1,
+                                            "codigo_produto": "DIS-6267",
+                                            "nome_produto": "Ergonômico Algodão Cadeira",
+                                            "quantidade_produtos": 10,
+                                            "preco": 5499.99,
+                                            "custo": 3849.993,
+                                            "id_fornecedor": 187,
+                                            "nome_fornecedor": "Distribuidora Central Ltda"
                                         }
                                     ]
                                 }
