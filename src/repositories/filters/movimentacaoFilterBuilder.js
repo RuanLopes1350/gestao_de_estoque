@@ -259,7 +259,7 @@ class MovimentacaoFilterBuilder {
             if (typeof status === 'string') {
                 status = status.toLowerCase() === 'true';
             }
-            this.filters.status = status;
+            this.filtros.status = status;
         }
         return this;
     }
