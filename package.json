@@ -11,6 +11,10 @@
     "seed": "node src/seeds/seeds.js",
     "seed:permissions": "node src/seeds/seedPermissions.js",
     "test": "jest --coverage --detectOpenHandles --silent",
+    "test:unit": "jest --selectProjects unit --coverage --detectOpenHandles",
+    "test:integration": "jest --selectProjects integration --coverage --detectOpenHandles",
+    "test:watch": "jest --watch",
+    "test:verbose": "jest --coverage --detectOpenHandles --verbose",
     "start": "node server.js"
   },
   "dependencies": {
