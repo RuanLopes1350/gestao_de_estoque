@@ -68,10 +68,8 @@ jest.mock('../../src/utils/validators/schemas/zod/querys/UsuarioQuerySchema.js',
 }));
 
 jest.mock('../../src/middlewares/LogMiddleware.js', () => ({
-    default: { 
-        log: jest.fn(),
-        logCriticalEvent: jest.fn()
-    },
+  __esModule: true,
+  default: { logCriticalEvent: jest.fn() }
 }));
 
 // Importar o controller
@@ -245,7 +243,7 @@ describe('UsuarioController', () => {
     });
 
     describe('cadastrarUsuario', () => {
-        it.skip('should create user without password successfully', async () => {
+        it('should create user without password successfully', async () => {
             const userData = { nome: 'Test User', email: 'test@example.com' };
             const mockCreatedUser = { 
                 _id: '507f1f77bcf86cd799439011', 
@@ -270,7 +268,7 @@ describe('UsuarioController', () => {
             expect(CommonResponse.created).toHaveBeenCalled();
         });
 
-        it.skip('should create user with password successfully', async () => {
+        it('should create user with password successfully', async () => {
             const userData = { nome: 'Test User', email: 'test@example.com', senha: 'password123' };
             const mockCreatedUser = { 
                 _id: '507f1f77bcf86cd799439011', 

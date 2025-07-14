@@ -7,7 +7,7 @@ class Usuario {
     const schema = new mongoose.Schema(
       {
         nome_usuario: { type: String, required: true },
-        email: { type: String, required: true, unique: true },
+        email: { type: String, required: true, unique: true, match: [/.+\@.+\..+/, 'Por favor, insira um email válido'] },
         matricula: { type: String, required: true, unique: true },
         senha: { type: String, required: false, select: false }, // Não obrigatório inicialmente
         perfil: {
@@ -124,3 +124,4 @@ class Usuario {
 }
 
 export default new Usuario().model;
+
