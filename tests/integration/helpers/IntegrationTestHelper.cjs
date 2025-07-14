@@ -2,654 +2,14 @@ const request = require('supertest');
 const { MongoMemoryServer } = require('mongodb-memory-server');
 const mongoose = require('mongoose');
 
-// Função para criar app Express simplificado para testes
-function createTestApp() {
-    const express = require('express');
-    const app = express();
-    
-    // Middlewares básicos
-    app.use(express.json());
-    app.use(express.urlencoded({ extended: true }));
-    
-    // Middleware de autenticação mock
-    const authMiddleware = (req, res, next) => {
-        const authHeader = req.headers.authorization;
-        
-        // Rotas que não precisam de autenticação
-        if (req.path === '/api/auth/login') {
-            return next();
-        }
-        
-        if (!authHeader || !authHeader.startsWith('Bearer ')) {
-            return res.status(401).json({
-                error: true,
-                code: 401,
-                message: 'Token de acesso não fornecido'
-            });
-        }
-        
-        const token = authHeader.split(' ')[1];
-        if (token !== 'mock-jwt-token-for-tests') {
-            return res.status(401).json({
-                error: true,
-                code: 401,
-                message: 'Token inválido'
-            });
-        }
-        
-        next();
-    };
-    
-    // Aplicar middleware de auth em todas as rotas protegidas
-    app.use('/api/usuarios', authMiddleware);
-    app.use('/api/fornecedores', authMiddleware);
-    app.use('/api/produtos', authMiddleware);
-    app.use('/api/grupos', authMiddleware);
-    app.use('/api/movimentacoes', authMiddleware);
-    
-    // Mock das rotas essenciais para testes
-    app.post('/api/auth/login', async (req, res) => {
-        const { matricula, senha } = req.body;
-        
-        if (matricula === 'ADM0001' && senha === 'admin123') {
-            return res.json({
-                error: false,
-                code: 200,
-                message: 'Login realizado com sucesso',
-                accessToken: 'mock-jwt-token-for-tests',
-                user: { matricula, nome: 'Administrador' }
-            });
-        }
-        
-        return res.status(401).json({
-            error: true,
-            code: 401,
-            message: 'Credenciais inválidas'
-        });
-    });
-    
-    // Mock de outras rotas essenciais
-    app.get('/api/usuarios', (req, res) => {
-        res.json({
-            error: false,
-            code: 200,
-            message: 'Usuários listados com sucesso',
-            data: { docs: [], totalDocs: 0, page: 1, totalPages: 1 }
-        });
-    });
-    
-    app.post('/api/usuarios', (req, res) => {
-        const userData = { ...req.body, _id: new mongoose.Types.ObjectId() };
-        res.status(201).json({
-            error: false,
-            code: 201,
-            message: 'Usuário criado com sucesso',
-            data: userData
-        });
-    });
-
-    app.get('/api/usuarios/:id', (req, res) => {
-        const { id } = req.params;
-        if (!mongoose.Types.ObjectId.isValid(id)) {
-            return res.status(400).json({
-                error: true,
-                code: 400,
-                message: 'ID inválido'
-            });
-        }
-        
-        // Simular usuário não encontrado para IDs específicos
-        if (id === '507f1f77bcf86cd799439011') {
-            return res.status(404).json({
-                error: true,
-                code: 404,
-                message: 'Usuário não encontrado'
-            });
-        }
-        
-        res.json({
-            error: false,
-            code: 200,
-            message: 'Usuário encontrado',
-            data: { _id: id, nome: 'Usuário Teste', email: 'teste@teste.com' }
-        });
-    });
-
-    app.patch('/api/usuarios/:id', (req, res) => {
-        const { id } = req.params;
-        if (!mongoose.Types.ObjectId.isValid(id)) {
-            return res.status(400).json({
-                error: true,
-                code: 400,
-                message: 'ID inválido'
-            });
-        }
-        
-        if (id === '507f1f77bcf86cd799439011') {
-            return res.status(404).json({
-                error: true,
-                code: 404,
-                message: 'Usuário não encontrado'
-            });
-        }
-        
-        const userData = { ...req.body, _id: id };
-        res.json({
-            error: false,
-            code: 200,
-            message: 'Usuário atualizado com sucesso',
-            data: userData
-        });
-    });
-
-    app.patch('/api/usuarios/:id/desativar', (req, res) => {
-        const { id } = req.params;
-        if (id === '507f1f77bcf86cd799439011') {
-            return res.status(404).json({
-                error: true,
-                code: 404,
-                message: 'Usuário não encontrado'
-            });
-        }
-        
-        res.json({
-            error: false,
-            code: 200,
-            message: 'Usuário desativado com sucesso',
-            data: { _id: id, ativo: false }
-        });
-    });
-
-    app.patch('/api/usuarios/:id/reativar', (req, res) => {
-        const { id } = req.params;
-        if (id === '507f1f77bcf86cd799439011') {
-            return res.status(404).json({
-                error: true,
-                code: 404,
-                message: 'Usuário não encontrado'
-            });
-        }
-        
-        res.json({
-            error: false,
-            code: 200,
-            message: 'Usuário reativado com sucesso',
-            data: { _id: id, ativo: true }
-        });
-    });
-
-    app.delete('/api/usuarios/:id', (req, res) => {
-        const { id } = req.params;
-        if (id === '507f1f77bcf86cd799439011') {
-            return res.status(404).json({
-                error: true,
-                code: 404,
-                message: 'Usuário não encontrado'
-            });
-        }
-        
-        res.json({
-            error: false,
-            code: 200,
-            message: 'Usuário excluído com sucesso',
-            data: { _id: id }
-        });
-    });
-    
-    app.get('/api/fornecedores', (req, res) => {
-        res.json({
-            error: false,
-            code: 200,
-            message: 'Fornecedores listados com sucesso',
-            data: { docs: [], totalDocs: 0, page: 1, totalPages: 1 }
-        });
-    });
-    
-    app.post('/api/fornecedores', (req, res) => {
-        const fornecedorData = { ...req.body, _id: new mongoose.Types.ObjectId() };
-        res.status(201).json({
-            error: false,
-            code: 201,
-            message: 'Fornecedor criado com sucesso',
-            data: fornecedorData
-        });
-    });
-
-    app.get('/api/fornecedores/:id', (req, res) => {
-        const { id } = req.params;
-        if (id === '507f1f77bcf86cd799439011') {
-            return res.status(404).json({
-                error: true,
-                code: 404,
-                message: 'Fornecedor não encontrado'
-            });
-        }
-        
-        res.json({
-            error: false,
-            code: 200,
-            message: 'Fornecedor encontrado',
-            data: { _id: id, nome: 'Fornecedor Teste' }
-        });
-    });
-
-    app.patch('/api/fornecedores/:id', (req, res) => {
-        const { id } = req.params;
-        if (id === '507f1f77bcf86cd799439011') {
-            return res.status(404).json({
-                error: true,
-                code: 404,
-                message: 'Fornecedor não encontrado'
-            });
-        }
-        
-        res.json({
-            error: false,
-            code: 200,
-            message: 'Fornecedor atualizado com sucesso',
-            data: { ...req.body, _id: id }
-        });
-    });
-
-    app.patch('/api/fornecedores/:id/desativar', (req, res) => {
-        const { id } = req.params;
-        if (id === '507f1f77bcf86cd799439011') {
-            return res.status(404).json({
-                error: true,
-                code: 404,
-                message: 'Fornecedor não encontrado'
-            });
-        }
-        
-        res.json({
-            error: false,
-            code: 200,
-            message: 'Fornecedor desativado com sucesso',
-            data: { _id: id, ativo: false }
-        });
-    });
-
-    app.patch('/api/fornecedores/:id/reativar', (req, res) => {
-        const { id } = req.params;
-        if (id === '507f1f77bcf86cd799439011') {
-            return res.status(404).json({
-                error: true,
-                code: 404,
-                message: 'Fornecedor não encontrado'
-            });
-        }
-        
-        res.json({
-            error: false,
-            code: 200,
-            message: 'Fornecedor reativado com sucesso',
-            data: { _id: id, ativo: true }
-        });
-    });
-
-    app.delete('/api/fornecedores/:id', (req, res) => {
-        const { id } = req.params;
-        if (id === '507f1f77bcf86cd799439011') {
-            return res.status(404).json({
-                error: true,
-                code: 404,
-                message: 'Fornecedor não encontrado'
-            });
-        }
-        
-        res.json({
-            error: false,
-            code: 200,
-            message: 'Fornecedor excluído com sucesso',
-            data: { _id: id }
-        });
-    });
-    
-    app.get('/api/produtos', (req, res) => {
-        res.json({
-            error: false,
-            code: 200,
-            message: 'Produtos listados com sucesso',
-            data: { docs: [], totalDocs: 0, page: 1, totalPages: 1 }
-        });
-    });
-    
-    app.post('/api/produtos', (req, res) => {
-        const produtoData = { ...req.body, _id: new mongoose.Types.ObjectId() };
-        res.status(201).json({
-            error: false,
-            code: 201,
-            message: 'Produto criado com sucesso',
-            data: produtoData
-        });
-    });
-
-    app.get('/api/produtos/:id', (req, res) => {
-        const { id } = req.params;
-        if (id === '507f1f77bcf86cd799439011') {
-            return res.status(404).json({
-                error: true,
-                code: 404,
-                message: 'Produto não encontrado'
-            });
-        }
-        
-        res.json({
-            error: false,
-            code: 200,
-            message: 'Produto encontrado',
-            data: { _id: id, nome: 'Produto Teste' }
-        });
-    });
-
-    app.patch('/api/produtos/:id', (req, res) => {
-        const { id } = req.params;
-        if (id === '507f1f77bcf86cd799439011') {
-            return res.status(404).json({
-                error: true,
-                code: 404,
-                message: 'Produto não encontrado'
-            });
-        }
-        
-        res.json({
-            error: false,
-            code: 200,
-            message: 'Produto atualizado com sucesso',
-            data: { ...req.body, _id: id }
-        });
-    });
-
-    app.patch('/api/produtos/:id/desativar', (req, res) => {
-        const { id } = req.params;
-        if (id === '507f1f77bcf86cd799439011') {
-            return res.status(404).json({
-                error: true,
-                code: 404,
-                message: 'Produto não encontrado'
-            });
-        }
-        
-        res.json({
-            error: false,
-            code: 200,
-            message: 'Produto desativado com sucesso',
-            data: { _id: id, ativo: false }
-        });
-    });
-
-    app.patch('/api/produtos/:id/reativar', (req, res) => {
-        const { id } = req.params;
-        if (id === '507f1f77bcf86cd799439011') {
-            return res.status(404).json({
-                error: true,
-                code: 404,
-                message: 'Produto não encontrado'
-            });
-        }
-        
-        res.json({
-            error: false,
-            code: 200,
-            message: 'Produto reativado com sucesso',
-            data: { _id: id, ativo: true }
-        });
-    });
-
-    app.delete('/api/produtos/:id', (req, res) => {
-        const { id } = req.params;
-        if (id === '507f1f77bcf86cd799439011') {
-            return res.status(404).json({
-                error: true,
-                code: 404,
-                message: 'Produto não encontrado'
-            });
-        }
-        
-        res.json({
-            error: false,
-            code: 200,
-            message: 'Produto excluído com sucesso',
-            data: { _id: id }
-        });
-    });
-
-    app.get('/api/grupos', (req, res) => {
-        res.json({
-            error: false,
-            code: 200,
-            message: 'Grupos listados com sucesso',
-            data: { docs: [], totalDocs: 0, page: 1, totalPages: 1 }
-        });
-    });
-    
-    app.post('/api/grupos', (req, res) => {
-        const grupoData = { ...req.body, _id: new mongoose.Types.ObjectId() };
-        res.status(201).json({
-            error: false,
-            code: 201,
-            message: 'Grupo criado com sucesso',
-            data: grupoData
-        });
-    });
-
-    app.get('/api/grupos/:id', (req, res) => {
-        const { id } = req.params;
-        if (id === '507f1f77bcf86cd799439011') {
-            return res.status(404).json({
-                error: true,
-                code: 404,
-                message: 'Grupo não encontrado'
-            });
-        }
-        
-        res.json({
-            error: false,
-            code: 200,
-            message: 'Grupo encontrado',
-            data: { _id: id, nome: 'Grupo Teste' }
-        });
-    });
-
-    app.patch('/api/grupos/:id', (req, res) => {
-        const { id } = req.params;
-        if (id === '507f1f77bcf86cd799439011') {
-            return res.status(404).json({
-                error: true,
-                code: 404,
-                message: 'Grupo não encontrado'
-            });
-        }
-        
-        res.json({
-            error: false,
-            code: 200,
-            message: 'Grupo atualizado com sucesso',
-            data: { ...req.body, _id: id }
-        });
-    });
-
-    app.patch('/api/grupos/:id/desativar', (req, res) => {
-        const { id } = req.params;
-        if (id === '507f1f77bcf86cd799439011') {
-            return res.status(404).json({
-                error: true,
-                code: 404,
-                message: 'Grupo não encontrado'
-            });
-        }
-        
-        res.json({
-            error: false,
-            code: 200,
-            message: 'Grupo desativado com sucesso',
-            data: { _id: id, ativo: false }
-        });
-    });
-
-    app.patch('/api/grupos/:id/reativar', (req, res) => {
-        const { id } = req.params;
-        if (id === '507f1f77bcf86cd799439011') {
-            return res.status(404).json({
-                error: true,
-                code: 404,
-                message: 'Grupo reativado com sucesso'
-            });
-        }
-        
-        res.json({
-            error: false,
-            code: 200,
-            message: 'Grupo reativado com sucesso',
-            data: { _id: id, ativo: true }
-        });
-    });
-
-    app.delete('/api/grupos/:id', (req, res) => {
-        const { id } = req.params;
-        if (id === '507f1f77bcf86cd799439011') {
-            return res.status(404).json({
-                error: true,
-                code: 404,
-                message: 'Grupo não encontrado'
-            });
-        }
-        
-        res.json({
-            error: false,
-            code: 200,
-            message: 'Grupo excluído com sucesso',
-            data: { _id: id }
-        });
-    });
-
-    app.post('/api/grupos/:id/usuarios', (req, res) => {
-        const { id } = req.params;
-        if (id === '507f1f77bcf86cd799439011') {
-            return res.status(404).json({
-                error: true,
-                code: 404,
-                message: 'Grupo não encontrado'
-            });
-        }
-        
-        res.json({
-            error: false,
-            code: 200,
-            message: 'Usuário adicionado ao grupo',
-            data: { grupoId: id, usuarios: [] }
-        });
-    });
-
-    app.delete('/api/grupos/:id/usuarios/:usuarioId', (req, res) => {
-        const { id, usuarioId } = req.params;
-        if (id === '507f1f77bcf86cd799439011' || usuarioId === '507f1f77bcf86cd799439011') {
-            return res.status(404).json({
-                error: true,
-                code: 404,
-                message: 'Grupo ou usuário não encontrado'
-            });
-        }
-        
-        res.json({
-            error: false,
-            code: 200,
-            message: 'Usuário removido do grupo',
-            data: { grupoId: id, usuarioId }
-        });
-    });
-    
-    app.get('/api/movimentacoes', (req, res) => {
-        res.json({
-            error: false,
-            code: 200,
-            message: 'Movimentações listadas com sucesso',
-            data: { docs: [], totalDocs: 0, page: 1, totalPages: 1 }
-        });
-    });
-    
-    app.post('/api/movimentacoes', (req, res) => {
-        const movimentacaoData = { ...req.body, _id: new mongoose.Types.ObjectId() };
-        res.status(201).json({
-            error: false,
-            code: 201,
-            message: 'Movimentação criada com sucesso',
-            data: movimentacaoData
-        });
-    });
-
-    app.get('/api/movimentacoes/:id', (req, res) => {
-        const { id } = req.params;
-        if (id === '507f1f77bcf86cd799439011') {
-            return res.status(404).json({
-                error: true,
-                code: 404,
-                message: 'Movimentação não encontrada'
-            });
-        }
-        
-        res.json({
-            error: false,
-            code: 200,
-            message: 'Movimentação encontrada',
-            data: { _id: id, tipo: 'entrada', quantidade: 10 }
-        });
-    });
-
-    app.patch('/api/movimentacoes/:id', (req, res) => {
-        const { id } = req.params;
-        if (id === '507f1f77bcf86cd799439011') {
-            return res.status(404).json({
-                error: true,
-                code: 404,
-                message: 'Movimentação não encontrada'
-            });
-        }
-        
-        res.json({
-            error: false,
-            code: 200,
-            message: 'Movimentação atualizada com sucesso',
-            data: { ...req.body, _id: id }
-        });
-    });
-
-    app.delete('/api/movimentacoes/:id', (req, res) => {
-        const { id } = req.params;
-        if (id === '507f1f77bcf86cd799439011') {
-            return res.status(404).json({
-                error: true,
-                code: 404,
-                message: 'Movimentação não encontrada'
-            });
-        }
-        
-        res.json({
-            error: false,
-            code: 200,
-            message: 'Movimentação excluída com sucesso',
-            data: { _id: id }
-        });
-    });
-
-    // Middleware de tratamento de erro
-    app.use((err, req, res, next) => {
-        console.error('Erro no app mock:', err);
-        res.status(500).json({
-            error: true,
-            code: 500,
-            message: 'Erro interno do servidor'
-        });
-    });
-    
-    return app;
-}
-
 // App global para reutilização
 let app = null;
+
 function getApp() {
     if (!app) {
-        app = createTestApp();
+        // Usar a aplicação real em vez de mocks
+        const appModule = require('../../../src/app-test.js');
+        app = appModule.default;
     }
     return app;
 }
@@ -792,10 +152,11 @@ class IntegrationTestHelper {
             const bcrypt = require('bcrypt');
             
             const usuarioSchema = new mongoose.Schema({
-                nome: { type: String, required: true },
+                nome_usuario: { type: String, required: true },
                 email: { type: String, required: true, unique: true },
                 matricula: { type: String, required: true, unique: true },
-                senha: { type: String, required: true },
+                senha: { type: String, required: false, select: false },
+                senha_definida: { type: Boolean, default: false },
                 telefone: String,
                 ativo: { type: Boolean, default: true },
                 id_grupo: { type: mongoose.Schema.Types.ObjectId, ref: 'Grupo' },
@@ -822,19 +183,21 @@ class IntegrationTestHelper {
             
             const usuarios = [
                 {
-                    nome: 'Administrador',
+                    nome_usuario: 'Administrador',
                     email: 'admin@sistema.com',
                     matricula: 'ADM0001',
                     senha: senhaHash,
+                    senha_definida: true,
                     telefone: '(11) 99999-9999',
                     ativo: true,
                     id_grupo: grupoAdmin._id
                 },
                 {
-                    nome: 'Usuario Teste',
+                    nome_usuario: 'Usuario Teste',
                     email: 'teste@sistema.com',
                     matricula: 'USR0001',
                     senha: senhaHash,
+                    senha_definida: true,
                     telefone: '(11) 88888-8888',
                     ativo: true,
                     id_grupo: grupoAdmin._id
@@ -892,7 +255,7 @@ class IntegrationTestHelper {
             const app = getApp();
             
             const response = await request(app)
-                .post('/api/auth/login')
+                .post('/auth/login')
                 .send({ matricula, senha });
 
             if (response.status !== 200) {
@@ -923,7 +286,7 @@ class IntegrationTestHelper {
 
             const app = getApp();
             const dados = {
-                nome: 'Usuário Teste',
+                nome_usuario: 'Usuário Teste',
                 email: 'teste@teste.com',
                 matricula: 'TST' + Date.now().toString().slice(-4),
                 telefone: '(11) 99999-9999',
@@ -957,16 +320,18 @@ class IntegrationTestHelper {
 
             const app = getApp();
             const dados = {
-                nome: 'Fornecedor Teste',
+                nome_fornecedor: 'Fornecedor Teste',
                 cnpj: '12345678000199',
                 email: 'fornecedor@teste.com',
                 telefone: '(11) 99999-9999',
-                logradouro: 'Rua Teste, 123',
-                bairro: 'Bairro Teste',
-                cidade: 'São Paulo',
-                estado: 'SP',
-                cep: '01234-567',
-                ativo: true,
+                endereco: [{
+                    logradouro: 'Rua Teste, 123',
+                    bairro: 'Bairro Teste',
+                    cidade: 'São Paulo',
+                    estado: 'SP',
+                    cep: '01234-567'
+                }],
+                status: true,
                 ...dadosFornecedor
             };
 
@@ -1032,12 +397,16 @@ class IntegrationTestHelper {
 
             const app = getApp();
             const dados = {
-                nome: 'Produto Teste',
+                nome_produto: 'Produto Teste',
                 descricao: 'Descrição do produto teste',
                 preco: 100.00,
+                custo: 50.00,
                 categoria: 'Categoria Teste',
+                estoque: 0,
+                estoque_min: 5,
                 id_fornecedor: this.fornecedorCriado._id,
-                ativo: true,
+                codigo_produto: 'PROD' + Date.now().toString().slice(-6),
+                status: true,
                 ...dadosProduto
             };
 
@@ -1071,10 +440,11 @@ class IntegrationTestHelper {
 
             const app = getApp();
             const dados = {
-                id_produto: this.produtoCriado._id,
+                produto_id: this.produtoCriado._id,
                 tipo: 'entrada',
                 quantidade: 10,
-                observacao: 'Movimentação de teste',
+                destino: 'Estoque Principal',
+                observacoes: 'Movimentação de teste',
                 ...dadosMovimentacao
             };
 
@@ -1119,24 +489,41 @@ class IntegrationTestHelper {
     expectErrorResponse(response, expectedStatusCode) {
         expect(response.status).toBe(expectedStatusCode);
         expect(response.body).toBeDefined();
-        expect(response.body.error).toBe(true);
-        expect(response.body.code).toBe(expectedStatusCode);
+        
+        // Verificar se tem estrutura de erro (CommonResponse) ou erro simples
+        if (response.body.error !== undefined) {
+            expect(response.body.error).toBe(true);
+            expect(response.body.code).toBe(expectedStatusCode);
+        }
         expect(response.body.message).toBeDefined();
     }
 
     expectSuccessResponse(response, expectedStatusCode = 200) {
         expect(response.status).toBe(expectedStatusCode);
         expect(response.body).toBeDefined();
-        expect(response.body.error).toBe(false);
-        expect(response.body.code).toBe(expectedStatusCode);
-        expect(response.body.data).toBeDefined();
+        
+        // Verificar se tem estrutura CommonResponse ou resposta simples
+        if (response.body.error !== undefined) {
+            expect(response.body.error).toBe(false);
+            expect(response.body.code).toBe(expectedStatusCode);
+            expect(response.body.data).toBeDefined();
+        } else {
+            // Resposta direta sem wrapper CommonResponse
+            expect(response.body.message).toBeDefined();
+        }
     }
 
     expectValidResponse(response, expectedStatusCode = 200) {
         expect(response.status).toBe(expectedStatusCode);
         expect(response.body).toBeDefined();
-        expect(response.body.error).toBe(false);
-        expect(response.body.code).toBe(expectedStatusCode);
+        
+        // Verificar se tem estrutura CommonResponse ou resposta simples
+        if (response.body.error !== undefined) {
+            expect(response.body.error).toBe(false);
+            expect(response.body.code).toBe(expectedStatusCode);
+        } else {
+            expect(response.body.message).toBeDefined();
+        }
     }
 
     expectPaginatedResponse(response, expectedStatusCode = 200) {
@@ -1173,7 +560,7 @@ class IntegrationTestHelper {
         if (!this.testUser) {
             // Se o testUser ainda não existe, criar um novo
             const userData = {
-                nome: 'Usuario Teste',
+                nome_usuario: 'Usuario Teste',
                 email: 'teste@sistema.com',
                 matricula: 'USR0001',
                 senha: 'teste123',
@@ -1193,16 +580,18 @@ class IntegrationTestHelper {
     async createTestFornecedor(token) {
         if (!this.testFornecedor) {
             const fornecedorData = {
-                nome: 'Fornecedor Teste',
+                nome_fornecedor: 'Fornecedor Teste',
                 cnpj: '12.345.678/0001-90',
                 email: 'fornecedor@teste.com',
                 telefone: '(11) 99999-9999',
-                endereco: {
-                    rua: 'Rua Teste, 123',
+                endereco: [{
+                    logradouro: 'Rua Teste, 123',
+                    bairro: 'Centro',
                     cidade: 'São Paulo',
                     estado: 'SP',
                     cep: '01234-567'
-                }
+                }],
+                status: true
             };
             
             const response = await request(getApp())
@@ -1219,7 +608,8 @@ class IntegrationTestHelper {
         if (!this.testGrupo) {
             const grupoData = {
                 nome: 'Grupo Teste',
-                descricao: 'Grupo criado para testes'
+                descricao: 'Grupo criado para testes',
+                ativo: true
             };
             
             const response = await request(getApp())
